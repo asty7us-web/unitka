@@ -1,0 +1,1123 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Юнитка</title>
+<meta name="description" content="Юнит-экономика WB, Ozon и Яндекс Маркета: сводка по товарам, ручной расчёт и пересчёт под новую цену">
+<meta name="theme-color" content="#2a78d6">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Юнитка">
+<script>try { var t = JSON.parse(localStorage.getItem("unitka.theme")); if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t); } catch (e) {}</script>
+<style>
+:root{
+  color-scheme: light;
+  --bg:#f4f4f1; --surface:#fcfcfb; --surface-2:#f0efec; --ink:#0b0b0b; --ink-2:#52514e; --muted:#7a7873;
+  --line:#e1e0d9; --ring:rgba(11,11,11,.10); --accent:#2a78d6; --accent-wash:#e6f0fc;
+  --good:#006300; --good-bg:#e8f4e8; --bad:#c62f2f; --bad-bg:#fbeaea; --warn-bg:#fff4dc; --mid:#946200;
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100; --s5:#e87ba4; --s6:#008300;
+  --shadow:0 1px 2px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.05);
+  --r:14px; --nav-h:0px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --bg:#0d0d0d; --surface:#1a1a19; --surface-2:#242422; --ink:#f0efec; --ink-2:#c3c2b7; --muted:#9a9890;
+    --line:#2c2c2a; --ring:rgba(255,255,255,.10); --accent:#3987e5; --accent-wash:#16253a;
+    --good:#2fbf2f; --good-bg:#132613; --bad:#e66767; --bad-bg:#2c1616; --warn-bg:#2b2410; --mid:#e3b341;
+    --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181; --s6:#008300;
+    --shadow:none;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --bg:#0d0d0d; --surface:#1a1a19; --surface-2:#242422; --ink:#f0efec; --ink-2:#c3c2b7; --muted:#9a9890;
+  --line:#2c2c2a; --ring:rgba(255,255,255,.10); --accent:#3987e5; --accent-wash:#16253a;
+  --good:#2fbf2f; --good-bg:#132613; --bad:#e66767; --bad-bg:#2c1616; --warn-bg:#2b2410; --mid:#e3b341;
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181; --s6:#008300;
+  --shadow:none;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom))}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:var(--accent);text-decoration:none}
+.num{font-variant-numeric:tabular-nums}
+.hidden{display:none!important}
+
+/* ── шапка ── */
+header{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line)}
+.bar{max-width:1180px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:14px}
+.brand{font-weight:700;font-size:18px;letter-spacing:-.01em;display:flex;align-items:center;gap:8px;white-space:nowrap}
+.brand i{width:26px;height:26px;border-radius:8px;background:var(--accent);color:#fff;display:grid;place-items:center;font-style:normal;font-size:15px}
+.seg{display:inline-flex;background:var(--surface-2);border-radius:10px;padding:3px;gap:2px;flex-wrap:wrap}
+.seg button{border:0;background:transparent;padding:6px 12px;border-radius:8px;font-weight:600;color:var(--ink-2);min-width:44px}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.seg.sm button{padding:4px 10px;font-size:13px;min-width:0}
+nav.tabs{display:flex;gap:4px;margin-left:auto}
+nav.tabs button{border:0;background:transparent;padding:8px 12px;border-radius:9px;color:var(--ink-2);font-weight:600;display:flex;align-items:center;gap:6px}
+nav.tabs button[aria-current="page"]{background:var(--accent-wash);color:var(--accent)}
+nav.tabs svg{width:20px;height:20px}
+.themeb{border:1px solid var(--ring);background:var(--surface);border-radius:10px;height:36px;padding:0 10px;display:flex;align-items:center;gap:6px;font-weight:600;color:var(--ink-2);font-size:13.5px;white-space:nowrap}
+.themeb svg{width:18px;height:18px}
+
+main{max-width:1180px;margin:0 auto;padding:16px}
+.page{display:none}.page.on{display:block}
+
+/* ── карточки и поля ── */
+.card{background:var(--surface);border:1px solid var(--ring);border-radius:var(--r);box-shadow:var(--shadow)}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 410px;gap:16px;align-items:start}
+.col{display:flex;flex-direction:column;gap:12px;min-width:0}
+details.sec{background:var(--surface);border:1px solid var(--ring);border-radius:var(--r);box-shadow:var(--shadow)}
+details.sec>summary{list-style:none;display:flex;align-items:center;gap:10px;padding:13px 16px;cursor:pointer;font-weight:650;user-select:none}
+details.sec>summary::-webkit-details-marker{display:none}
+details.sec>summary .sum{margin-left:auto;color:var(--ink-2);font-weight:500;font-size:14px;text-align:right;max-width:58%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+details.sec>summary::after{content:"";width:8px;height:8px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg);margin:-4px 2px 0 4px;transition:transform .15s;flex:none}
+details.sec[open]>summary::after{transform:rotate(-135deg);margin-top:4px}
+.fields{padding:0 16px 12px}
+.f{display:grid;grid-template-columns:1fr auto;align-items:center;gap:10px;padding:7px 0;border-top:1px solid var(--line)}
+.f:first-child{border-top:0}
+.f small{display:block;color:var(--muted);font-size:12.5px;line-height:1.3;margin-top:1px;font-weight:400}
+.inp{display:flex;align-items:center;background:var(--surface-2);border:1px solid transparent;border-radius:9px;width:150px;height:38px;padding:0 10px}
+.inp:focus-within{border-color:var(--accent);background:var(--surface)}
+.inp input{border:0;background:transparent;outline:0;width:100%;min-width:0;text-align:right;font-variant-numeric:tabular-nums;font-size:16px;padding:0}
+.inp i{font-style:normal;color:var(--muted);margin-left:6px;font-size:14px;white-space:nowrap}
+.f.calc .val{font-weight:700;font-variant-numeric:tabular-nums;padding-right:2px}
+.f.total>span:first-child{font-weight:650}
+select.sel{height:38px;border-radius:9px;border:1px solid transparent;background:var(--surface-2);padding:0 8px;max-width:230px}
+.chk{display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--line)}
+.chk input{width:18px;height:18px}
+.linkbtn{border:0;background:none;color:var(--accent);padding:6px 0;font-weight:600;font-size:13.5px}
+.namebar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.namebar input{flex:1 1 220px;height:42px;border-radius:11px;border:1px solid var(--ring);background:var(--surface);padding:0 12px;font-size:16px;font-weight:600;min-width:0}
+.mprow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;color:var(--ink-2);font-weight:600}
+.btn{height:42px;border-radius:11px;border:1px solid var(--ring);background:var(--surface);padding:0 14px;font-weight:600;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.btn.pri{background:var(--accent);color:#fff;border-color:transparent}
+.btn.sm{height:34px;padding:0 11px;font-size:13.5px;border-radius:9px}
+.ib{width:32px;height:32px;padding:0;justify-content:center;font-size:15px}
+.btn:active{transform:translateY(1px)}
+
+/* ── итог расчёта ── */
+.res{position:sticky;top:72px;max-height:calc(100vh - 88px);overflow:auto;padding:16px;display:flex;flex-direction:column;gap:14px}
+.hero .lbl{color:var(--ink-2);font-size:13.5px}
+.hero .big{font-size:36px;font-weight:750;letter-spacing:-.02em;line-height:1.05}
+.pos{color:var(--good)} .neg{color:var(--bad)} .mid{color:var(--mid)}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.kpi{background:var(--surface-2);border-radius:11px;padding:8px 10px}
+.kpi b{display:block;font-size:18px;font-variant-numeric:tabular-nums}
+.kpi span{font-size:12.5px;color:var(--ink-2)}
+.kpi span.pos{color:var(--good)} .kpi span.neg{color:var(--bad)} .kpi span.mid{color:var(--mid)}
+.h{font-weight:650;font-size:14px;margin:2px 0 6px;display:flex;justify-content:space-between;gap:8px}
+.h span{color:var(--ink-2);font-weight:500}
+.stack{display:flex;height:16px;gap:2px;border-radius:5px;overflow:hidden;background:var(--surface-2)}
+.stack>div{height:100%;min-width:2px}
+.legend{display:grid;grid-template-columns:auto 1fr auto auto;gap:3px 10px;margin-top:8px;font-size:13.5px;align-items:center}
+.legend .dot{width:10px;height:10px;border-radius:3px}
+.legend .r{text-align:right;font-variant-numeric:tabular-nums}
+.legend .p{color:var(--ink-2)}
+.legend .sub{grid-column:2/5;color:var(--ink-2);font-size:12.5px;margin:-2px 0 2px}
+.rows{display:grid;grid-template-columns:1fr auto;gap:5px 10px;font-size:14px}
+.rows .r{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+.rows .m{color:var(--ink-2);font-weight:400}
+.note{font-size:12.5px;color:var(--ink-2);line-height:1.4}
+.warn{background:var(--warn-bg);border-radius:10px;padding:8px 10px;font-size:13px}
+table.t{width:100%;border-collapse:collapse;font-size:13.5px;font-variant-numeric:tabular-nums}
+table.t th{font-weight:600;color:var(--ink-2);text-align:right;padding:5px 4px;border-bottom:1px solid var(--line);font-size:12.5px}
+table.t td{text-align:right;padding:6px 4px;border-bottom:1px solid var(--line)}
+table.t th:first-child,table.t td:first-child{text-align:left}
+table.t .l{text-align:left}
+table.t tr.cur td{font-weight:700;background:var(--accent-wash)}
+.tablewrap{overflow-x:auto}
+table.t.big td,table.t.big th{padding:7px 5px;white-space:nowrap}
+table.t.big tbody tr{cursor:pointer}
+table.t.big tbody tr:hover td{background:var(--surface-2)}
+input[type=range]{width:100%;height:32px;-webkit-appearance:none;appearance:none;background:transparent;margin:0}
+input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:3px;background:var(--line)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:50%;background:var(--accent);margin-top:-9px;border:3px solid var(--surface);box-shadow:0 1px 4px rgba(0,0,0,.3)}
+input[type=range]::-moz-range-track{height:6px;border-radius:3px;background:var(--line)}
+input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:var(--accent);border:3px solid var(--surface)}
+.slider{display:flex;align-items:center;gap:10px}
+.slider .inp{width:140px;flex:none}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1px solid var(--ring);background:var(--surface-2);border-radius:999px;padding:5px 11px;font-size:13px;font-weight:600}
+.chip.on{background:var(--accent);color:#fff;border-color:transparent}
+details.how{font-size:13px;color:var(--ink-2)}
+details.how summary{cursor:pointer;color:var(--accent);font-weight:600}
+details.how ul{padding-left:18px;margin:6px 0}
+#res,#detail{scroll-margin-top:70px}
+.mini{display:none}
+
+/* ── сводка ── */
+.sum-grid{display:grid;grid-template-columns:minmax(0,1fr) 440px;gap:16px;align-items:start}
+.search{display:flex;align-items:center;gap:8px;background:var(--surface);border:2px solid var(--ring);border-radius:14px;padding:0 14px;height:52px}
+.search:focus-within{border-color:var(--accent)}
+.search svg{width:20px;height:20px;color:var(--muted);flex:none}
+.search input{border:0;outline:0;background:transparent;flex:1;min-width:0;font-size:17px;height:100%}
+.search button{border:0;background:var(--surface-2);border-radius:50%;width:28px;height:28px;color:var(--ink-2);flex:none}
+.sumbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:space-between;margin:10px 0}
+.list{display:flex;flex-direction:column}
+.lhead,.item{display:grid;grid-template-columns:minmax(0,1fr) 78px 74px 62px;gap:8px;align-items:center}
+.lhead{padding:10px 14px;font-size:12px;color:var(--ink-2);font-weight:600;border-bottom:1px solid var(--line);position:sticky;top:57px;background:var(--surface);z-index:2;border-radius:var(--r) var(--r) 0 0}
+.lhead span:not(:first-child),.item .c{text-align:right}
+.item{padding:11px 14px;border:0;border-bottom:1px solid var(--line);cursor:pointer;text-align:left;background:none;width:100%}
+.item:last-child{border-bottom:0}
+.item:hover{background:var(--surface-2)}
+.item.sel{background:var(--accent-wash)}
+.item .n{font-weight:600;overflow-wrap:anywhere;line-height:1.3}
+.item .s{display:block;color:var(--ink-2);font-size:12.5px;font-weight:400;margin-top:2px}
+.item .c{font-variant-numeric:tabular-nums;font-weight:650}
+.item .c.fa{font-weight:500}
+.item.dim{opacity:.6}
+.badge{display:inline-block;font-size:11px;font-weight:700;padding:1px 5px;border-radius:5px;background:var(--surface-2);color:var(--ink-2);margin-right:5px;vertical-align:1px}
+.more{border:0;background:none;color:var(--accent);font-weight:600;padding:12px 14px;text-align:left;width:100%}
+.tot{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.tot div{font-size:12.5px;color:var(--ink-2)} .tot b{display:block;font-size:17px;color:var(--ink);font-variant-numeric:tabular-nums}
+.detail{padding:16px;display:flex;flex-direction:column;gap:14px;position:sticky;top:72px;max-height:calc(100vh - 88px);overflow:auto}
+.detail .title{font-size:18px;font-weight:700;overflow-wrap:anywhere}
+.back{display:none}
+.lock{max-width:440px;margin:24px auto;padding:20px;display:flex;flex-direction:column;gap:12px}
+.lock input{height:44px;border-radius:11px;border:1px solid var(--ring);background:var(--surface-2);padding:0 12px;font-size:16px}
+.empty{padding:28px 16px;text-align:center;color:var(--ink-2)}
+.delta{font-size:12.5px;font-weight:600}
+
+/* ── мои расчёты ── */
+.saved{display:flex;flex-direction:column;gap:10px}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:12px}
+.sv{display:grid;grid-template-columns:auto 1fr auto;gap:4px 12px;align-items:center;padding:12px 14px}
+.sv .n{font-weight:650;overflow-wrap:anywhere}
+.sv .s{color:var(--ink-2);font-size:13px}
+.sv .acts{display:flex;gap:6px;grid-column:2/4;flex-wrap:wrap}
+.toast{position:fixed;left:50%;bottom:calc(24px + var(--nav-h) + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-weight:600;z-index:50;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90vw;text-align:center}
+.toast.on{opacity:1}
+
+/* ── телефон ── */
+@media (max-width: 860px){
+  :root{--nav-h:62px}
+  .bar{padding:8px 16px;gap:10px;justify-content:space-between}
+  .themeb span{display:none}
+  nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--surface);border-top:1px solid var(--line);margin:0;
+    padding:4px 8px calc(4px + env(safe-area-inset-bottom));justify-content:space-around;gap:0}
+  nav.tabs button{flex-direction:column;gap:2px;font-size:11.5px;padding:6px 8px;min-width:76px}
+  nav.tabs button[aria-current="page"]{background:transparent}
+  main{padding:12px 12px 16px}
+  .grid,.sum-grid{grid-template-columns:minmax(0,1fr)}
+  .res,.detail{position:static;max-height:none;overflow:visible}
+  .inp{width:132px}
+  .lhead,.item{grid-template-columns:minmax(0,1fr) 70px 62px 52px;gap:6px;padding-left:12px;padding-right:12px}
+  .lhead{top:53px}
+  .mini{display:flex;position:fixed;left:8px;right:8px;bottom:calc(var(--nav-h) + 6px + env(safe-area-inset-bottom));z-index:25;
+    background:var(--ink);color:var(--bg);border-radius:14px;padding:9px 14px;align-items:center;justify-content:space-between;gap:10px;border:0;font-weight:600;box-shadow:0 6px 20px rgba(0,0,0,.25)}
+  .mini b{font-size:17px}
+  .mini .g{opacity:.75;font-weight:500;font-size:13px}
+  body.calc-on{padding-bottom:calc(var(--nav-h) + 64px + env(safe-area-inset-bottom))}
+  body.calc-on .toast{bottom:calc(var(--nav-h) + 74px + env(safe-area-inset-bottom))}
+  .detail-wrap.open{position:fixed;inset:0;z-index:40;background:var(--bg);overflow:auto;padding:0 0 calc(24px + env(safe-area-inset-bottom))}
+  .detail-wrap.open .detail{border-radius:0;border:0;min-height:100%}
+  .detail-wrap:not(.open){display:none}
+  .back{display:inline-flex}
+}
+@media (max-width: 380px){ .inp{width:116px} .hero .big{font-size:30px} .lhead,.item{grid-template-columns:minmax(0,1fr) 64px 58px 48px} }
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <div class="brand"><i>Ю</i><span>Юнитка</span></div>
+    <nav class="tabs" id="tabs">
+      <button data-tab="sum"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg>Сводка</button>
+      <button data-tab="calc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="5" y="3" width="14" height="18" rx="2.5"/><path d="M8.5 7.5h7M8.5 12h.01M12 12h.01M15.5 12h.01M8.5 16h.01M12 16h.01M15.5 16h.01"/></svg>Расчёт</button>
+      <button data-tab="saved"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M7 3.5h10a1 1 0 0 1 1 1V20l-6-3.8L6 20V4.5a1 1 0 0 1 1-1Z"/></svg>Мои расчёты</button>
+    </nav>
+    <button class="themeb" id="bTheme" aria-label="Тема"></button>
+  </div>
+</header>
+
+<main>
+<!-- ═════════ СВОДКА ═════════ -->
+<section class="page" id="p-sum">
+  <div id="factLoading" class="card empty hidden">Загружаю товары из панелей…</div>
+  <div id="factLock" class="card lock hidden">
+    <div class="h" style="font-size:17px">Сводка по товарам</div>
+    <div class="note">Цены и факт панелей ВБ, Озон и ЯМ лежат зашифрованными. Введите пароль один раз — телефон и компьютер его запомнят.</div>
+    <form id="passForm" style="display:flex;flex-direction:column;gap:12px" onsubmit="return false">
+      <input type="text" name="username" value="unitka" autocomplete="username" class="hidden" readonly>
+      <input id="pass" type="password" placeholder="Пароль" autocomplete="current-password">
+      <button class="btn pri" id="bUnlock" type="submit">Открыть</button>
+    </form>
+    <div class="note" id="lockMsg"></div>
+  </div>
+  <div id="factBox" class="hidden">
+    <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="fq" type="search" placeholder="Найти товар — начните печатать" autocomplete="off" enterkeyhint="search"><button id="fqClear" class="hidden" aria-label="Очистить">✕</button></div>
+    <div class="sumbar">
+      <div class="seg" id="sumMp"><button data-sf="all">Все</button><button data-sf="wb">WB</button><button data-sf="ozon">Ozon</button><button data-sf="ym">ЯМ</button></div>
+      <select class="sel" id="fsort" aria-label="Порядок"><option value="sales">по выручке</option><option value="margin">сначала низкая маржа</option><option value="name">по алфавиту</option></select>
+    </div>
+    <div class="sum-grid">
+      <div class="card" id="factList"></div>
+      <div class="detail-wrap" id="detailWrap"><div class="card detail" id="detail"></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════ РАСЧЁТ ═════════ -->
+<section class="page" id="p-calc">
+  <div class="grid">
+    <div class="col" id="form">
+      <div class="mprow">Площадка <div class="seg" id="mpSeg" role="group" aria-label="Площадка"><button data-mp="wb">WB</button><button data-mp="ozon">Ozon</button><button data-mp="ym">ЯМ</button></div></div>
+      <div class="namebar">
+        <input id="name" placeholder="Товар (артикул продавца)" autocomplete="off">
+        <button class="btn pri" id="bSave" title="Сохранить этот расчёт во вкладку «Мои расчёты» на этом устройстве">В мои расчёты</button>
+        <button class="btn" id="bShare" title="Ссылка, по которой этот расчёт откроется на другом телефоне или компьютере">Поделиться</button>
+        <button class="btn" id="bNew">Новый</button>
+      </div>
+
+      <details class="sec" open data-sec="price">
+        <summary>Цена <span class="sum" data-sum="price"></span></summary>
+        <div class="fields">
+          <label class="f"><span>Цена до скидки</span><span class="inp"><input data-k="price0" inputmode="decimal"><i>₽</i></span></label>
+          <label class="f"><span>Ваша скидка</span><span class="inp"><input data-k="disc" inputmode="decimal"><i>%</i></span></label>
+          <label class="f total"><span>Цена продажи<small>с неё считаются комиссия, реклама и налог</small></span><span class="inp"><input id="pSale" inputmode="decimal"><i>₽</i></span></label>
+          <label class="f"><span>Скидка площадки (СПП, баллы)<small>платит площадка; влияет на цену для покупателя и эквайринг</small></span><span class="inp"><input data-f="spp" inputmode="decimal"><i>%</i></span></label>
+          <div class="f calc"><span>Покупатель платит</span><span class="val" data-out="pb"></span></div>
+        </div>
+      </details>
+
+      <details class="sec" open data-sec="cost">
+        <summary>Себестоимость <span class="sum" data-sum="cost"></span></summary>
+        <div class="fields">
+          <label class="f"><span>Закупка за 1 шт</span><span class="inp"><input data-k="buy" inputmode="decimal"><i>₽</i></span></label>
+          <label class="f"><span>Доставка партии до склада<small>за всю партию — разделится на штуки</small></span><span class="inp"><input data-k="lotShip" inputmode="decimal"><i>₽</i></span></label>
+          <label class="f"><span>Штук в партии</span><span class="inp"><input data-k="lotQty" inputmode="decimal"><i>шт</i></span></label>
+          <label class="f"><span>ФФ, упаковка, маркировка за 1 шт</span><span class="inp"><input data-k="ff" inputmode="decimal"><i>₽</i></span></label>
+          <label class="f"><span>Прочее за 1 шт</span><span class="inp"><input data-k="costOther" inputmode="decimal"><i>₽</i></span></label>
+          <div class="f calc total"><span>Себестоимость 1 шт</span><span class="val" data-out="cost"></span></div>
+        </div>
+      </details>
+
+      <details class="sec" open data-sec="mp">
+        <summary><span id="mpTitle">Расходы площадки</span> <span class="sum" data-sum="mp"></span></summary>
+        <div class="fields">
+          <div class="f"><span>Схема работы</span><span class="seg sm" id="schemeSeg"></span></div>
+          <label class="f"><span>Комиссия</span><span class="inp"><input data-f="comm" inputmode="decimal"><i>%</i></span></label>
+          <label class="f"><span>Эквайринг<small id="acqHint">от цены покупателя</small></span><span class="inp"><input data-f="acq" inputmode="decimal"><i>%</i></span></label>
+          <label class="f"><span>Логистика до покупателя<small id="logiHint">за одну доставку</small></span><span class="inp"><input data-f="logi" inputmode="decimal"><i>₽</i></span></label>
+          <label class="f" data-only="ym"><span>Логистика, % от цены<small>если площадка берёт процентом</small></span><span class="inp"><input data-f="logiPct" inputmode="decimal"><i>%</i></span></label>
+          <label class="f" data-only="ozon"><span>Обработка отправления<small>доплата FBS, если не внутри логистики</small></span><span class="inp"><input data-f="proc" inputmode="decimal"><i>₽</i></span></label>
+          <label class="f" data-only="ozon"><span>Последняя миля, % от цены</span><span class="inp"><input data-f="lastPct" inputmode="decimal"><i>%</i></span></label>
+          <label class="f" data-only="ozon"><span>Последняя миля, не больше</span><span class="inp"><input data-f="lastMax" inputmode="decimal"><i>₽</i></span></label>
+          <label class="f" data-only="ozon"><span>Нелокальные продажи<small>наценка за доставку из другого кластера</small></span><span class="inp"><input data-f="nonloc" inputmode="decimal"><i>%</i></span></label>
+          <label class="f" data-only="ozon"><span>Кросс-докинг<small>за литр объёма</small></span><span class="inp"><input data-f="xdock" inputmode="decimal"><i>₽/л</i></span></label>
+          <label class="f" data-only="ozon"><span>Объём товара</span><span class="inp"><input data-k="vol" inputmode="decimal"><i>л</i></span></label>
+          <label class="f"><span>Обратная логистика<small>за возврат одного невыкупа</small></span><span class="inp"><input data-f="back" inputmode="decimal"><i>₽</i></span></label>
+          <label class="f"><span>Процент выкупа<small>из 100 заказов выкупают</small></span><span class="inp"><input data-f="buyout" inputmode="decimal"><i>%</i></span></label>
+          <div class="f calc"><span>Логистика на 1 проданную шт<small>с учётом невыкупов туда и обратно</small></span><span class="val" data-out="logi"></span></div>
+          <label class="f"><span>Хранение на 1 шт</span><span class="inp"><input data-f="stor" inputmode="decimal"><i>₽</i></span></label>
+          <label class="f"><span>Приёмка на 1 шт</span><span class="inp"><input data-f="accept" inputmode="decimal"><i>₽</i></span></label>
+          <label class="f"><span>Прочие удержания<small>отзывы за баллы, штрафы, подписки</small></span><span class="inp"><input data-f="other" inputmode="decimal"><i>₽</i></span></label>
+          <label class="f"><span>Прочие удержания, % от цены</span><span class="inp"><input data-f="otherPct" inputmode="decimal"><i>%</i></span></label>
+          <label class="f"><span>Соинвест, не облагается налогом<small>доля цены, с которой не платим налог</small></span><span class="inp"><input data-f="soinv" inputmode="decimal"><i>%</i></span></label>
+          <button class="linkbtn" data-act="saveDefaults">Запомнить эти значения по умолчанию для <span class="mpName"></span></button>
+        </div>
+      </details>
+
+      <details class="sec" data-sec="ads">
+        <summary>Реклама <span class="sum" data-sum="ads"></span></summary>
+        <div class="fields">
+          <div class="f"><span>Считать рекламу</span><span class="seg sm" id="adsSeg"><button data-ads="pct">ДРР, %</button><button data-ads="rub">₽ на шт</button></span></div>
+          <label class="f" data-ads-only="pct"><span>ДРР<small>доля рекламы от цены продажи</small></span><span class="inp"><input data-k="drr" inputmode="decimal"><i>%</i></span></label>
+          <label class="f" data-ads-only="rub"><span>Реклама на 1 проданную шт</span><span class="inp"><input data-k="adsRub" inputmode="decimal"><i>₽</i></span></label>
+        </div>
+      </details>
+
+      <details class="sec" data-sec="tax">
+        <summary>Налоги <span class="sum" data-sum="tax"></span></summary>
+        <div class="fields">
+          <div class="f"><span>Система</span><select class="sel" data-k="tax" id="taxSel"></select></div>
+          <label class="f"><span>Ставка</span><span class="inp"><input data-k="taxRate" inputmode="decimal"><i>%</i></span></label>
+          <div class="f" id="taxBaseRow"><span>Налог «доходы» считать от</span><span class="seg sm" id="baseSeg"><button data-base="sale">цены продажи</button><button data-base="buyer">цены покупателя</button></span></div>
+          <div class="f" id="ndsRow"><span>НДС</span><select class="sel" data-k="nds" id="ndsSel">
+            <option value="0">без НДС</option><option value="5">5%</option><option value="7">7%</option><option value="10">10%</option><option value="22">22%</option></select></div>
+          <label class="chk" id="ndsDedRow"><input type="checkbox" data-k="ndsDeduct"><span>Вычет входящего НДС с услуг площадки и рекламы (22%)</span></label>
+          <button class="linkbtn" data-act="saveDefaults">Запомнить налоги и рекламу по умолчанию</button>
+        </div>
+      </details>
+
+      <details class="sec" data-sec="plan">
+        <summary>Цель и план продаж <span class="sum" data-sum="plan"></span></summary>
+        <div class="fields">
+          <label class="f"><span>Целевая маржа<small>от неё — зелёный; от 0 до неё — жёлтый</small></span><span class="inp"><input data-k="target" inputmode="decimal"><i>%</i></span></label>
+          <label class="f"><span>Целевой ROI<small>такой же светофор для ROI</small></span><span class="inp"><input data-k="targetRoi" inputmode="decimal"><i>%</i></span></label>
+          <label class="f"><span>Продаж в месяц</span><span class="inp"><input data-k="perMonth" inputmode="decimal"><i>шт</i></span></label>
+        </div>
+      </details>
+    </div>
+
+    <aside class="card res" id="res"></aside>
+  </div>
+  <button class="mini" id="mini"></button>
+</section>
+
+<!-- ═════════ МОИ РАСЧЁТЫ ═════════ -->
+<section class="page" id="p-saved">
+  <div class="saved" id="savedBox"></div>
+</section>
+</main>
+<div class="toast" id="toast"></div>
+<input type="file" id="importFile" accept="application/json,.json" class="hidden">
+
+<script>
+"use strict";
+/* ═════════ общие ═════════ */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const LS = {
+  get(k, d) { try { const v = localStorage.getItem("unitka." + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem("unitka." + k, JSON.stringify(v)); } catch (e) {} },
+  del(k) { try { localStorage.removeItem("unitka." + k); } catch (e) {} }
+};
+const clone = o => JSON.parse(JSON.stringify(o));
+function num(v) {
+  if (typeof v === "number") return isFinite(v) ? v : 0;
+  if (v == null || v === "") return 0;
+  const x = parseFloat(String(v).replace(/[\s  ]/g, "").replace(",", "."));
+  return isFinite(x) ? x : 0;
+}
+const NF0 = new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 0 });
+const NF1 = new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 1 });
+const NF2 = new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 2 });
+const MINUS = "−";
+function rub(x, sign) {
+  if (x == null || !isFinite(x)) return "—";
+  const a = Math.abs(x), s = (a < 100 ? NF1 : NF0).format(a);
+  const neg = x < 0 && s !== "0";
+  return (neg ? MINUS : (sign && x > 0 && s !== "0" ? "+" : "")) + s + " ₽";
+}
+function pct(x, d = 1, sign) {
+  if (x == null || !isFinite(x)) return "—";
+  const s = Math.abs(x * 100).toLocaleString("ru-RU", { minimumFractionDigits: d, maximumFractionDigits: d });
+  const neg = x < 0 && /[1-9]/.test(s);
+  return (neg ? MINUS : (sign && x > 0 && /[1-9]/.test(s) ? "+" : "")) + s + "%";
+}
+const cls = x => (x > 0.004 ? "pos" : x < -0.004 ? "neg" : "");
+const tone = (v, good) => (v == null || !isFinite(v) ? "" : v < -0.00005 ? "neg" : v >= good - 0.00005 ? "pos" : "mid");
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+function inField(v) { const x = num(v); return Math.abs(x - Math.round(x)) < 1e-9 ? String(Math.round(x)) : String(Math.round(x * 100) / 100).replace(".", ","); }
+function toast(t) { const el = $("#toast"); el.textContent = t; el.classList.add("on"); clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove("on"), 2600); }
+const isPhone = () => matchMedia("(max-width: 860px)").matches;
+
+/* ═════════ тема ═════════ */
+let THEME = LS.get("theme", "auto");
+const TH = {
+  auto: ["Тема: как в системе", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16Z" fill="currentColor"/></svg>'],
+  light: ["Тема: светлая", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4"/></svg>'],
+  dark: ["Тема: тёмная", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/></svg>']
+};
+function applyTheme() {
+  if (THEME === "auto") document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme", THEME);
+  $("#bTheme").innerHTML = TH[THEME][1] + "<span>" + TH[THEME][0].replace("Тема: ", "") + "</span>";
+  $("#bTheme").title = TH[THEME][0] + " — нажмите, чтобы сменить";
+}
+$("#bTheme").onclick = () => { THEME = { auto: "light", light: "dark", dark: "auto" }[THEME]; LS.set("theme", THEME); applyTheme(); toast(TH[THEME][0]); };
+
+/* ═════════ площадки и налоги ═════════ */
+const OZX = { proc: 0, lastPct: 0, lastMax: 0, nonloc: 0, xdock: 0 };
+const MPS = {
+  wb:   { name: "Wildberries", short: "WB", schemes: ["FBW", "FBS"],
+          fees: Object.assign({ scheme: "FBW", comm: 25, acq: 0, logi: 60, logiPct: 0, back: 50, buyout: 90, stor: 3, accept: 0, other: 0, otherPct: 0, soinv: 0, spp: 0 }, OZX),
+          acqHint: "у WB обычно уже внутри комиссии — ставьте 0", logiHint: "за одну доставку, с коэффициентом склада" },
+  ozon: { name: "Ozon", short: "Ozon", schemes: ["FBO", "FBS", "rFBS"],
+          fees: Object.assign({ scheme: "FBS", comm: 30, acq: 1, logi: 130, logiPct: 0, back: 95, buyout: 90, stor: 0, accept: 0, other: 0, otherPct: 0, soinv: 50, spp: 0 }, OZX),
+          acqHint: "от цены покупателя", logiHint: "всё вместе или только базовый тариф — доплаты ниже" },
+  ym:   { name: "Яндекс Маркет", short: "ЯМ", schemes: ["FBY", "FBS"],
+          fees: Object.assign({ scheme: "FBS", comm: 15, acq: 1.6, logi: 0, logiPct: 7.35, back: 0, buyout: 90, stor: 0, accept: 0, other: 0, otherPct: 0, soinv: 0, spp: 0 }, OZX),
+          acqHint: "приём платежа, от цены покупателя", logiHint: "₽ за доставку; процент — строкой ниже" }
+};
+const TAX = {
+  ausn_d:  { name: "АУСН «Доходы»", rate: 8, kind: "income", nds: false },
+  ausn_dr: { name: "АУСН «Доходы − расходы»", rate: 20, kind: "profit", min: 0.03, nds: false },
+  usn_d:   { name: "УСН «Доходы»", rate: 6, kind: "income", nds: true },
+  usn_dr:  { name: "УСН «Доходы − расходы»", rate: 15, kind: "profit", min: 0.01, nds: true },
+  osno:    { name: "ОСНО (НДФЛ / на прибыль)", rate: 13, kind: "profit", min: 0, nds: true },
+  custom:  { name: "Свой % от выручки", rate: 6, kind: "income", nds: false },
+  none:    { name: "Не учитывать", rate: 0, kind: "none", nds: false }
+};
+const COMMON_KEYS = ["adsMode", "drr", "adsRub", "tax", "taxRate", "taxBase", "nds", "ndsDeduct", "target", "targetRoi", "perMonth"];
+function defaults() {
+  const d = LS.get("defaults", {});
+  const fees = {};
+  for (const k in MPS) fees[k] = Object.assign({}, MPS[k].fees, (d.fees || {})[k] || {});
+  return Object.assign({ adsMode: "pct", drr: 10, adsRub: 0, tax: "ausn_d", taxRate: 8, taxBase: "sale", nds: 0, ndsDeduct: false, target: 10, targetRoi: 30, perMonth: 100 },
+                       d.common || {}, { fees });
+}
+function newState(mp) {
+  return Object.assign({ v: 2, name: "", mp: mp || "wb", price0: 1500, disc: 0, buy: 400, lotShip: 0, lotQty: 100, ff: 0, costOther: 0, vol: 0 }, defaults());
+}
+function fixState(s) {
+  const base = newState(s && s.mp);
+  s = Object.assign(base, s || {});
+  for (const k in MPS) s.fees[k] = Object.assign({}, MPS[k].fees, (s.fees || {})[k] || {});
+  if (!MPS[s.mp]) s.mp = "wb";
+  if (!TAX[s.tax]) s.tax = "ausn_d";
+  return s;
+}
+
+/* ═════════ расчёт одной штуки ═════════ */
+function calc(s, mp, p0) {
+  mp = mp || s.mp;
+  const f = s.fees[mp];
+  const P0 = p0 == null ? num(s.price0) : p0;
+  const disc = Math.min(99.9, Math.max(0, num(s.disc))) / 100;
+  const P = P0 * (1 - disc);
+  const Pb = P * (1 - num(f.spp) / 100);
+  const qty = num(s.lotQty);
+  const cost = num(s.buy) * (1 + num(s.agent) / 100) + (qty > 0 ? num(s.lotShip) / qty : 0) + num(s.ff) + num(s.costOther);
+  const comm = P * num(f.comm) / 100;
+  const acq = Pb * num(f.acq) / 100;
+  const b = Math.min(100, Math.max(1, num(f.buyout) || 100)) / 100;
+  const lastV = P * num(f.lastPct) / 100, last = num(f.lastMax) > 0 ? Math.min(lastV, num(f.lastMax)) : lastV;
+  const fwd = num(f.logi) + P * num(f.logiPct) / 100 + num(f.proc) + last + P * num(f.nonloc) / 100 + num(f.xdock) * num(s.vol);
+  const logi = fwd / b + (1 / b - 1) * num(f.back);
+  const stor = num(f.stor) + num(f.accept);
+  const other = num(f.other) + P * num(f.otherPct) / 100;
+  const mpSum = comm + acq + logi + stor + other;
+  const ads = s.adsMode === "rub" ? num(s.adsRub) : P * num(s.drr) / 100;
+  const sys = TAX[s.tax] || TAX.none, rate = num(s.taxRate) / 100;
+  const base = (s.taxBase === "buyer" ? Pb : P) * (1 - num(f.soinv) / 100);
+  const ndsR = sys.nds ? num(s.nds) / 100 : 0;
+  const ndsOut = ndsR > 0 ? base * ndsR / (1 + ndsR) : 0;
+  const ndsIn = ndsR >= 0.1 && s.ndsDeduct ? (mpSum + ads) * 22 / 122 : 0;
+  const inc = base - ndsOut, exp = cost + mpSum + ads - ndsIn;
+  let incTax = 0;
+  if (sys.kind === "income") incTax = inc * rate;
+  else if (sys.kind === "profit") incTax = Math.max(rate * (inc - exp), (sys.min || 0) * inc, 0);
+  const nds = ndsOut - ndsIn;
+  const tax = incTax + nds;
+  const profit = P - cost - mpSum - ads - tax;
+  return { P0, P, Pb, cost, comm, acq, logi, stor, other, mpSum, ads, incTax, nds, tax, profit, b,
+           gross: P - cost - mpSum, expenses: cost + mpSum + ads + tax,
+           margin: P > 0 ? profit / P : NaN, roi: cost > 0 ? profit / cost : NaN, payout: P - mpSum };
+}
+/* цена до скидки, при которой маржа = t (t = 0 — безубыточность); null — недостижимо */
+function solveP0(s, mp, t) {
+  const g = p0 => { const r = calc(s, mp, p0); return r.profit - t * r.P; };
+  let lo = 0, hi = Math.max(100, num(s.price0) * 2);
+  let i = 0;
+  while (g(hi) < 0 && i++ < 40) hi *= 2;
+  if (g(hi) < 0) return null;
+  for (let k = 0; k < 90; k++) { const m = (lo + hi) / 2; if (g(m) < 0) lo = m; else hi = m; }
+  return hi;
+}
+function priceTarget(s, mp, t) {
+  const p0 = solveP0(s, mp, t);
+  if (p0 == null) return null;
+  return { p0, p: p0 * (1 - Math.min(99.9, num(s.disc)) / 100) };
+}
+
+/* ═════════ состояние ═════════ */
+let S = fixState(LS.get("draft", null));
+let TAB = LS.get("tab", "sum");
+function saveDraft() { LS.set("draft", S); }
+
+/* ═════════ форма расчёта ═════════ */
+$("#taxSel").innerHTML = Object.entries(TAX).map(([k, t]) => `<option value="${k}">${t.name}</option>`).join("");
+function writeForm() {
+  $("#name").value = S.name || "";
+  $$("[data-k]").forEach(el => {
+    const v = S[el.dataset.k];
+    if (el.type === "checkbox") el.checked = !!v;
+    else if (el.tagName === "SELECT") el.value = String(v);
+    else el.value = v == null ? "" : inField(v);
+  });
+  writeFees();
+  syncSale(true);
+  syncToggles();
+}
+function writeFees() {
+  const f = S.fees[S.mp], m = MPS[S.mp];
+  $$("#form [data-f]").forEach(el => { el.value = inField(f[el.dataset.f]); });
+  $$(".mpName").forEach(el => el.textContent = m.short);
+  $("#mpTitle").textContent = "Расходы " + m.short;
+  $("#acqHint").textContent = m.acqHint;
+  $("#logiHint").textContent = m.logiHint;
+  $("#schemeSeg").innerHTML = m.schemes.map(x => `<button data-scheme="${x}" aria-pressed="${f.scheme === x}">${x}</button>`).join("");
+  $$("[data-only]").forEach(el => { const i = el.querySelector("input"), v = i.dataset.f ? f[i.dataset.f] : S[i.dataset.k];
+    el.classList.toggle("hidden", el.dataset.only !== S.mp && !num(v)); });
+  $$("#mpSeg button").forEach(b => b.setAttribute("aria-pressed", b.dataset.mp === S.mp));
+}
+function syncToggles() {
+  $$("#adsSeg button").forEach(b => b.setAttribute("aria-pressed", b.dataset.ads === S.adsMode));
+  $$("[data-ads-only]").forEach(el => el.classList.toggle("hidden", el.dataset.adsOnly !== S.adsMode));
+  $$("#baseSeg button").forEach(b => b.setAttribute("aria-pressed", b.dataset.base === S.taxBase));
+  const sys = TAX[S.tax];
+  $("#taxBaseRow").classList.toggle("hidden", sys.kind !== "income");
+  $("#ndsRow").classList.toggle("hidden", !sys.nds);
+  $("#ndsDedRow").classList.toggle("hidden", !(sys.nds && num(S.nds) >= 10));
+}
+function syncSale(force) {
+  const el = $("#pSale");
+  if (!force && document.activeElement === el) return;
+  el.value = inField(Math.round(num(S.price0) * (1 - Math.min(99.9, num(S.disc)) / 100) * 100) / 100);
+}
+const isPick = el => el.tagName === "SELECT" || el.type === "checkbox";
+$("#form").addEventListener("input", e => { if (!isPick(e.target)) onField(e.target); });
+$("#form").addEventListener("change", e => { if (isPick(e.target)) onField(e.target); });
+function onField(el) {
+  if (el.id === "name") { S.name = el.value; saveDraft(); return; }
+  if (el.id === "pSale") {
+    const d = Math.min(99.9, num(S.disc)) / 100;
+    S.price0 = Math.round(num(el.value) / (1 - d) * 100) / 100;
+    $('[data-k="price0"]').value = inField(S.price0);
+  } else if (el.dataset.k) {
+    S[el.dataset.k] = el.type === "checkbox" ? el.checked : el.value;
+    if (el.dataset.k === "tax") { S.taxRate = TAX[S.tax].rate; $('[data-k="taxRate"]').value = inField(S.taxRate); syncToggles(); }
+    if (el.dataset.k === "nds") syncToggles();
+    if (el.dataset.k === "price0" || el.dataset.k === "disc") syncSale();
+  } else if (el.dataset.f) {
+    S.fees[S.mp][el.dataset.f] = el.value;
+  }
+  saveDraft(); schedule();
+}
+$("#form").addEventListener("click", e => {
+  const b = e.target.closest("button");
+  if (!b) return;
+  if (b.dataset.mp) { if (b.dataset.mp !== S.mp) { S.mp = b.dataset.mp; saveDraft(); writeFees(); render(); } }
+  else if (b.dataset.scheme) { S.fees[S.mp].scheme = b.dataset.scheme; writeFees(); saveDraft(); schedule(); }
+  else if (b.dataset.ads) { S.adsMode = b.dataset.ads; syncToggles(); saveDraft(); schedule(); }
+  else if (b.dataset.base) { S.taxBase = b.dataset.base; syncToggles(); saveDraft(); schedule(); }
+  else if (b.dataset.act === "saveDefaults") {
+    const d = LS.get("defaults", {});
+    d.fees = d.fees || {}; d.fees[S.mp] = clone(S.fees[S.mp]);
+    d.common = {}; COMMON_KEYS.forEach(k => d.common[k] = S[k]);
+    LS.set("defaults", d); toast("Запомнил: новые расчёты начнутся с этих значений");
+  }
+});
+$("#form").addEventListener("focusout", e => { if (e.target.id === "pSale") syncSale(true); });
+
+/* ═════════ итог расчёта ═════════ */
+let queued = false;           // одна перерисовка на пачку событий; не rAF — он стоит в фоновых вкладках
+function schedule() { if (queued) return; queued = true; Promise.resolve().then(() => { queued = false; render(); }); }
+
+function segs(r) {
+  return [
+    { k: "Себестоимость", v: r.cost, c: "var(--s1)" },
+    { k: "Комиссия и эквайринг", v: r.comm + r.acq, c: "var(--s2)", sub: r.acq ? `комиссия ${rub(r.comm)} · эквайринг ${rub(r.acq)}` : "" },
+    { k: "Логистика, хранение, прочее", v: r.logi + r.stor + r.other, c: "var(--s3)", sub: `логистика ${rub(r.logi)}` + (r.stor ? ` · хранение/приёмка ${rub(r.stor)}` : "") + (r.other ? ` · прочее ${rub(r.other)}` : "") },
+    { k: "Реклама", v: r.ads, c: "var(--s4)" },
+    { k: "Налоги", v: r.tax, c: "var(--s5)", sub: r.nds ? `налог ${rub(r.incTax)} · НДС ${rub(r.nds)}` : "" },
+    { k: r.profit >= 0 ? "Прибыль" : "Убыток", v: r.profit, c: "var(--s6)", profit: true }
+  ];
+}
+function stackHTML(r) {
+  const parts = segs(r);
+  const total = parts.reduce((a, p) => a + Math.max(0, p.v), 0) || 1;
+  const bar = parts.filter(p => p.v > 0).map(p =>
+    `<div style="width:${(p.v / total * 100).toFixed(3)}%;background:${p.c}" title="${esc(p.k)}: ${rub(p.v)} · ${pct(p.v / r.P)} цены"></div>`).join("");
+  const leg = parts.map(p => `<span class="dot" style="background:${p.c}"></span><span${p.profit ? ' style="font-weight:650"' : ""}>${esc(p.k)}</span>` +
+    `<span class="r${p.profit ? " " + cls(p.v) : ""}" style="${p.profit ? "font-weight:700" : ""}">${rub(p.v)}</span><span class="r p">${pct(p.v / r.P, 0)}</span>` +
+    (p.sub ? `<span class="sub">${p.sub}</span>` : "")).join("");
+  return `<div class="stack" role="img" aria-label="Из чего складывается цена">${bar}</div>
+    ${r.profit < 0 ? `<div class="note neg" style="margin-top:6px">Расходы больше цены на ${rub(-r.profit)} — продажа в минус.</div>` : ""}
+    <div class="legend">${leg}</div>`;
+}
+const STEPS = [-30, -20, -15, -10, -5, 0, 5, 10, 15, 20, 30];
+function whatIfRows(s, mp, p0, perMonth) {
+  const r0 = calc(s, mp, p0);
+  return STEPS.map(d => {
+    const r = calc(s, mp, p0 * (1 + d / 100));
+    const need = r.profit > 0 && r0.profit > 0 && perMonth > 0 ? perMonth * r0.profit / r.profit : null;
+    return `<tr class="${d === 0 ? "cur" : ""}"><td>${d === 0 ? "сейчас" : (d > 0 ? "+" : MINUS) + Math.abs(d) + "%"}</td><td>${rub(r.P)}</td>` +
+      `<td class="${cls(r.profit)}">${rub(r.profit)}</td><td>${pct(r.margin)}</td><td>${need == null ? "—" : NF0.format(Math.ceil(need))}</td></tr>`;
+  }).join("");
+}
+function render() {
+  const r = calc(S), m = MPS[S.mp], t = num(S.target) / 100, tr = num(S.targetRoi) / 100, pm = num(S.perMonth), qty = num(S.lotQty);
+  const be = priceTarget(S, S.mp, 0), p5 = priceTarget(S, S.mp, 0.05), pt = priceTarget(S, S.mp, t);
+  const disc = num(S.disc) > 0;
+  const priceLine = (lbl, x) => `<span>${lbl}</span><span class="r">${x ? rub(x.p) + (disc ? `<span class="m"> · до скидки ${rub(x.p0)}</span>` : "") : '<span class="m">недостижимо</span>'}</span>`;
+  const maxDisc = be && r.P0 > 0 ? 1 - be.p / r.P0 : null;
+  const f = S.fees[S.mp];
+  const rates = num(f.comm) + num(f.acq) + (S.adsMode === "pct" ? num(S.drr) : 0) + num(f.otherPct) + num(f.logiPct) + num(f.nonloc);
+  const others = Object.keys(MPS).map(k => {
+    const x = calc(S, k), y = priceTarget(S, k, t);
+    return `<tr class="${k === S.mp ? "cur" : ""}"><td>${MPS[k].short}</td><td class="${tone(x.margin, t)}">${rub(x.profit)}</td><td class="${tone(x.margin, t)}">${pct(x.margin)}</td><td>${y ? rub(y.p) : "—"}</td></tr>`;
+  }).join("");
+  const slMin = Math.round(r.P0 * 0.5), slMax = Math.round(r.P0 * 1.5) || 100;
+  $("#res").innerHTML = `
+    <div class="hero"><div class="lbl">Прибыль с 1 проданной шт · ${m.short}</div><div class="big ${tone(r.margin, t)}">${rub(r.profit)}</div></div>
+    <div class="kpis">
+      <div class="kpi"><b class="${tone(r.margin, t)}">${pct(r.margin)}</b><span>маржа · цель ${NF1.format(t * 100)}%</span></div>
+      <div class="kpi"><b class="${tone(r.roi, tr)}">${pct(r.roi, 0)}</b><span>ROI · цель ${NF0.format(tr * 100)}%</span></div>
+      <div class="kpi"><b>${rub(r.payout)}</b><span>перечислит ${m.short}</span></div>
+    </div>
+    <div><div class="h">Куда уходит цена <span>${rub(r.P)}</span></div>${stackHTML(r)}</div>
+    <div><div class="h">Цены</div><div class="rows">
+      ${priceLine("Безубыточность", be)}
+      ${priceLine("Маржа 5%", p5)}
+      ${t !== 0.05 ? priceLine("Маржа " + NF1.format(t * 100) + "% (цель)", pt) : ""}
+      ${maxDisc != null ? `<span>Макс. скидка от ${rub(r.P0)}, чтобы не уйти в минус</span><span class="r ${maxDisc < 0 ? "neg" : ""}">${maxDisc < 0 ? "уже в минусе" : pct(maxDisc)}</span>` : ""}
+    </div>${!pt && rates + t * 100 >= 100 ? `<div class="warn" style="margin-top:8px">Процентные расходы (${NF1.format(rates)}%) и цель вместе дают больше 100% — цена не спасёт, нужно снижать ставки.</div>` : ""}</div>
+    <div><div class="h">Итоги на 1 шт</div><div class="rows">
+      <span>Итого расходов</span><span class="r">${rub(r.expenses)}</span>
+      <span>Валовая прибыль<span class="m"> — до рекламы и налогов</span></span><span class="r ${cls(r.gross)}">${rub(r.gross)}</span>
+      <span>Наценка на себестоимость</span><span class="r">${r.cost > 0 ? pct((r.P - r.cost) / r.cost, 0) : "—"}</span>
+      <span>В месяц при ${NF0.format(pm)} шт</span><span class="r ${cls(r.profit)}">${rub(r.profit * pm)}</span>
+    </div></div>
+    ${qty > 0 ? `<div><div class="h">Партия ${NF0.format(qty)} шт <span>если продать всё</span></div><div class="rows">
+      <span>Вложения в партию</span><span class="r">${rub(r.cost * qty)}</span>
+      <span>Выручка партии</span><span class="r">${rub(r.P * qty)}</span>
+      <span>Чистая прибыль партии</span><span class="r ${cls(r.profit)}">${rub(r.profit * qty)}</span>
+    </div></div>` : ""}
+    <div><div class="h">Что если поменять цену</div>
+      <div class="slider"><input type="range" id="wiR" min="${slMin}" max="${slMax}" step="1" value="${Math.round(r.P0)}" aria-label="Цена до скидки">
+        <span class="inp"><input id="wiP" inputmode="decimal" value="${inField(Math.round(r.P0))}"><i>₽</i></span></div>
+      <div id="wiOut" class="rows" style="margin-top:8px"></div>
+      <div class="tablewrap" style="margin-top:10px"><table class="t"><thead><tr><th>Цена</th><th>Продажа</th><th>Прибыль/шт</th><th>Маржа</th><th>Нужно шт/мес*</th></tr></thead>
+      <tbody>${whatIfRows(S, S.mp, r.P0, pm)}</tbody></table></div>
+      <div class="note" style="margin-top:4px">* сколько продавать в месяц, чтобы прибыль осталась как сейчас при ${NF0.format(pm)} шт</div>
+    </div>
+    <div><div class="h">Та же цена на других площадках</div>
+      <table class="t"><thead><tr><th></th><th>Прибыль/шт</th><th>Маржа</th><th>Цена под ${NF1.format(t * 100)}%</th></tr></thead><tbody>${others}</tbody></table>
+      <div class="note" style="margin-top:4px">По расходам, заданным для каждой площадки (переключатель «Площадка» над названием).</div></div>
+    <details class="how"><summary>Как считаем</summary><ul>
+      <li>Цена продажи = цена до скидки × (1 − ваша скидка). От неё — комиссия, реклама (ДРР) и налог «доходы».</li>
+      <li>Эквайринг — от цены покупателя (после скидки площадки).</li>
+      <li>Логистика на проданную шт = доставка ÷ выкуп + обратная × (1 ÷ выкуп − 1): невыкупы возят туда и обратно.</li>
+      <li>Ozon: доставка = тариф + обработка + последняя миля (% от цены, не больше потолка) + нелокальные + кросс-докинг × литры.</li>
+      <li>«Доходы − расходы» — ставка с прибыли до налога, не меньше минимального (УСН 1%, АУСН 3% от доходов).</li>
+      <li>Соинвест — доля цены, с которой налог не платится (как в таблице Вики для Ozon).</li>
+      <li>Маржа = прибыль ÷ цена продажи. ROI = прибыль ÷ себестоимость. Цвет: зелёный — от цели, жёлтый — от 0 до цели, красный — минус.</li></ul></details>`;
+  const upd = p0 => {
+    const x = calc(S, S.mp, p0), d = x.profit - r.profit;
+    const need = x.profit > 0 && r.profit > 0 && pm > 0 ? Math.ceil(pm * r.profit / x.profit) : null;
+    $("#wiOut").innerHTML = `<span>Продажа ${rub(x.P)} — прибыль/шт</span><span class="r ${cls(x.profit)}">${rub(x.profit)} <span class="delta ${cls(d)}">(${rub(d, true)})</span></span>
+      <span>Маржа · ROI</span><span class="r">${pct(x.margin)} · ${pct(x.roi, 0)}</span>
+      <span>В месяц при ${NF0.format(pm)} шт</span><span class="r ${cls(x.profit)}">${rub(x.profit * pm)}</span>
+      <span>Продаж для той же прибыли в месяц</span><span class="r">${need == null ? "—" : NF0.format(need) + " шт" + (pm ? ` <span class="m">(${pct(need / pm - 1, 0, true)})</span>` : "")}</span>`;
+  };
+  upd(r.P0);
+  $("#wiR").oninput = e => { $("#wiP").value = e.target.value; upd(num(e.target.value)); };
+  $("#wiP").oninput = e => { const v = num(e.target.value); if (v > 0) { $("#wiR").value = v; upd(v); } };
+
+  $("#mini").innerHTML = `<span><span class="g">Прибыль </span><b>${rub(r.profit)}</b></span><span>${pct(r.margin)} <span class="g">маржа</span></span><span>${pct(r.roi, 0)} <span class="g">ROI</span></span>`;
+  $('[data-sum="price"]').textContent = rub(r.P);
+  $('[data-sum="cost"]').textContent = rub(r.cost);
+  $('[data-sum="mp"]').textContent = rub(r.mpSum) + " · " + pct(r.mpSum / r.P, 0);
+  $('[data-sum="ads"]').textContent = S.adsMode === "rub" ? rub(r.ads) : NF1.format(num(S.drr)) + "% · " + rub(r.ads);
+  $('[data-sum="tax"]').textContent = TAX[S.tax].name.replace(/«|»/g, "") + (TAX[S.tax].kind !== "none" ? " " + NF2.format(num(S.taxRate)) + "%" : "");
+  $('[data-sum="plan"]').textContent = "маржа " + NF1.format(num(S.target)) + "% · ROI " + NF0.format(num(S.targetRoi)) + "% · " + NF0.format(pm) + " шт/мес";
+  $('[data-out="pb"]').textContent = rub(r.Pb);
+  $('[data-out="cost"]').textContent = rub(r.cost);
+  $('[data-out="logi"]').textContent = rub(r.logi);
+}
+$("#mini").addEventListener("click", () => $("#res").scrollIntoView({ behavior: "smooth", block: "start" }));
+
+/* ═════════ кнопки расчёта ═════════ */
+function encodeState(s) {
+  const b = new TextEncoder().encode(JSON.stringify(s));
+  let bin = ""; b.forEach(x => bin += String.fromCharCode(x));
+  return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+function decodeState(t) {
+  const bin = atob(t.replace(/-/g, "+").replace(/_/g, "/"));
+  return JSON.parse(new TextDecoder().decode(Uint8Array.from(bin, c => c.charCodeAt(0))));
+}
+$("#bShare").onclick = async () => {
+  const st = clone(S); delete st.id;
+  const url = location.origin + location.pathname + "#c=" + encodeState(st);
+  try {
+    if (navigator.share && isPhone()) { await navigator.share({ title: "Юнитка: " + (S.name || "расчёт"), url }); return; }
+    await navigator.clipboard.writeText(url); toast("Ссылка скопирована — по ней этот расчёт откроется на любом устройстве");
+  } catch (e) { prompt("Скопируйте ссылку", url); }
+};
+$("#bNew").onclick = () => { S = newState(S.mp); saveDraft(); writeForm(); render(); window.scrollTo(0, 0); toast("Новый расчёт"); };
+$("#bSave").onclick = () => {
+  const list = LS.get("saved", []);
+  if (!S.name.trim()) { S.name = "Расчёт " + new Date().toLocaleDateString("ru-RU"); $("#name").value = S.name; }
+  if (!S.id) S.id = Date.now().toString(36);
+  const i = list.findIndex(x => x.id === S.id);
+  const item = { id: S.id, at: Date.now(), s: clone(S) };
+  if (i >= 0) list[i] = item; else list.unshift(item);
+  LS.set("saved", list); saveDraft();
+  toast(i >= 0 ? "Обновлено во вкладке «Мои расчёты»" : "Сохранено во вкладку «Мои расчёты»");
+};
+
+/* ═════════ мои расчёты ═════════ */
+let CMP = new Set(), SVQ = "";
+function svCalc(it) {
+  const s = fixState(clone(it.s)), r = calc(s);
+  return { it, s, r, be: priceTarget(s, s.mp, 0), t: num(s.target) / 100, tr: num(s.targetRoi) / 100 };
+}
+function renderSaved() {
+  const list = LS.get("saved", []);
+  const all = list.map(svCalc);
+  const words = SVQ.split(/\s+/).filter(Boolean);
+  const shown = all.filter(o => words.every(w => (o.s.name || "").toLowerCase().replace(/ё/g, "е").includes(w)));
+  const head = `<div class="card toolbar" style="flex-direction:column;align-items:stretch">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between">
+        <div class="h" style="margin:0">Мои расчёты <span>${list.length ? "хранятся на этом устройстве" : ""}</span></div>
+        <div class="chips"><button class="btn sm" data-sv="csv">Excel</button><button class="btn sm" data-sv="export">Скачать файлом</button><button class="btn sm" data-sv="import">Загрузить файл</button></div></div>
+      ${list.length > 3 ? `<div class="search" style="height:44px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="svq" type="search" placeholder="Найти расчёт" value="${esc(SVQ)}" autocomplete="off"></div>` : ""}</div>`;
+  if (!list.length) {
+    $("#savedBox").innerHTML = head + `<div class="card empty">Пока пусто. Посчитайте товар во вкладке «Расчёт» и нажмите «В мои расчёты» — он появится здесь.<br><br>
+      Расчёты хранятся на этом устройстве. Перенести на телефон или компьютер — «Скачать файлом» здесь и «Загрузить файл» там, или «Поделиться» ссылкой из расчёта.</div>`;
+    return;
+  }
+  let rows;
+  if (isPhone()) {
+    rows = shown.map(({ it, s, r, t, tr }) => `<div class="card sv"><input type="checkbox" data-cmp="${it.id}" ${CMP.has(it.id) ? "checked" : ""} aria-label="Сравнить">
+      <div><div class="n"><span class="badge">${MPS[s.mp].short}</span>${esc(s.name || "Без названия")}</div>
+      <div class="s">${rub(r.P)} · ${new Date(it.at).toLocaleDateString("ru-RU")}</div></div>
+      <div style="text-align:right"><b class="${tone(r.margin, t)} num">${rub(r.profit)}</b><div class="s"><span class="${tone(r.margin, t)}">${pct(r.margin)}</span> · ROI <span class="${tone(r.roi, tr)}">${pct(r.roi, 0)}</span></div></div>
+      <div class="acts"><button class="btn sm pri" data-open="${it.id}">Открыть</button><button class="btn sm ib" data-copy="${it.id}" title="Копия" aria-label="Копия">⧉</button><button class="btn sm ib" data-del="${it.id}" title="Удалить" aria-label="Удалить">✕</button></div></div>`).join("");
+  } else {
+    rows = `<div class="card tablewrap" style="padding:6px 10px"><table class="t big"><thead><tr><th></th><th class="l">Товар</th><th>Цена продажи</th><th>Себест.</th>
+      <th>Расходы МП</th><th>Реклама</th><th>Налоги</th><th>Прибыль/шт</th><th>Маржа</th><th>ROI</th><th>Безубыт.</th><th>Партия</th><th>ЧП партии</th><th></th></tr></thead><tbody>
+      ${shown.map(({ it, s, r, be, t, tr }) => `<tr data-row="${it.id}">
+        <td><input type="checkbox" data-cmp="${it.id}" ${CMP.has(it.id) ? "checked" : ""} aria-label="Сравнить"></td>
+        <td class="l" style="white-space:normal;min-width:200px"><span class="badge">${MPS[s.mp].short}</span><b>${esc(s.name || "Без названия")}</b></td>
+        <td>${rub(r.P)}</td><td>${rub(r.cost)}</td><td>${rub(r.mpSum)}</td><td>${rub(r.ads)}</td><td>${rub(r.tax)}</td>
+        <td class="${tone(r.margin, t)}"><b>${rub(r.profit)}</b></td><td class="${tone(r.margin, t)}">${pct(r.margin)}</td><td class="${tone(r.roi, tr)}">${pct(r.roi, 0)}</td>
+        <td>${be ? rub(be.p) : "—"}</td><td>${NF0.format(num(s.lotQty))}</td><td class="${cls(r.profit)}">${rub(r.profit * num(s.lotQty))}</td>
+        <td style="padding-left:0"><button class="btn sm ib" data-copy="${it.id}" title="Копия" aria-label="Копия">⧉</button><button class="btn sm ib" data-del="${it.id}" title="Удалить" aria-label="Удалить" style="margin-left:4px">✕</button></td></tr>`).join("")}
+      </tbody></table></div>`;
+  }
+  if (!shown.length) rows = `<div class="card empty">Ничего не нашлось</div>`;
+  const chosen = all.filter(o => CMP.has(o.it.id));
+  let cmp = "";
+  if (chosen.length >= 2) {
+    const line = (lbl, fn) => `<tr><td>${lbl}</td>${chosen.map(fn).join("")}</tr>`;
+    cmp = `<div class="card tablewrap" style="padding:14px"><div class="h">Сравнение</div><table class="t"><thead><tr><th></th>${chosen.map(c => `<th>${MPS[c.s.mp].short} · ${esc(c.s.name)}</th>`).join("")}</tr></thead><tbody>
+      ${line("Цена продажи", c => `<td>${rub(c.r.P)}</td>`)}${line("Себестоимость", c => `<td>${rub(c.r.cost)}</td>`)}
+      ${line("Комиссия и эквайринг", c => `<td>${rub(c.r.comm + c.r.acq)}</td>`)}${line("Логистика и прочее", c => `<td>${rub(c.r.logi + c.r.stor + c.r.other)}</td>`)}
+      ${line("Реклама", c => `<td>${rub(c.r.ads)}</td>`)}${line("Налоги", c => `<td>${rub(c.r.tax)}</td>`)}
+      ${line("<b>Прибыль/шт</b>", c => `<td class="${tone(c.r.margin, c.t)}"><b>${rub(c.r.profit)}</b></td>`)}${line("Маржа", c => `<td class="${tone(c.r.margin, c.t)}">${pct(c.r.margin)}</td>`)}
+      ${line("ROI", c => `<td class="${tone(c.r.roi, c.tr)}">${pct(c.r.roi, 0)}</td>`)}${line("Безубыточность", c => `<td>${c.be ? rub(c.be.p) : "—"}</td>`)}
+      </tbody></table></div>`;
+  } else cmp = `<div class="note" style="padding:0 4px">Отметьте два и больше расчёта галочкой — появится сравнение.</div>`;
+  $("#savedBox").innerHTML = head + cmp + rows;
+}
+function openSaved(id) {
+  const it = LS.get("saved", []).find(x => x.id === id);
+  if (it) { S = fixState(clone(it.s)); saveDraft(); writeForm(); setTab("calc"); render(); window.scrollTo(0, 0); }
+}
+function exportCsv() {
+  const head = ["Площадка", "Товар", "Цена до скидки", "Цена продажи", "Себестоимость", "Комиссия", "Эквайринг", "Логистика", "Хранение и прочее", "Реклама", "Налоги",
+    "Валовая прибыль", "Прибыль/шт", "Маржа, %", "ROI, %", "Безубыточная цена", "Партия, шт", "Вложения в партию", "Выручка партии", "Чистая прибыль партии"];
+  const n = x => (x == null || !isFinite(x) ? "" : String(Math.round(x * 100) / 100).replace(".", ","));
+  const q = v => '"' + String(v == null ? "" : v).replace(/"/g, '""') + '"';
+  const lines = LS.get("saved", []).map(svCalc).map(({ s, r, be }) => {
+    const qty = num(s.lotQty);
+    return [MPS[s.mp].short, s.name, n(r.P0), n(r.P), n(r.cost), n(r.comm), n(r.acq), n(r.logi), n(r.stor + r.other), n(r.ads), n(r.tax),
+      n(r.gross), n(r.profit), n(r.margin * 100), n(r.roi * 100), be ? n(be.p) : "", n(qty), n(r.cost * qty), n(r.P * qty), n(r.profit * qty)].map(q).join(";");
+  });
+  download("unitka_" + new Date().toISOString().slice(0, 10) + ".csv", "﻿" + [head.map(q).join(";")].concat(lines).join("\r\n"), "text/csv;charset=utf-8");
+}
+function download(name, text, type) {
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([text], { type })); a.download = name; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+$("#savedBox").addEventListener("click", e => {
+  if (e.target.closest("a,select,input")) return;
+  const b = e.target.closest("button");
+  if (!b) { const tr = e.target.closest("tr[data-row]"); if (tr) openSaved(tr.dataset.row); return; }
+  const list = LS.get("saved", []);
+  if (b.dataset.sv === "csv") exportCsv();
+  else if (b.dataset.open) openSaved(b.dataset.open);
+  else if (b.dataset.copy) { const it = list.find(x => x.id === b.dataset.copy); if (it) { const s = clone(it.s); s.id = Date.now().toString(36); s.name = (s.name || "") + " (копия)"; list.unshift({ id: s.id, at: Date.now(), s }); LS.set("saved", list); renderSaved(); } }
+  else if (b.dataset.del) { if (confirm("Удалить расчёт?")) { LS.set("saved", list.filter(x => x.id !== b.dataset.del)); CMP.delete(b.dataset.del); renderSaved(); } }
+  else if (b.dataset.sv === "export") download("unitka_" + new Date().toISOString().slice(0, 10) + ".json", JSON.stringify({ unitka: 1, saved: list, defaults: LS.get("defaults", {}) }, null, 1), "application/json");
+  else if (b.dataset.sv === "import") $("#importFile").click();
+});
+$("#savedBox").addEventListener("change", e => { const c = e.target.dataset.cmp; if (c) { e.target.checked ? CMP.add(c) : CMP.delete(c); renderSaved(); } });
+$("#savedBox").addEventListener("input", e => {
+  if (e.target.id !== "svq") return;
+  SVQ = e.target.value.trim().toLowerCase().replace(/ё/g, "е"); const pos = e.target.selectionStart;
+  renderSaved(); const q = $("#svq"); if (q) { q.focus(); q.setSelectionRange(pos, pos); }
+});
+$("#importFile").addEventListener("change", async e => {
+  const file = e.target.files[0]; if (!file) return;
+  try {
+    const d = JSON.parse(await file.text());
+    const have = LS.get("saved", []), ids = new Set(have.map(x => x.id));
+    const add = (d.saved || []).filter(x => x && x.s && !ids.has(x.id));
+    LS.set("saved", add.concat(have));
+    if (d.defaults && confirm("Взять из файла и значения по умолчанию?")) LS.set("defaults", d.defaults);
+    toast("Загружено расчётов: " + add.length); renderSaved();
+  } catch (err) { toast("Файл не читается"); }
+  e.target.value = "";
+});
+
+/* ═════════ сводка: цены сейчас + факт панелей ═════════ */
+let FACT = null, FSEL = null, FQ = "", FSORT = LS.get("sumSort", "sales"), SUMF = LS.get("sumMp", "all"), FADS = LS.get("factAds2", "pct"), FCHG = 0, FPRICE = null, SHOWALL = false;
+const b64u8 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+async function deriveKey(pass, saltB64, iter) {
+  const base = await crypto.subtle.importKey("raw", new TextEncoder().encode(pass), "PBKDF2", false, ["deriveKey"]);
+  return crypto.subtle.deriveKey({ name: "PBKDF2", hash: "SHA-256", salt: b64u8(saltB64), iterations: iter }, base, { name: "AES-GCM", length: 256 }, true, ["decrypt"]);
+}
+async function loadFact(pass) {
+  const res = await fetch("fact.enc.json?t=" + Date.now(), { cache: "no-store" });
+  if (!res.ok) throw new Error(res.status === 404 ? "Данные ещё не выложены" : "Данные не загрузились (" + res.status + ")");
+  const enc = await res.json();
+  let key = null;
+  const kc = LS.get("kc", null);
+  if (!pass && kc && kc.salt === enc.salt) key = await crypto.subtle.importKey("raw", b64u8(kc.k), "AES-GCM", false, ["decrypt"]);
+  if (!key) {
+    pass = pass || LS.get("pass", "");
+    if (!pass) throw new Error("NEED_PASS");
+    key = await deriveKey(pass, enc.salt, enc.iter);
+  }
+  let plain;
+  try { plain = await crypto.subtle.decrypt({ name: "AES-GCM", iv: b64u8(enc.iv) }, key, b64u8(enc.ct)); }
+  catch (e) { LS.del("kc"); throw new Error("BAD_PASS"); }
+  if (pass) {
+    LS.set("pass", pass);
+    try { const raw = new Uint8Array(await crypto.subtle.exportKey("raw", key)); let bin = ""; raw.forEach(x => bin += String.fromCharCode(x)); LS.set("kc", { salt: enc.salt, k: btoa(bin) }); } catch (e) {}
+  }
+  return JSON.parse(new TextDecoder().decode(plain));
+}
+async function openFact(pass) {
+  $("#lockMsg").textContent = pass ? "Открываю…" : "";
+  if (!pass) $("#factLoading").classList.remove("hidden");
+  try {
+    FACT = await loadFact(pass);
+    $("#factLoading").classList.add("hidden"); $("#factLock").classList.add("hidden"); $("#factBox").classList.remove("hidden");
+    renderFact();
+  } catch (e) {
+    $("#factLoading").classList.add("hidden"); $("#factBox").classList.add("hidden"); $("#factLock").classList.remove("hidden");
+    $("#lockMsg").textContent = e.message === "BAD_PASS" ? "Пароль не подошёл." : e.message === "NEED_PASS" ? "" : e.message;
+  }
+}
+$("#bUnlock").onclick = () => { const p = $("#pass").value.trim(); if (p) openFact(p); };
+
+/* одна строка панели → рубли на 1 проданную шт */
+function unit(row) {
+  const u = num(row.units), sales = num(row.sales);
+  if (u <= 0 || sales <= 0) return null;
+  const per = k => num(row[k]) / u;
+  const x = { price: sales / u, comm: per("comm"), acq: per("acq"), logi: per("logi"), stor: per("stor"), ff: per("ff") + per("dop"),
+              loyal: per("loyal"), ads: per("ads") + per("ads2"), tax: per("tax"), cost: per("cost"), profit: per("profit"), units: u };
+  const sum = x.comm + x.acq + x.logi + x.stor + x.ff + x.loyal + x.ads + x.tax + x.cost;
+  x.resid = x.price - sum - x.profit;      // если панель считает иначе — «прочее», чтобы факт совпал с панелью
+  x.cR = x.comm / x.price; x.aR = x.acq / x.price; x.tR = x.tax / x.price; x.drr = x.ads / x.price;
+  return x;
+}
+function at(x, p, adsMode) {
+  const comm = x.cR * p, acq = x.aR * p, tax = x.tR * p, ads = adsMode === "pct" ? x.drr * p : x.ads;
+  const fixed = x.logi + x.stor + x.ff + x.loyal + x.resid + x.cost;
+  const profit = p - comm - acq - tax - ads - fixed;
+  return { p, comm, acq, tax, ads, profit, margin: profit / p, roi: x.cost > 0 ? profit / x.cost : NaN };
+}
+function factPrice(x, adsMode, m) {           // цена, при которой маржа = m
+  const rate = x.cR + x.aR + x.tR + (adsMode === "pct" ? x.drr : 0);
+  const fixed = x.logi + x.stor + x.ff + x.loyal + x.resid + x.cost + (adsMode === "pct" ? 0 : x.ads);
+  return 1 - rate - m > 0 ? fixed / (1 - rate - m) : null;
+}
+const norm = s => String(s || "").toLowerCase().replace(/ё/g, "е");
+function sumItems() {
+  const words = norm(FQ).split(/\s+/).filter(Boolean), out = [];
+  for (const mp of ["wb", "ozon", "ym"]) {
+    if (SUMF !== "all" && SUMF !== mp) continue;
+    const p = FACT && FACT.mp[mp]; if (!p) continue;
+    for (const r of p.rows) {
+      if (words.length && !words.every(w => norm(r.a + " " + (r.cat || "")).includes(w))) continue;
+      const x = unit(r), now = num(r.now) || null, n = x && now ? at(x, now, FADS) : null;
+      out.push({ mp, r, x, now, n, key: mp + "|" + r.a });
+    }
+  }
+  const mOf = o => (o.n ? o.n.margin : o.x ? o.x.profit / o.x.price : Infinity);
+  out.sort((a, b) => {
+    if (!a.x !== !b.x) return a.x ? -1 : 1;
+    if (FSORT === "sales") return num(b.r.sales) - num(a.r.sales);
+    if (FSORT === "name") return a.r.a.localeCompare(b.r.a, "ru");
+    return mOf(a) - mOf(b);
+  });
+  return out;
+}
+function renderFact(keepDetail) {
+  if (!FACT) return;
+  $$("#sumMp button").forEach(b => b.setAttribute("aria-pressed", b.dataset.sf === SUMF));
+  $("#fsort").value = FSORT;
+  const items = sumItems(), t = num(S.target) / 100 || 0.1;
+  const sold = items.filter(o => o.x), rest = items.filter(o => !o.x);
+  const S1 = sold.reduce((a, o) => a + num(o.r.sales), 0), P1 = sold.reduce((a, o) => a + num(o.r.profit), 0);
+  const nowS = sold.filter(o => o.n).reduce((a, o) => a + o.x.units * o.now, 0), nowP = sold.filter(o => o.n).reduce((a, o) => a + o.x.units * o.n.profit, 0);
+  const months = [...new Set(["wb", "ozon", "ym"].filter(k => SUMF === "all" || SUMF === k).map(k => FACT.mp[k] && MPS[k].short + " — " + String(FACT.mp[k].month).toLowerCase()).filter(Boolean))];
+  const upd = new Date(FACT.updated);
+  const row = o => {
+    const fm = o.x ? o.x.profit / o.x.price : null;
+    return `<button class="item ${FSEL === o.key ? "sel" : ""} ${o.x ? "" : "dim"}" data-key="${esc(o.key)}">
+      <span class="n">${esc(o.r.a)}<span class="s"><span class="badge">${MPS[o.mp].short}</span>${o.x ? NF0.format(o.x.units) + " шт за месяц" : "нет продаж в месяце"}${o.r.ip && o.mp === "wb" ? " · " + esc(o.r.ip.replace("ИП ", "")) : ""}</span></span>
+      <span class="c">${o.now ? rub(o.now) : "—"}</span>
+      <span class="c ${o.n ? tone(o.n.margin, t) : ""}">${o.n ? pct(o.n.margin) : "—"}</span>
+      <span class="c fa ${fm != null ? tone(fm, t) : ""}">${fm != null ? pct(fm, 0) : "—"}</span></button>`;
+  };
+  $("#factList").innerHTML = `
+    <div class="tot"><div>Товаров с продажами<b>${NF0.format(sold.length)}</b></div>
+      <div>Маржа сейчас<b class="${tone(nowS ? nowP / nowS : NaN, t)}">${nowS ? pct(nowP / nowS) : "—"}</b></div>
+      <div>Факт панели<b class="${tone(S1 ? P1 / S1 : NaN, t)}">${S1 ? pct(P1 / S1) : "—"}</b></div></div>
+    <div class="lhead"><span>Товар</span><span>Цена сейчас</span><span>Маржа сейчас</span><span>Факт</span></div>
+    <div class="list">${sold.map(row).join("") || '<div class="empty">Ничего не нашлось' + (FQ ? " — проверьте написание или выберите «Все»" : "") + "</div>"}
+      ${rest.length ? (SHOWALL || FQ ? rest.map(row).join("") : `<button class="more" id="showAll">Ещё ${rest.length} без продаж в этом месяце — показать</button>`) : ""}</div>
+    <div class="note" style="padding:10px 14px">«Маржа сейчас» — при цене в кабинете сейчас и расходах из факта месяца: комиссия, эквайринг, налог${FADS === "pct" ? " и реклама (ДРР)" : ""} — в % от цены, логистика, ФФ, хранение${FADS === "pct" ? "" : ", реклама"} и себестоимость — в рублях на 1 шт.
+      «Факт» — валовая прибыль ÷ выручка по панели. Месяц: ${months.map(esc).join(", ")}. Обновлено ${upd.toLocaleDateString("ru-RU")} ${upd.toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" })}.</div>`;
+  if (keepDetail) return;
+  if (!isPhone() && (!FSEL || !items.some(o => o.key === FSEL && o.x))) { FSEL = sold.length ? sold[0].key : null; FPRICE = null; markSel(); }
+  renderDetail();
+}
+function markSel() { $$("#factList .item").forEach(b => b.classList.toggle("sel", b.dataset.key === FSEL)); }
+$("#fq").addEventListener("input", e => { FQ = e.target.value.trim(); $("#fqClear").classList.toggle("hidden", !FQ); renderFact(); });
+$("#fqClear").onclick = () => { $("#fq").value = ""; FQ = ""; $("#fqClear").classList.add("hidden"); renderFact(); $("#fq").focus(); };
+$("#sumMp").addEventListener("click", e => { const b = e.target.closest("button"); if (b) { SUMF = b.dataset.sf; LS.set("sumMp", SUMF); renderFact(); } });
+$("#fsort").addEventListener("change", e => { FSORT = e.target.value; LS.set("sumSort", FSORT); renderFact(); });
+$("#factList").addEventListener("click", e => {
+  if (e.target.id === "showAll") { SHOWALL = true; renderFact(); return; }
+  const b = e.target.closest(".item"); if (!b) return;
+  FSEL = b.dataset.key; FPRICE = null; FCHG = 0; markSel(); renderDetail();
+  if (isPhone()) { $("#detailWrap").classList.add("open"); $("#detailWrap").scrollTop = 0; history.pushState({ d: 1 }, ""); }
+});
+window.addEventListener("popstate", () => $("#detailWrap").classList.remove("open"));
+
+function curFact() {
+  if (!FACT || !FSEL) return {};
+  const i = FSEL.indexOf("|"), mp = FSEL.slice(0, i), a = FSEL.slice(i + 1);
+  const p = FACT.mp[mp], row = p && p.rows.find(r => r.a === a);
+  return { mp, p, row, x: row && unit(row), now: row && num(row.now) || null };
+}
+function renderDetail() {
+  const box = $("#detail");
+  const { mp, p, row, x, now } = curFact();
+  if (!x) { box.innerHTML = `<div class="empty">${row ? "У этого товара нет продаж в месяце — считать не из чего. Посчитайте его во вкладке «Расчёт»." : "Выберите товар в списке"}</div>`; return; }
+  const t = num(S.target) / 100 || 0.1;
+  const base = now || x.price, price = Math.round(FPRICE || base);
+  const nb = at(x, base, FADS), fm = x.profit / x.price;
+  const lo = Math.round(Math.min(base, x.price) * 0.5), hi = Math.round(Math.max(base, x.price) * 1.5);
+  box.innerHTML = `
+    <div><button class="btn sm back" id="bBack">← Все товары</button></div>
+    <div><div class="title">${esc(row.a)}</div><div class="note">${[MPS[mp].name, row.ip, NF0.format(x.units) + " шт продано за " + String(p.month).toLowerCase()].filter(Boolean).map(esc).join(" · ")}</div></div>
+    <div class="kpis">
+      <div class="kpi"><b>${now ? rub(now) : "—"}</b><span>цена сейчас${now ? "" : " — нет данных"}</span></div>
+      <div class="kpi"><b class="${tone(nb.margin, t)}">${pct(nb.margin)}</b><span>маржа сейчас · ${rub(nb.profit)}/шт</span></div>
+      <div class="kpi"><b class="${tone(fm, t)}">${pct(fm)}</b><span>факт панели · ${rub(x.profit)}/шт</span></div>
+    </div>
+    <div><div class="h">Что если поставить цену <span>средняя в факте ${rub(x.price)}</span></div>
+      <div class="slider"><input type="range" id="fR" min="${lo}" max="${hi}" step="1" value="${price}" aria-label="Новая цена">
+        <span class="inp"><input id="fP" inputmode="decimal" value="${inField(price)}"><i>₽</i></span></div>
+      <div class="chips" style="margin-top:6px">${[-10, -5, 5, 10].map(d => `<button class="chip" data-step="${d}">${d > 0 ? "+" : MINUS}${Math.abs(d)}%</button>`).join("")}<button class="chip" data-step="now">сейчас</button><button class="chip" data-step="fact">как в факте</button></div></div>
+    <div id="dOut" style="display:flex;flex-direction:column;gap:14px"></div>
+    <details class="how"><summary>Настройки пересчёта</summary>
+      <div class="f" style="border:0"><span>Ожидаю изменение продаж<small>например, +15% от снижения цены</small></span><span class="inp" style="width:120px"><input id="fChg" inputmode="decimal" value="${inField(FCHG)}"><i>%</i></span></div>
+      <div class="f"><span>Реклама при смене цены</span><span class="seg sm" id="fAds"><button data-fads="rub" aria-pressed="${FADS === "rub"}">₽ на шт как в факте</button><button data-fads="pct" aria-pressed="${FADS === "pct"}">ДРР % как в факте</button></span></div>
+    </details>
+    <button class="btn" id="bToCalc">Открыть в расчёте и поправить цифры</button>`;
+  paintDetail();
+}
+function paintDetail() {
+  const { p, x, now } = curFact(), out = $("#dOut");
+  if (!x || !out) return;
+  const base = now || x.price, price = FPRICE || base;
+  const t = num(S.target) / 100 || 0.1;
+  const b = at(x, base, FADS), n = at(x, price, FADS);
+  const monthB = b.profit * x.units, unitsN = x.units * (1 + FCHG / 100), monthN = n.profit * unitsN;
+  const need = n.profit > 0 && b.profit > 0 ? Math.ceil(x.units * b.profit / n.profit) : null;
+  const be = factPrice(x, FADS, 0), pt = factPrice(x, FADS, t);
+  const line = (lbl, a, c, plain) => `<tr><td>${lbl}</td><td>${rub(a)}</td><td>${rub(c)}</td><td class="${plain ? "" : cls(a - c)}">${Math.abs(c - a) < 0.5 ? "" : rub(c - a, true)}</td></tr>`;
+  const steps = [-15, -10, -5, 0, 5, 10, 15].map(d => {
+    const q = at(x, base * (1 + d / 100), FADS), nd = q.profit > 0 && b.profit > 0 ? Math.ceil(x.units * b.profit / q.profit) : null;
+    return `<tr class="${d === 0 ? "cur" : ""}"><td>${d === 0 ? "сейчас" : (d > 0 ? "+" : MINUS) + Math.abs(d) + "%"}</td><td>${rub(q.p)}</td><td class="${cls(q.profit)}">${rub(q.profit)}</td><td class="${tone(q.margin, t)}">${pct(q.margin)}</td><td>${nd == null ? "—" : NF0.format(nd)}</td></tr>`;
+  }).join("");
+  out.innerHTML = `
+    <div class="kpis">
+      <div class="kpi"><b class="${tone(n.margin, t)}">${rub(n.profit)}</b><span>прибыль/шт <span class="delta ${cls(n.profit - b.profit)}">${rub(n.profit - b.profit, true)}</span></span></div>
+      <div class="kpi"><b class="${tone(n.margin, t)}">${pct(n.margin)}</b><span>маржа</span></div>
+      <div class="kpi"><b class="${cls(monthN)}">${rub(monthN)}</b><span>за месяц <span class="delta ${cls(monthN - monthB)}">${rub(monthN - monthB, true)}</span></span></div>
+    </div>
+    <div class="rows">
+      <span>Чтобы заработать столько же, сколько сейчас</span><span class="r">${need == null ? (n.profit <= 0 ? '<span class="neg">каждая продажа в минус</span>' : "—") : NF0.format(need) + " шт/мес <span class='m'>(" + pct(need / x.units - 1, 0, true) + ")</span>"}</span>
+      <span>Безубыточная цена</span><span class="r">${be ? rub(be) : "—"}</span>
+      <span>Цена под маржу ${NF1.format(t * 100)}%</span><span class="r">${pt ? rub(pt) : "недостижимо"}</span>
+    </div>
+    <div><div class="h">На 1 шт <span>факт месяца → при новой цене</span></div>
+      <table class="t"><thead><tr><th>Статья</th><th>Факт</th><th>Новая</th><th>Δ</th></tr></thead><tbody>
+        ${line("Цена продажи", x.price, price, true)}
+        ${line("Комиссия · " + pct(x.cR), x.comm, n.comm)}
+        ${Math.abs(x.acq) >= 0.05 ? line("Эквайринг · " + pct(x.aR), x.acq, n.acq) : ""}
+        ${line("Логистика", x.logi, x.logi)}
+        ${Math.abs(x.stor) >= 0.05 ? line("Хранение", x.stor, x.stor) : ""}
+        ${Math.abs(x.ff) >= 0.05 ? line("ФФ и доукомплектовка", x.ff, x.ff) : ""}
+        ${Math.abs(x.loyal) >= 0.05 ? line("Лояльность, отзывы", x.loyal, x.loyal) : ""}
+        ${line("Реклама · ДРР " + pct(x.drr), x.ads, n.ads)}
+        ${line("Налог · " + pct(x.tR), x.tax, n.tax)}
+        ${line("Себестоимость", x.cost, x.cost)}
+        ${Math.abs(x.resid) >= 0.5 ? line("Прочее (сверка с панелью)", x.resid, x.resid) : ""}
+        <tr class="cur"><td>Прибыль</td><td class="${cls(x.profit)}">${rub(x.profit)}</td><td class="${cls(n.profit)}">${rub(n.profit)}</td><td class="${cls(n.profit - x.profit)}">${rub(n.profit - x.profit, true)}</td></tr>
+      </tbody></table></div>
+    <div><div class="h">Шаги от цены сейчас</div><div class="tablewrap"><table class="t"><thead><tr><th></th><th>Цена</th><th>Прибыль/шт</th><th>Маржа</th><th>Нужно шт/мес*</th></tr></thead><tbody>${steps}</tbody></table></div>
+      <div class="note" style="margin-top:4px">* сколько продавать в месяц, чтобы прибыль не упала ниже, чем при цене сейчас (${NF0.format(x.units)} шт)</div></div>`;
+}
+$("#detail").addEventListener("input", e => {
+  const id = e.target.id;
+  if (id === "fR" || id === "fP") {
+    const v = num(e.target.value); if (!(v > 0)) return;
+    FPRICE = v;
+    if (id === "fR") $("#fP").value = inField(v); else $("#fR").value = v;
+    paintDetail();
+  }
+  if (id === "fChg") { FCHG = num(e.target.value); paintDetail(); }
+});
+$("#detail").addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  const { mp, p, row, x, now } = curFact();
+  if (b.id === "bBack") { history.back(); return; }
+  if (b.dataset.step != null && x) {
+    const base = now || x.price, d = b.dataset.step;
+    FPRICE = d === "now" ? null : d === "fact" ? x.price : Math.round(base * (1 + num(d) / 100));
+    const v = Math.round(FPRICE || base); $("#fP").value = inField(v); $("#fR").value = v; paintDetail();
+  }
+  if (b.dataset.fads) { FADS = b.dataset.fads; LS.set("factAds2", FADS); $$("#fAds button").forEach(z => z.setAttribute("aria-pressed", z.dataset.fads === FADS)); paintDetail(); renderFactKeep(); }
+  if (b.id === "bToCalc" && x) {
+    const s = newState(mp), f = s.fees[mp];
+    const r2 = v => Math.round(v * 100) / 100, p4 = v => Math.round(v * 1e6) / 1e4;      // рубли до копейки, проценты до 0,0001
+    Object.assign(s, { name: row.a, price0: r2(FPRICE || now || x.price), disc: 0, buy: r2(x.cost), lotShip: 0, ff: r2(x.ff), costOther: 0, vol: 0,
+      tax: "custom", taxRate: p4(x.tR), nds: 0, taxBase: "sale", perMonth: Math.round(x.units) });
+    if (FADS === "pct") { s.adsMode = "pct"; s.drr = p4(x.drr); } else { s.adsMode = "rub"; s.adsRub = r2(x.ads); }
+    Object.assign(f, OZX, { comm: p4(x.cR), acq: p4(x.aR), spp: 0, logi: r2(x.logi), logiPct: 0, back: 0, buyout: 100,
+      stor: r2(x.stor), accept: 0, other: r2(x.loyal + x.resid), otherPct: 0, soinv: 0 });
+    S = s; saveDraft(); writeForm(); setTab("calc"); render(); window.scrollTo(0, 0);
+    toast("Цифры факта перенесены в расчёт — правьте любые");
+  }
+});
+function renderFactKeep() { const y = window.scrollY; renderFact(true); window.scrollTo(0, y); }
+
+/* ═════════ вкладки ═════════ */
+function setTab(t) {
+  TAB = t; LS.set("tab", t);
+  $$(".page").forEach(p => p.classList.toggle("on", p.id === "p-" + t));
+  $$("#tabs button").forEach(b => b.setAttribute("aria-current", b.dataset.tab === t ? "page" : "false"));
+  document.body.classList.toggle("calc-on", t === "calc");
+  $("#mini").classList.toggle("hidden", t !== "calc");
+  if (t === "saved") renderSaved();
+  if (t === "sum") { if (FACT) renderFact(); else openFact(); }
+  if (t !== "sum") $("#detailWrap").classList.remove("open");
+}
+$("#tabs").addEventListener("click", e => { const b = e.target.closest("button"); if (b) { setTab(b.dataset.tab); window.scrollTo(0, 0); } });
+
+/* ═════════ старт ═════════ */
+(function init() {
+  applyTheme();
+  const h = new URLSearchParams(location.hash.slice(1));
+  if (h.get("k")) { LS.set("pass", h.get("k")); LS.del("kc"); TAB = "sum"; }
+  if (h.get("c")) { try { S = fixState(decodeState(h.get("c"))); delete S.id; saveDraft(); TAB = "calc"; } catch (e) { toast("Ссылка на расчёт повреждена"); } }
+  if (h.get("k") || h.get("c")) history.replaceState(null, "", location.pathname + location.search);
+  if (isPhone()) $$("details.sec").forEach(d => { if (!["price", "cost", "mp"].includes(d.dataset.sec)) d.open = false; });
+  writeForm(); render(); setTab(["sum", "calc", "saved"].includes(TAB) ? TAB : "sum");
+})();
+</script>
+</body>
+</html>
