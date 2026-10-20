@@ -1077,6 +1077,7 @@ function renderFact(keepDetail) {
     <div class="note" style="padding:10px 14px"><b>По юнитке</b> — маржа, если продавать по цене сейчас: расходы на 1 шт из панели за месяц (комиссия, эквайринг, налог и реклама — в % от цены, логистика, ФФ, хранение и себестоимость — в рублях).
       <b>По панели</b> — что получилось по факту за выбранный срок: валовая прибыль ÷ выручка. <b>Без ДРР</b> — то же без рекламы, как «% с налогом БЕЗ дрр» в панели.
       Цвет: зелёный — от ${NF1.format(t * 100)}%, жёлтый — от 0 до ${NF1.format(t * 100)}%, красный — минус. Обновлено ${upd.toLocaleDateString("ru-RU")} ${upd.toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" })}.
+      <br><a class="linkbtn" href="unitka-ext.zip" download>Скачать расширение для карточек WB и Ozon (Opera, Chrome)</a>
       <br><button class="linkbtn" id="bForget">Забыть пароль на этом устройстве</button></div>`;
   if (keepDetail) return;
   if (!isPhone() && (!FSEL || !items.some(o => o.key === FSEL && o.x))) { FSEL = sold.length ? sold[0].key : null; FPRICE = null; markSel(); }
