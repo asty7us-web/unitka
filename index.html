@@ -60,7 +60,8 @@ a{color:var(--accent);text-decoration:none}
 .hidden{display:none!important}
 
 /* ── шапка ── */
-header{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line)}
+header{position:fixed;top:0;left:0;right:0;z-index:50;background:var(--bg);border-bottom:1px solid var(--line)}
+body{padding-top:var(--hdr,57px)}
 .bar{max-width:1180px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:14px}
 .brand{font-weight:700;font-size:18px;letter-spacing:-.01em;display:flex;align-items:center;gap:8px;white-space:nowrap}
 .brand i{width:26px;height:26px;border-radius:8px;background:var(--accent);color:#fff;display:grid;place-items:center;font-style:normal;font-size:15px}
@@ -109,7 +110,16 @@ select.sel{height:38px;border-radius:9px;border:1px solid transparent;background
 .chk input{width:18px;height:18px}
 .linkbtn{border:0;background:none;color:var(--accent);padding:6px 0;font-weight:600;font-size:13.5px}
 .namebar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.namebar input{flex:1 1 220px;height:42px;border-radius:11px;border:1px solid var(--ring);background:var(--surface);padding:0 12px;font-size:16px;font-weight:600;min-width:0}
+.acwrap{position:relative;flex:1 1 260px;min-width:0}
+.namebar input{width:100%;height:46px;border-radius:12px;border:2px solid var(--ring);background:var(--surface);padding:0 12px;font-size:16px;font-weight:600;min-width:0}
+.namebar input:focus{border-color:var(--accent);outline:0}
+.ac{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:45;background:var(--surface);border:1px solid var(--ring);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.18);max-height:min(60vh,430px);overflow:auto;padding:4px}
+.ac button{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px;width:100%;text-align:left;border:0;background:none;padding:10px 10px;border-radius:9px;color:var(--ink)}
+.ac button[aria-selected="true"],.ac button:hover{background:var(--accent-wash)}
+.ac .n{font-weight:650;overflow-wrap:anywhere}
+.ac .s{grid-column:1/3;color:var(--ink-2);font-size:12.5px}
+.ac .r{font-weight:700;font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+.ac .tip{padding:12px;color:var(--ink-2);font-size:13.5px}
 .mprow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;color:var(--ink-2);font-weight:600}
 .btn{height:42px;border-radius:11px;border:1px solid var(--ring);background:var(--surface);padding:0 14px;font-weight:600;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
 .btn.pri{background:var(--accent);color:#fff;border-color:transparent}
@@ -118,7 +128,7 @@ select.sel{height:38px;border-radius:9px;border:1px solid transparent;background
 .btn:active{transform:translateY(1px)}
 
 /* ── итог расчёта ── */
-.res{position:sticky;top:72px;max-height:calc(100vh - 88px);overflow:auto;padding:16px;display:flex;flex-direction:column;gap:14px}
+.res{position:sticky;top:calc(var(--hdr,57px) + 15px);max-height:calc(100vh - var(--hdr,57px) - 31px);overflow:auto;padding:16px;display:flex;flex-direction:column;gap:14px}
 .hero .lbl{color:var(--ink-2);font-size:13.5px}
 .hero .big{font-size:36px;font-weight:750;letter-spacing:-.02em;line-height:1.05}
 .pos{color:var(--good)} .neg{color:var(--bad)} .mid{color:var(--mid)}
@@ -164,7 +174,7 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
 details.how{font-size:13px;color:var(--ink-2)}
 details.how summary{cursor:pointer;color:var(--accent);font-weight:600}
 details.how ul{padding-left:18px;margin:6px 0}
-#res,#detail{scroll-margin-top:70px}
+#res,#detail{scroll-margin-top:calc(var(--hdr,57px) + 12px)}
 .mini{display:none}
 
 /* ── сводка ── */
@@ -177,7 +187,7 @@ details.how ul{padding-left:18px;margin:6px 0}
 .sumbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:space-between;margin:10px 0}
 .list{display:flex;flex-direction:column}
 .lhead,.item{display:grid;grid-template-columns:minmax(0,1fr) 78px 74px 62px;gap:8px;align-items:center}
-.lhead{padding:10px 14px;font-size:12px;color:var(--ink-2);font-weight:600;border-bottom:1px solid var(--line);position:sticky;top:57px;background:var(--surface);z-index:2;border-radius:var(--r) var(--r) 0 0}
+.lhead{padding:10px 14px;font-size:12px;color:var(--ink-2);font-weight:600;border-bottom:1px solid var(--line);position:sticky;top:var(--hdr,57px);background:var(--surface);z-index:2;border-radius:var(--r) var(--r) 0 0}
 .lhead span:not(:first-child),.item .c{text-align:right}
 .item{padding:11px 14px;border:0;border-bottom:1px solid var(--line);cursor:pointer;text-align:left;background:none;width:100%}
 .item:last-child{border-bottom:0}
@@ -192,7 +202,7 @@ details.how ul{padding-left:18px;margin:6px 0}
 .more{border:0;background:none;color:var(--accent);font-weight:600;padding:12px 14px;text-align:left;width:100%}
 .tot{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:12px 14px;border-bottom:1px solid var(--line)}
 .tot div{font-size:12.5px;color:var(--ink-2)} .tot b{display:block;font-size:17px;color:var(--ink);font-variant-numeric:tabular-nums}
-.detail{padding:16px;display:flex;flex-direction:column;gap:14px;position:sticky;top:72px;max-height:calc(100vh - 88px);overflow:auto}
+.detail{padding:16px;display:flex;flex-direction:column;gap:14px;position:sticky;top:calc(var(--hdr,57px) + 15px);max-height:calc(100vh - var(--hdr,57px) - 31px);overflow:auto}
 .detail .title{font-size:18px;font-weight:700;overflow-wrap:anywhere}
 .back{display:none}
 .lock{max-width:440px;margin:24px auto;padding:20px;display:flex;flex-direction:column;gap:12px}
@@ -224,14 +234,14 @@ details.how ul{padding-left:18px;margin:6px 0}
   .res,.detail{position:static;max-height:none;overflow:visible}
   .inp{width:132px}
   .lhead,.item{grid-template-columns:minmax(0,1fr) 70px 62px 52px;gap:6px;padding-left:12px;padding-right:12px}
-  .lhead{top:53px}
   .mini{display:flex;position:fixed;left:8px;right:8px;bottom:calc(var(--nav-h) + 6px + env(safe-area-inset-bottom));z-index:25;
     background:var(--ink);color:var(--bg);border-radius:14px;padding:9px 14px;align-items:center;justify-content:space-between;gap:10px;border:0;font-weight:600;box-shadow:0 6px 20px rgba(0,0,0,.25)}
   .mini b{font-size:17px}
   .mini .g{opacity:.75;font-weight:500;font-size:13px}
   body.calc-on{padding-bottom:calc(var(--nav-h) + 64px + env(safe-area-inset-bottom))}
   body.calc-on .toast{bottom:calc(var(--nav-h) + 74px + env(safe-area-inset-bottom))}
-  .detail-wrap.open{position:fixed;inset:0;z-index:40;background:var(--bg);overflow:auto;padding:0 0 calc(24px + env(safe-area-inset-bottom))}
+  .detail-wrap.open{position:fixed;top:var(--hdr,53px);left:0;right:0;bottom:0;z-index:40;background:var(--bg);overflow:auto;overscroll-behavior:contain;padding:0 0 calc(24px + var(--nav-h) + env(safe-area-inset-bottom))}
+  .detail-wrap.open .backbar{position:sticky;top:0;z-index:3;background:var(--surface);margin:-16px -16px 0;padding:10px 16px;border-bottom:1px solid var(--line)}
   .detail-wrap.open .detail{border-radius:0;border:0;min-height:100%}
   .detail-wrap:not(.open){display:none}
   .back{display:inline-flex}
@@ -287,7 +297,8 @@ details.how ul{padding-left:18px;margin:6px 0}
     <div class="col" id="form">
       <div class="mprow">Площадка <div class="seg" id="mpSeg" role="group" aria-label="Площадка"><button data-mp="wb">WB</button><button data-mp="ozon">Ozon</button><button data-mp="ym">ЯМ</button></div></div>
       <div class="namebar">
-        <input id="name" placeholder="Товар (артикул продавца)" autocomplete="off">
+        <div class="acwrap"><input id="name" placeholder="Найдите товар по артикулу или впишите название" autocomplete="off" enterkeyhint="search" role="combobox" aria-expanded="false" aria-controls="ac">
+          <div class="ac hidden" id="ac" role="listbox"></div></div>
         <button class="btn pri" id="bSave" title="Сохранить этот расчёт во вкладку «Мои расчёты» на этом устройстве">В мои расчёты</button>
         <button class="btn" id="bShare" title="Ссылка, по которой этот расчёт откроется на другом телефоне или компьютере">Поделиться</button>
         <button class="btn" id="bNew">Новый</button>
@@ -426,6 +437,21 @@ const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;"
 function inField(v) { const x = num(v); return Math.abs(x - Math.round(x)) < 1e-9 ? String(Math.round(x)) : String(Math.round(x * 100) / 100).replace(".", ","); }
 function toast(t) { const el = $("#toast"); el.textContent = t; el.classList.add("on"); clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove("on"), 2600); }
 const isPhone = () => matchMedia("(max-width: 860px)").matches;
+/* перерисовка без прыжков: запомнить прокрутку страницы и окон и вернуть до отрисовки кадра */
+function keepScroll(fn) {
+  const w = window.scrollY, els = ["#detailWrap", "#detail", "#res"].map(s => document.querySelector(s)).filter(Boolean).map(e => [e, e.scrollTop]);
+  fn();
+  els.forEach(([e, t]) => { if (e.scrollTop !== t) e.scrollTop = t; });
+  if (Math.abs(window.scrollY - w) > 1) window.scrollTo(0, w);
+}
+/* поиск без придирок: регистр, ё, латинские буквы-двойники (x→х, c→с…), пробелы, _ - * . / не важны */
+const LAT = { a: "а", b: "в", c: "с", e: "е", h: "н", k: "к", m: "м", o: "о", p: "р", t: "т", x: "х", y: "у" };
+const canon = s => String(s == null ? "" : s).toLowerCase().replace(/ё/g, "е").replace(/×/g, "х").replace(/[abcehkmoptxy]/g, ch => LAT[ch]).replace(/[\s_\-*.,/\\()"«»]+/g, "");
+const qWords = q => String(q || "").split(/\s+/).map(canon).filter(Boolean);
+const hit = (words, text) => { const t = canon(text); return words.every(w => t.includes(w)); };
+/* товар панели: слова — по артикулу продавца; номер WB (nmID) — только если в запросе одни цифры от 5 знаков */
+const hitRow = (words, r) => { const t = canon(r.a + " " + (r.cat || "")), nm = r.nm ? String(Math.round(r.nm)) : "";
+  return words.every(w => t.includes(w) || (nm && /^\d{5,}$/.test(w) && nm.includes(w))); };
 
 /* ═════════ тема ═════════ */
 let THEME = LS.get("theme", "auto");
@@ -626,7 +652,7 @@ $("#form").addEventListener("focusout", e => { if (e.target.id === "pSale") sync
 
 /* ═════════ итог расчёта ═════════ */
 let queued = false;           // одна перерисовка на пачку событий; не rAF — он стоит в фоновых вкладках
-function schedule() { if (queued) return; queued = true; Promise.resolve().then(() => { queued = false; render(); }); }
+function schedule() { if (queued) return; queued = true; Promise.resolve().then(() => { queued = false; keepScroll(render); }); }
 
 function segs(r) {
   return [
@@ -726,8 +752,8 @@ function render() {
       <span>Продаж для той же прибыли в месяц</span><span class="r">${need == null ? "—" : NF0.format(need) + " шт" + (pm ? ` <span class="m">(${pct(need / pm - 1, 0, true)})</span>` : "")}</span>`;
   };
   upd(r.P0);
-  $("#wiR").oninput = e => { $("#wiP").value = e.target.value; upd(num(e.target.value)); };
-  $("#wiP").oninput = e => { const v = num(e.target.value); if (v > 0) { $("#wiR").value = v; upd(v); } };
+  $("#wiR").oninput = e => { $("#wiP").value = e.target.value; keepScroll(() => upd(num(e.target.value))); };
+  $("#wiP").oninput = e => { const v = num(e.target.value); if (v > 0) { $("#wiR").value = v; keepScroll(() => upd(v)); } };
 
   $("#mini").innerHTML = `<span><span class="g">Прибыль </span><b>${rub(r.profit)}</b></span><span>${pct(r.margin)} <span class="g">маржа</span></span><span>${pct(r.roi, 0)} <span class="g">ROI</span></span>`;
   $('[data-sum="price"]').textContent = rub(r.P);
@@ -781,8 +807,8 @@ function svCalc(it) {
 function renderSaved() {
   const list = LS.get("saved", []);
   const all = list.map(svCalc);
-  const words = SVQ.split(/\s+/).filter(Boolean);
-  const shown = all.filter(o => words.every(w => (o.s.name || "").toLowerCase().replace(/ё/g, "е").includes(w)));
+  const words = qWords(SVQ);
+  const shown = all.filter(o => hit(words, o.s.name || ""));
   const head = `<div class="card toolbar" style="flex-direction:column;align-items:stretch">
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between">
         <div class="h" style="margin:0">Мои расчёты <span>${list.length ? "хранятся на этом устройстве" : ""}</span></div>
@@ -946,12 +972,12 @@ function factPrice(x, adsMode, m) {           // цена, при которой
 }
 const norm = s => String(s || "").toLowerCase().replace(/ё/g, "е");
 function sumItems() {
-  const words = norm(FQ).split(/\s+/).filter(Boolean), out = [];
+  const words = qWords(FQ), out = [];
   for (const mp of ["wb", "ozon", "ym"]) {
     if (SUMF !== "all" && SUMF !== mp) continue;
     const p = FACT && FACT.mp[mp]; if (!p) continue;
     for (const r of p.rows) {
-      if (words.length && !words.every(w => norm(r.a + " " + (r.cat || "")).includes(w))) continue;
+      if (words.length && !hitRow(words, r)) continue;
       const x = unit(r), now = num(r.now) || null, n = x && now ? at(x, now, FADS) : null;
       out.push({ mp, r, x, now, n, key: mp + "|" + r.a });
     }
@@ -1000,8 +1026,8 @@ function renderFact(keepDetail) {
 function markSel() { $$("#factList .item").forEach(b => b.classList.toggle("sel", b.dataset.key === FSEL)); }
 $("#fq").addEventListener("input", e => { FQ = e.target.value.trim(); $("#fqClear").classList.toggle("hidden", !FQ); renderFact(); });
 $("#fqClear").onclick = () => { $("#fq").value = ""; FQ = ""; $("#fqClear").classList.add("hidden"); renderFact(); $("#fq").focus(); };
-$("#sumMp").addEventListener("click", e => { const b = e.target.closest("button"); if (b) { SUMF = b.dataset.sf; LS.set("sumMp", SUMF); renderFact(); } });
-$("#fsort").addEventListener("change", e => { FSORT = e.target.value; LS.set("sumSort", FSORT); renderFact(); });
+$("#sumMp").addEventListener("click", e => { const b = e.target.closest("button"); if (b) { SUMF = b.dataset.sf; LS.set("sumMp", SUMF); keepScroll(renderFact); } });
+$("#fsort").addEventListener("change", e => { FSORT = e.target.value; LS.set("sumSort", FSORT); keepScroll(renderFact); });
 $("#factList").addEventListener("click", e => {
   if (e.target.id === "showAll") { SHOWALL = true; renderFact(); return; }
   if (e.target.id === "bForget") {
@@ -1031,7 +1057,7 @@ function renderDetail() {
   const nb = at(x, base, FADS), fm = x.profit / x.price;
   const lo = Math.round(Math.min(base, x.price) * 0.5), hi = Math.round(Math.max(base, x.price) * 1.5);
   box.innerHTML = `
-    <div><button class="btn sm back" id="bBack">← Все товары</button></div>
+    <div class="backbar"><button class="btn sm back" id="bBack">← Все товары</button></div>
     <div><div class="title">${esc(row.a)}</div><div class="note">${[MPS[mp].name, row.ip, NF0.format(x.units) + " шт продано за " + String(p.month).toLowerCase()].filter(Boolean).map(esc).join(" · ")}</div></div>
     <div class="kpis">
       <div class="kpi"><b>${now ? rub(now) : "—"}</b><span>цена сейчас${now ? "" : " — нет данных"}</span></div>
@@ -1099,9 +1125,9 @@ $("#detail").addEventListener("input", e => {
     const v = num(e.target.value); if (!(v > 0)) return;
     FPRICE = v;
     if (id === "fR") $("#fP").value = inField(v); else $("#fR").value = v;
-    paintDetail();
+    keepScroll(paintDetail);
   }
-  if (id === "fChg") { FCHG = num(e.target.value); paintDetail(); }
+  if (id === "fChg") { FCHG = num(e.target.value); keepScroll(paintDetail); }
 });
 $("#detail").addEventListener("click", e => {
   const b = e.target.closest("button"); if (!b) return;
@@ -1110,21 +1136,25 @@ $("#detail").addEventListener("click", e => {
   if (b.dataset.step != null && x) {
     const base = now || x.price, d = b.dataset.step;
     FPRICE = d === "now" ? null : d === "fact" ? x.price : Math.round(base * (1 + num(d) / 100));
-    const v = Math.round(FPRICE || base); $("#fP").value = inField(v); $("#fR").value = v; paintDetail();
+    const v = Math.round(FPRICE || base); $("#fP").value = inField(v); $("#fR").value = v; keepScroll(paintDetail);
   }
-  if (b.dataset.fads) { FADS = b.dataset.fads; LS.set("factAds2", FADS); $$("#fAds button").forEach(z => z.setAttribute("aria-pressed", z.dataset.fads === FADS)); paintDetail(); renderFactKeep(); }
+  if (b.dataset.fads) { FADS = b.dataset.fads; LS.set("factAds2", FADS); $$("#fAds button").forEach(z => z.setAttribute("aria-pressed", z.dataset.fads === FADS)); keepScroll(() => { paintDetail(); renderFact(true); }); }
   if (b.id === "bToCalc" && x) {
-    const s = newState(mp), f = s.fees[mp];
-    const r2 = v => Math.round(v * 100) / 100, p4 = v => Math.round(v * 1e6) / 1e4;      // рубли до копейки, проценты до 0,0001
-    Object.assign(s, { name: row.a, price0: r2(FPRICE || now || x.price), disc: 0, buy: r2(x.cost), lotShip: 0, ff: r2(x.ff), costOther: 0, vol: 0,
-      tax: "custom", taxRate: p4(x.tR), nds: 0, taxBase: "sale", perMonth: Math.round(x.units) });
-    if (FADS === "pct") { s.adsMode = "pct"; s.drr = p4(x.drr); } else { s.adsMode = "rub"; s.adsRub = r2(x.ads); }
-    Object.assign(f, OZX, { comm: p4(x.cR), acq: p4(x.aR), spp: 0, logi: r2(x.logi), logiPct: 0, back: 0, buyout: 100,
-      stor: r2(x.stor), accept: 0, other: r2(x.loyal + x.resid), otherPct: 0, soinv: 0 });
-    S = s; saveDraft(); writeForm(); setTab("calc"); render(); window.scrollTo(0, 0);
+    S = factToState(mp, row, x, FPRICE || now || x.price); saveDraft(); writeForm(); setTab("calc"); render(); window.scrollTo(0, 0);
     toast("Цифры факта перенесены в расчёт — правьте любые");
   }
 });
+/* строка панели → состояние расчёта, которое даёт ту же прибыль, что факт (при цене price) */
+function factToState(mp, row, x, price) {
+  const s = newState(mp), f = s.fees[mp];
+  const r2 = v => Math.round(v * 100) / 100, p4 = v => Math.round(v * 1e6) / 1e4;      // рубли до копейки, проценты до 0,0001
+  Object.assign(s, { name: row.a, price0: r2(price), disc: 0, buy: r2(x.cost), lotShip: 0, ff: r2(x.ff), costOther: 0, vol: 0,
+    tax: "custom", taxRate: p4(x.tR), nds: 0, taxBase: "sale", perMonth: Math.round(x.units) });
+  if (FADS === "pct") { s.adsMode = "pct"; s.drr = p4(x.drr); } else { s.adsMode = "rub"; s.adsRub = r2(x.ads); }
+  Object.assign(f, OZX, { comm: p4(x.cR), acq: p4(x.aR), spp: 0, logi: r2(x.logi), logiPct: 0, back: 0, buyout: 100,
+    stor: r2(x.stor), accept: 0, other: r2(x.loyal + x.resid), otherPct: 0, soinv: 0 });
+  return s;
+}
 function renderFactKeep() { const y = window.scrollY; renderFact(true); window.scrollTo(0, y); }
 
 /* ═════════ вкладки ═════════ */
@@ -1140,8 +1170,57 @@ function setTab(t) {
 }
 $("#tabs").addEventListener("click", e => { const b = e.target.closest("button"); if (b) { setTab(b.dataset.tab); window.scrollTo(0, 0); } });
 
+/* ═════════ поиск товара в «Расчёте»: артикул → список → все цифры факта в расчёт ═════════ */
+let AC = [], ACI = -1, acLoading = false;
+function acItems(q) {
+  const words = qWords(q); if (!words.length || !FACT) return [];
+  const out = [];
+  for (const mp of ["wb", "ozon", "ym"]) for (const r of (FACT.mp[mp] || { rows: [] }).rows)
+    if (hitRow(words, r)) { const x = unit(r), now = num(r.now) || null; out.push({ mp, r, x, now, n: x && now ? at(x, now, FADS) : null }); }
+  out.sort((a, b) => (!a.x !== !b.x ? (a.x ? -1 : 1) : num(b.r.sales) - num(a.r.sales)));
+  return out.slice(0, 12);
+}
+function acShow() {
+  const box = $("#ac"), q = $("#name").value.trim(), t = num(S.target) / 100 || 0.1;
+  if (q.length < 2) { box.classList.add("hidden"); $("#name").setAttribute("aria-expanded", "false"); return; }
+  if (!FACT) {
+    if (LS.get("pass", "") || LS.get("kc", null)) {
+      box.innerHTML = '<div class="tip">Загружаю ваши товары…</div>';
+      if (!acLoading) { acLoading = true; loadFact().then(d => { FACT = d; acLoading = false; acShow(); }).catch(() => { acLoading = false; box.innerHTML = '<div class="tip">Не получилось загрузить товары — откройте вкладку «Сводка».</div>'; }); }
+    } else box.innerHTML = '<div class="tip">Чтобы искать свои товары, один раз введите пароль во вкладке «Сводка». Без пароля можно просто вписать название и считать вручную.</div>';
+  } else {
+    AC = acItems(q); ACI = AC.length ? 0 : -1;
+    box.innerHTML = AC.length ? AC.map((o, i) => `<button type="button" role="option" aria-selected="${i === ACI}" data-ac="${i}">
+        <span class="n"><span class="badge">${MPS[o.mp].short}</span>${esc(o.r.a)}</span>
+        <span class="r ${o.n ? tone(o.n.margin, t) : ""}">${o.n ? pct(o.n.margin) : ""}</span>
+        <span class="s">${o.now ? "цена сейчас " + rub(o.now) : "цены нет"} · ${o.x ? NF0.format(o.x.units) + " шт за месяц" : "нет продаж в месяце"}${o.r.ip && o.mp === "wb" ? " · " + esc(o.r.ip.replace("ИП ", "")) : ""}</span></button>`).join("")
+      : '<div class="tip">Такого артикула нет в панелях. Можно вписать название и считать вручную.</div>';
+  }
+  box.classList.remove("hidden"); $("#name").setAttribute("aria-expanded", "true");
+}
+function acPick(i) {
+  const o = AC[i]; if (!o) return;
+  $("#ac").classList.add("hidden");
+  if (o.x) { S = factToState(o.mp, o.r, o.x, o.now || o.x.price); toast("Подставил «" + o.r.a + "»: цена сейчас и расходы из факта — правьте любые цифры"); }
+  else { S.name = o.r.a; S.mp = o.mp; if (o.now) S.price0 = o.now; S.disc = 0; toast("У товара нет продаж в месяце — подставил цену, остальное заполните"); }
+  saveDraft(); writeForm(); render();
+}
+$("#name").addEventListener("input", acShow);
+$("#name").addEventListener("focus", () => { if ($("#name").value.trim().length >= 2) acShow(); });
+$("#name").addEventListener("keydown", e => {
+  if ($("#ac").classList.contains("hidden") || !AC.length) return;
+  if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); ACI = (ACI + (e.key === "ArrowDown" ? 1 : -1) + AC.length) % AC.length; $$("#ac button").forEach((b, i) => b.setAttribute("aria-selected", i === ACI)); }
+  else if (e.key === "Enter") { e.preventDefault(); acPick(ACI); }
+  else if (e.key === "Escape") $("#ac").classList.add("hidden");
+});
+$("#ac").addEventListener("pointerdown", e => { const b = e.target.closest("[data-ac]"); if (b) { e.preventDefault(); acPick(+b.dataset.ac); } });
+$("#ac").addEventListener("click", e => { const b = e.target.closest("[data-ac]"); if (b) acPick(+b.dataset.ac); });
+document.addEventListener("pointerdown", e => { if (!e.target.closest(".acwrap")) $("#ac").classList.add("hidden"); });
+
 /* ═════════ старт ═════════ */
+function setHdr() { document.documentElement.style.setProperty("--hdr", $("header").offsetHeight + "px"); }
 (function init() {
+  setHdr(); window.addEventListener("resize", setHdr);
   applyTheme();
   const h = new URLSearchParams(location.hash.slice(1));
   if (h.get("k")) { LS.set("pass", h.get("k")); LS.del("kc"); TAB = "sum"; }
