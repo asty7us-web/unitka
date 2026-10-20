@@ -264,6 +264,12 @@ details.how ul{padding-left:18px;margin:6px 0}
 .sv .acts{display:flex;gap:6px;grid-column:2/4;flex-wrap:wrap}
 .toast{position:fixed;left:50%;bottom:calc(24px + var(--nav-h) + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-weight:600;z-index:50;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90vw;text-align:center}
 .toast.on{opacity:1}
+.modal{position:fixed;inset:0;z-index:85;background:rgba(10,10,10,.45);display:flex;align-items:center;justify-content:center;padding:16px}
+.modal .sheet{width:min(460px,100%);padding:16px;display:flex;flex-direction:column;gap:12px}
+.modal .sheet .h{align-items:center}
+.shurl{width:100%;height:42px;border-radius:10px;border:1px solid var(--ring);background:var(--surface-2);padding:0 10px;font-size:14px;color:var(--ink-2)}
+a.btn{text-decoration:none;color:inherit}
+@media (max-width:860px){.modal{align-items:flex-end;padding:0}.modal .sheet{border-radius:16px 16px 0 0;padding-bottom:calc(16px + env(safe-area-inset-bottom))}}
 
 /* ── телефон ── */
 @media (max-width: 860px){
@@ -455,6 +461,12 @@ details.how ul{padding-left:18px;margin:6px 0}
 </main>
 <div class="toast" id="toast"></div>
 <input type="file" id="importFile" accept="application/json,.json" class="hidden">
+<div class="modal hidden" id="shareBox" role="dialog" aria-label="Поделиться расчётом"><div class="card sheet">
+  <div class="h" style="font-size:16px">Ссылка на этот расчёт <button class="tour-x" id="shClose" aria-label="Закрыть" style="position:static">✕</button></div>
+  <div class="note">Откроется на любом телефоне или компьютере с теми же цифрами — пароль не нужен, цифры только этого расчёта.</div>
+  <input id="shareUrl" class="shurl" readonly>
+  <div class="chips"><button class="btn pri" id="shCopy">Скопировать</button><a class="btn" id="shTg" target="_blank" rel="noopener">Отправить в Telegram</a><button class="btn hidden" id="shMore">Ещё…</button></div>
+</div></div>
 
 <script>
 "use strict";
@@ -842,14 +854,33 @@ function decodeState(t) {
   const bin = atob(t.replace(/-/g, "+").replace(/_/g, "/"));
   return JSON.parse(new TextDecoder().decode(Uint8Array.from(bin, c => c.charCodeAt(0))));
 }
+/* короткая ссылка: состояние сжимается (deflate) → #z=…; если браузер не умеет — как раньше #c=… */
+const b64u = u8 => { let s = ""; u8.forEach(x => s += String.fromCharCode(x)); return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, ""); };
+async function packState(s) {
+  if (!window.CompressionStream) return "c=" + encodeState(s);
+  const z = new Blob([JSON.stringify(s)]).stream().pipeThrough(new CompressionStream("deflate-raw"));
+  return "z=" + b64u(new Uint8Array(await new Response(z).arrayBuffer()));
+}
+async function unpackZ(t) {
+  const bin = Uint8Array.from(atob(t.replace(/-/g, "+").replace(/_/g, "/")), c => c.charCodeAt(0));
+  return JSON.parse(await new Response(new Blob([bin]).stream().pipeThrough(new DecompressionStream("deflate-raw"))).text());
+}
 $("#bShare").onclick = async () => {
   const st = clone(S); delete st.id;
-  const url = location.origin + location.pathname + "#c=" + encodeState(st);
-  try {
-    if (navigator.share && isPhone()) { await navigator.share({ title: "Юнитка: " + (S.name || "расчёт"), url }); return; }
-    await navigator.clipboard.writeText(url); toast("Ссылка скопирована — по ней этот расчёт откроется на любом устройстве");
-  } catch (e) { prompt("Скопируйте ссылку", url); }
+  const url = location.origin + location.pathname + "#" + await packState(st);
+  $("#shareUrl").value = url;
+  $("#shTg").href = "https://t.me/share/url?url=" + encodeURIComponent(url) + "&text=" + encodeURIComponent("Юнитка: " + (S.name || "расчёт"));
+  $("#shMore").classList.toggle("hidden", !navigator.share);
+  $("#shareBox").classList.remove("hidden");
 };
+$("#shClose").onclick = () => $("#shareBox").classList.add("hidden");
+$("#shareBox").addEventListener("click", e => { if (e.target.id === "shareBox") $("#shareBox").classList.add("hidden"); });
+$("#shCopy").onclick = async () => {
+  const el = $("#shareUrl"), url = el.value;
+  try { await navigator.clipboard.writeText(url); } catch (e) { el.focus(); el.select(); try { document.execCommand("copy"); } catch (e2) {} }
+  toast("Ссылка скопирована"); $("#shareBox").classList.add("hidden");
+};
+$("#shMore").onclick = async () => { try { await navigator.share({ title: "Юнитка: " + (S.name || "расчёт"), url: $("#shareUrl").value }); } catch (e) {} };
 $("#bNew").onclick = () => { S = newState(S.mp); saveDraft(); writeForm(); render(); window.scrollTo(0, 0); toast("Новый расчёт"); };
 $("#bSave").onclick = () => {
   const list = LS.get("saved", []);
@@ -1161,7 +1192,7 @@ function renderDetail() {
     <div class="backbar"><button class="btn sm back" id="bBack">‹ Сводка</button><span class="bt">${esc(row.a)}</span></div>
     <div><div class="title">${esc(row.a)}</div><div class="note">${[MPS[mp].name, cab(mp, row.ip), NF0.format(x.units) + " шт продано за " + String(p.month).toLowerCase()].filter(Boolean).map(esc).join(" · ")}</div></div>
     <div class="kpis">
-      <div class="kpi"><b>${now ? rub(now) : "—"}</b><span>наша до СПП${now ? "" : " — нет данных"}</span></div>
+      <div class="kpi"><b>${now ? rub(now) : "—"}</b><span>наша до СПП${now ? "" : " — нет данных"}${row.spp ? `<br>витрина ${rub(row.vit)} · СПП ${pct(row.spp, 0)}` : ""}</span></div>
       <div class="kpi"><b class="${tone(nb.margin, t)}">${pct(nb.margin)}</b><span>по юнитке · ${rub(nb.profit)}/шт</span></div>
       <div class="kpi"><b class="${pm.m != null ? tone(pm.m, t) : ""}">${pm.m != null ? pct(pm.m) : "—"}</b><span>по панели ${esc(PER[SUMP])}${pm.nd != null ? ` · без ДРР <span class="${tone(pm.nd, t)}">${pct(pm.nd)}</span> · ДРР ${pct(pm.drr)}` : ""}</span></div>
     </div>
@@ -1248,7 +1279,8 @@ function factToState(mp, row, x, price) {
   Object.assign(s, { name: row.a, price0: r2(price), disc: 0, buy: r2(x.cost), lotShip: 0, ff: r2(x.ff), costOther: 0, vol: 0,
     tax: "custom", taxRate: p4(x.tR), nds: 0, taxBase: "sale", perMonth: Math.round(x.units) });
   if (FADS === "pct") { s.adsMode = "pct"; s.drr = p4(x.drr); } else { s.adsMode = "rub"; s.adsRub = r2(x.ads); }
-  Object.assign(f, OZX, { comm: p4(x.cR), acq: p4(x.aR), spp: 0, logi: r2(x.logi), logiPct: 0, back: 0, buyout: 100,
+  const spp = row.spp > 0 && row.spp < 0.95 ? row.spp : 0;                          // СПП / соинвест с витрины (лист «Цены витрина» панели)
+  Object.assign(f, OZX, { comm: p4(x.cR), acq: p4(x.aR / (1 - spp)), spp: p4(spp), logi: r2(x.logi), logiPct: 0, back: 0, buyout: 100,
     stor: r2(x.stor), accept: 0, other: r2(x.loyal + x.resid), otherPct: 0, soinv: 0 });
   return s;
 }
@@ -1458,7 +1490,8 @@ function setHdr() { document.documentElement.style.setProperty("--hdr", $("heade
   const h = new URLSearchParams(location.hash.slice(1));
   if (h.get("k")) { LS.set("pass", h.get("k")); LS.del("kc"); TAB = "sum"; }
   if (h.get("c")) { try { S = fixState(decodeState(h.get("c"))); delete S.id; saveDraft(); TAB = "calc"; } catch (e) { toast("Ссылка на расчёт повреждена"); } }
-  if (h.get("k") || h.get("c")) history.replaceState(null, "", location.pathname + location.search);
+  if (h.get("z")) { TAB = "calc"; unpackZ(h.get("z")).then(st => { S = fixState(st); delete S.id; saveDraft(); writeForm(); render(); }).catch(() => toast("Ссылка на расчёт повреждена")); }
+  if (h.get("k") || h.get("c") || h.get("z")) history.replaceState(null, "", location.pathname + location.search);
   if (isPhone()) $$("details.sec").forEach(d => { if (!["price", "cost", "mp"].includes(d.dataset.sec)) d.open = false; });
   writeForm(); render(); setTab(["sum", "calc", "saved"].includes(TAB) ? TAB : "sum");
 })();
