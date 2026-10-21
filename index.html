@@ -1041,27 +1041,29 @@ async function openFact(pass) {
 }
 $("#bUnlock").onclick = () => { const p = $("#pass").value.trim(); if (p) openFact(p); };
 
-/* одна строка панели → рубли на 1 проданную шт */
+/* одна строка панели → рубли на 1 проданную шт. row.h — те же статьи за несколько месяцев, когда в месяце продано меньше 3 шт (baza.py):
+   src — за какие месяцы, ub — штук в них, units — в среднем за месяц с продажами */
 function unit(row) {
-  const u = num(row.units), sales = num(row.sales);
+  const b = row.h || row, u = num(b.units), sales = num(b.sales);
   if (u <= 0 || sales <= 0) return null;
-  const per = k => num(row[k]) / u;
-  const x = { price: sales / u, comm: per("comm"), acq: per("acq"), logi: per("logi"), stor: per("stor"), ff: per("ff") + per("dop"),
-              loyal: per("loyal"), ads: per("ads") + per("ads2"), tax: per("tax"), cost: per("cost"), profit: per("profit"), units: u };
-  const sum = x.comm + x.acq + x.logi + x.stor + x.ff + x.loyal + x.ads + x.tax + x.cost;
+  const per = k => num(b[k]) / u;
+  const x = { price: sales / u, comm: per("comm"), acq: per("acq"), logi: per("logi"), stor: per("stor"), ff: per("ff"), dop: per("dop"),
+              loyal: per("loyal"), ads: per("ads") + per("ads2"), tax: per("tax"), cost: per("cost"), profit: per("profit"),
+              units: row.h ? u / (num(row.h.n) || 1) : u, ub: u, src: row.h ? row.h.label : "" };
+  const sum = x.comm + x.acq + x.logi + x.stor + x.ff + x.dop + x.loyal + x.ads + x.tax + x.cost;
   x.resid = x.price - sum - x.profit;      // если панель считает иначе — «прочее», чтобы факт совпал с панелью
   x.cR = x.comm / x.price; x.aR = x.acq / x.price; x.tR = x.tax / x.price; x.drr = x.ads / x.price;
   return x;
 }
 function at(x, p, adsMode) {
   const comm = x.cR * p, acq = x.aR * p, tax = x.tR * p, ads = adsMode === "pct" ? x.drr * p : x.ads;
-  const fixed = x.logi + x.stor + x.ff + x.loyal + x.resid + x.cost;
+  const fixed = x.logi + x.stor + x.ff + x.dop + x.loyal + x.resid + x.cost;
   const profit = p - comm - acq - tax - ads - fixed;
   return { p, comm, acq, tax, ads, profit, margin: profit / p, roi: x.cost > 0 ? profit / x.cost : NaN };
 }
 function factPrice(x, adsMode, m) {           // цена, при которой маржа = m
   const rate = x.cR + x.aR + x.tR + (adsMode === "pct" ? x.drr : 0);
-  const fixed = x.logi + x.stor + x.ff + x.loyal + x.resid + x.cost + (adsMode === "pct" ? 0 : x.ads);
+  const fixed = x.logi + x.stor + x.ff + x.dop + x.loyal + x.resid + x.cost + (adsMode === "pct" ? 0 : x.ads);
   return 1 - rate - m > 0 ? fixed / (1 - rate - m) : null;
 }
 const norm = s => String(s || "").toLowerCase().replace(/ё/g, "е");
@@ -1069,6 +1071,8 @@ const mpIco = (mp, big) => `<span class="mpi ${mp}${big ? " big" : ""}" title="$
 const mpTag = mp => `<span class="badge">${MPS[mp].short}</span>`;
 /* WB — кабинеты по-нашему: ИП Топал = Каб 1, ИП Мамаева = Каб 2; у Ozon и ЯМ кабинет один — не пишем */
 const cab = (mp, ip) => (mp !== "wb" || !ip ? "" : /топал/i.test(ip) ? "Каб 1" : /мамаев/i.test(ip) ? "Каб 2" : ip);
+/* подпись под товаром: продажи за месяц панели и, если добраны прошлые месяцы, за какие считается юнитка */
+const soldTxt = (r, x) => !x ? "нет продаж" : (num(r.units) > 0 ? NF0.format(num(r.units)) + " шт за месяц" : "нет продаж в месяце") + (x.src ? " · юнитка за " + x.src : "");
 const PER = { week: "за неделю", w2: "за 2 недели", month: "за месяц" };
 /* строка панели за выбранный срок (месяц — сама строка; неделя / 2 недели — из per) */
 function perOf(mp) { const p = FACT && FACT.mp[mp]; return SUMP === "month" ? p && { label: p.month, rows: p.rows } : p && p.per && p.per[SUMP]; }
@@ -1137,19 +1141,20 @@ function renderFact(keepDetail) {
   const upd = new Date(FACT.updated);
   const cell = (v, cl) => `<span class="c ${cl == null ? (v != null ? tone(v, t) : "") : cl}">${v != null ? pct(v) : "—"}</span>`;
   const row = o => `<button class="item ${FSEL === o.key ? "sel" : ""} ${o.x ? "" : "dim"}" data-key="${esc(o.key)}">
-      <span class="n">${esc(o.r.a)}<span class="s">${mpTag(o.mp)}<b class="pr">${o.now ? rub(o.now) : "цены нет"}</b>${o.now ? " наша до СПП" : ""} · ${o.x ? NF0.format(o.x.units) + " шт за месяц" : "нет продаж в месяце"}${cab(o.mp, o.r.ip) ? " · " + cab(o.mp, o.r.ip) : ""}</span></span>
+      <span class="n">${esc(o.r.a)}<span class="s">${mpTag(o.mp)}<b class="pr">${o.now ? rub(o.now) : "цены нет"}</b>${o.now ? " наша до СПП" : ""} · ${soldTxt(o.r, o.x)}${cab(o.mp, o.r.ip) ? " · " + cab(o.mp, o.r.ip) : ""}</span></span>
       ${cell(o.n ? o.n.margin : null)}${cell(o.pm.m)}${cell(o.pm.drr, "drr")}</button>`;
   $("#factList").innerHTML = `
     <div class="lhead"><span>Товар · наша цена до СПП</span><span>По юнитке<small>при нашей цене</small></span><span>По панели<small>${esc(PER[SUMP])}</small></span><span>ДРР<small>панель</small></span></div>
     <div class="list">${sold.map(row).join("") || '<div class="empty">Ничего не нашлось' + (FQ ? " — проверьте написание или выберите «Все»" : "") + "</div>"}
-      ${rest.length ? (SHOWALL || FQ ? rest.map(row).join("") : `<button class="more" id="showAll">Ещё ${rest.length} без продаж в этом месяце — показать</button>`) : ""}</div>
+      ${rest.length ? (SHOWALL || FQ ? rest.map(row).join("") : `<button class="more" id="showAll">Ещё ${rest.length} без продаж — показать</button>`) : ""}</div>
     <div class="note" style="padding:10px 14px"><b>Наша до СПП</b> — наша цена продажи сейчас, до скидки площадки: WB — со скидкой продавца, Ozon и ЯМ — цена в кабинете.
       <b>По юнитке</b> — маржа при нашей цене: расходы на 1 шт из панели за месяц (комиссия, эквайринг, налог и реклама — в % от цены, логистика, ФФ, хранение и себестоимость — в рублях).
+      Продано в месяце меньше 3 шт — расходы берутся вместе с прошлыми месяцами (до полугода), под товаром написано, за какие.
       <b>По панели</b> — что получилось по факту за выбранный срок: валовая прибыль ÷ выручка. <b>ДРР</b> — реклама ÷ выручка за тот же срок.
       Цвет: зелёный — от ${NF1.format(t * 100)}%, жёлтый — от 0 до ${NF1.format(t * 100)}%, красный — минус. Обновлено ${upd.toLocaleDateString("ru-RU")} ${upd.toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" })}.
       <br><a class="linkbtn" href="unitka-ext.zip" download>Скачать расширение для компьютера (Opera, Chrome)</a></div>`;
   if (keepDetail) return;
-  if (!isPhone() && (!FSEL || !items.some(o => o.key === FSEL && o.x))) { FSEL = sold.length ? sold[0].key : null; FPRICE = null; markSel(); }
+  if (!isPhone() && (!FSEL || !items.some(o => o.key === FSEL))) { FSEL = sold.length ? sold[0].key : null; FPRICE = null; markSel(); }
   renderDetail();
 }
 function showFact() {
@@ -1183,14 +1188,30 @@ function curFact() {
 function renderDetail() {
   const box = $("#detail");
   const { mp, p, row, x, now } = curFact();
-  if (!x) { box.innerHTML = `<div class="empty">${row ? "У этого товара нет продаж в месяце — считать не из чего. Посчитайте его во вкладке «Расчёт»." : "Выберите товар в списке"}</div>`; return; }
+  const back = row ? `<div class="backbar"><button class="btn sm back" id="bBack">‹ Сводка</button><span class="bt">${esc(row.a)}</span></div>` : "";
+  if (!x) {
+    if (!row) { box.innerHTML = `<div class="empty">Выберите товар в списке</div>`; return; }
+    const ff = num(row.ff1) + num(row.dop1);
+    box.innerHTML = back + `
+    <div><div class="title">${esc(row.a)}</div><div class="note">${[MPS[mp].name, cab(mp, row.ip), row.np ? "нет в панели" : "нет продаж"].filter(Boolean).map(esc).join(" · ")}</div></div>
+    <div class="kpis">
+      <div class="kpi"><b>${now ? rub(now) : "—"}</b><span>наша до СПП${now ? "" : " — нет данных"}${row.spp ? `<br>витрина ${rub(row.vit)} · СПП ${pct(row.spp, 0)}` : ""}</span></div>
+      <div class="kpi"><b>${row.c1 ? rub(row.c1) : "—"}</b><span>себестоимость 1 шт${row.c1 ? "" : " — в панели нет"}</span></div>
+      <div class="kpi"><b>${ff ? rub(ff) : "—"}</b><span>${mp === "ym" ? "ФФ — в панели ЯМ нет" : num(row.dop1) ? "ФФ и доукомплектовка на 1 шт" : "ФФ на 1 шт" + (ff ? "" : " — в панели нет")}</span></div>
+    </div>
+    <div class="note">На ${esc(MPS[mp].short)} этот товар не продавался последние полгода — комиссию, логистику и рекламу по факту взять не из чего.
+      В «Расчёте» подставлю цену, себестоимость и ФФ из панели, остальное — по настройкам площадки.</div>
+    <button class="btn" id="bToCalc">Посчитать во вкладке «Расчёт»</button>`;
+    return;
+  }
   const t = num(S.target) / 100 || 0.1;
   const base = now || x.price, price = Math.round(FPRICE || base);
   const nb = at(x, base, FADS), pm = panelM(perRow(mp, row));
   const lo = Math.round(base * 0.5), hi = Math.round(base * 1.5);
-  box.innerHTML = `
-    <div class="backbar"><button class="btn sm back" id="bBack">‹ Сводка</button><span class="bt">${esc(row.a)}</span></div>
-    <div><div class="title">${esc(row.a)}</div><div class="note">${[MPS[mp].name, cab(mp, row.ip), NF0.format(x.units) + " шт продано за " + String(p.month).toLowerCase()].filter(Boolean).map(esc).join(" · ")}</div></div>
+  const mon = String(p.month).toLowerCase();
+  box.innerHTML = back + `
+    <div><div class="title">${esc(row.a)}</div><div class="note">${[MPS[mp].name, cab(mp, row.ip), (num(row.units) > 0 ? NF0.format(num(row.units)) + " шт продано за " + mon : "за " + mon + " продаж нет"),
+      x.src ? "юнитка за " + x.src + " (" + NF0.format(x.ub) + " шт)" : ""].filter(Boolean).map(esc).join(" · ")}</div></div>
     <div class="kpis">
       <div class="kpi"><b>${now ? rub(now) : "—"}</b><span>наша до СПП${now ? "" : " — нет данных"}${row.spp ? `<br>витрина ${rub(row.vit)} · СПП ${pct(row.spp, 0)}` : ""}</span></div>
       <div class="kpi"><b class="${tone(nb.margin, t)}">${pct(nb.margin)}</b><span>по юнитке · ${rub(nb.profit)}/шт</span></div>
@@ -1202,11 +1223,11 @@ function renderDetail() {
       <div class="chips" style="margin-top:6px">${[-10, -5, 5, 10].map(d => `<button class="chip" data-step="${d}">${d > 0 ? "+" : MINUS}${Math.abs(d)}%</button>`).join("")}<button class="chip" data-step="now">↺ цена сейчас</button></div></div>
     <div id="dOut" style="display:flex;flex-direction:column;gap:14px"></div>
     <button class="btn" id="bToCalc">Посчитать подробно во вкладке «Расчёт»</button>
-    <div class="note">Юнитка берёт расходы на 1 шт из панели за ${esc(String(p.month).toLowerCase())}: комиссия, эквайринг, налог и реклама меняются вместе с ценой (в % от цены), логистика, ФФ, хранение и себестоимость — те же рубли.</div>`;
+    <div class="note">Юнитка берёт расходы на 1 шт из панели за ${x.src ? esc(x.src) + " — за " + esc(mon) + " продаж мало, поэтому добраны прошлые месяцы" : esc(mon)}: комиссия, эквайринг, налог и реклама меняются вместе с ценой (в % от цены), логистика, ФФ, доукомплектовка, хранение и себестоимость — те же рубли.</div>`;
   paintDetail();
 }
 function paintDetail() {
-  const { x, now } = curFact(), out = $("#dOut");
+  const { mp, x, now } = curFact(), out = $("#dOut");
   if (!x || !out) return;
   const base = now || x.price, price = FPRICE || base;
   const t = num(S.target) / 100 || 0.1;
@@ -1214,7 +1235,7 @@ function paintDetail() {
   const monthB = b.profit * x.units, monthN = n.profit * x.units;
   const need = n.profit > 0 && b.profit > 0 ? Math.ceil(x.units * b.profit / n.profit) : null;
   const be = factPrice(x, FADS, 0), pt = factPrice(x, FADS, t);
-  const fixed = { logi: x.logi, stor: x.stor, ff: x.ff, loyal: x.loyal, resid: x.resid, cost: x.cost };
+  const fixed = { logi: x.logi, stor: x.stor, ff: x.ff, dop: x.dop, loyal: x.loyal, resid: x.resid, cost: x.cost };
   const line = (lbl, a, c, plain) => `<tr><td>${lbl}</td><td>${rub(a)}</td><td>${rub(c)}</td><td class="${plain ? "" : cls(a - c)}">${Math.abs(c - a) < 0.5 ? "" : rub(c - a, true)}</td></tr>`;
   const steps = [-15, -10, -5, 0, 5, 10, 15].map(d => {
     const q = at(x, base * (1 + d / 100), FADS), nd = q.profit > 0 && b.profit > 0 ? Math.ceil(x.units * b.profit / q.profit) : null;
@@ -1238,7 +1259,8 @@ function paintDetail() {
         ${Math.abs(x.acq) >= 0.05 ? line("Эквайринг · " + pct(x.aR), b.acq, n.acq) : ""}
         ${line("Логистика", fixed.logi, fixed.logi)}
         ${Math.abs(fixed.stor) >= 0.05 ? line("Хранение", fixed.stor, fixed.stor) : ""}
-        ${Math.abs(fixed.ff) >= 0.05 ? line("ФФ и доукомплектовка", fixed.ff, fixed.ff) : ""}
+        ${mp === "ym" ? '<tr><td>ФФ и доукомплектовка</td><td colspan="3">в панели ЯМ нет</td></tr>'
+          : line(Math.abs(fixed.ff) >= 0.05 ? "ФФ" : "ФФ · нет ставки в панели", fixed.ff, fixed.ff) + line("Доукомплектовка", fixed.dop, fixed.dop)}
         ${Math.abs(fixed.loyal) >= 0.05 ? line("Лояльность, отзывы", fixed.loyal, fixed.loyal) : ""}
         ${line("Реклама · ДРР " + pct(x.drr), b.ads, n.ads)}
         ${line("Налог · " + pct(x.tR), b.tax, n.tax)}
@@ -1267,16 +1289,26 @@ $("#detail").addEventListener("click", e => {
     FPRICE = d === "now" ? null : Math.round(base * (1 + num(d) / 100));
     const v = Math.round(FPRICE || base); $("#fP").value = inField(v); $("#fR").value = v; keepScroll(paintDetail);
   }
-  if (b.id === "bToCalc" && x) {
-    S = factToState(mp, row, x, FPRICE || now || x.price); saveDraft(); writeForm(); setTab("calc"); render(); window.scrollTo(0, 0);
-    toast("Цифры товара перенесены в расчёт — правьте любые");
+  if (b.id === "bToCalc" && row) {
+    S = x ? factToState(mp, row, x, FPRICE || now || x.price) : emptyToState(mp, row);
+    saveDraft(); writeForm(); setTab("calc"); render(); window.scrollTo(0, 0);
+    toast(x ? "Цифры товара перенесены в расчёт — правьте любые" : emptyTip(row));
   }
 });
+/* товар без продаж → расчёт: цена сейчас, себестоимость, ФФ и доукомплектовка из панели; комиссия, логистика, налог и ДРР — настройки площадки */
+function emptyToState(mp, row) {
+  const s = newState(mp), r2 = v => Math.round(v * 100) / 100;
+  Object.assign(s, { name: row.a, disc: 0, buy: r2(num(row.c1)), lotShip: 0, ff: r2(num(row.ff1)), costOther: r2(num(row.dop1)) });
+  if (num(row.now) > 0) s.price0 = r2(num(row.now));
+  return s;
+}
+const emptyTip = row => (row.c1 ? "Подставил цену, себестоимость и ФФ из панели" : "Себестоимости в панели нет — впишите закупку") +
+  "; комиссия, логистика и ДРР — по настройкам площадки, проверьте";
 /* строка панели → состояние расчёта, которое даёт ту же прибыль, что факт (при цене price) */
 function factToState(mp, row, x, price) {
   const s = newState(mp), f = s.fees[mp];
   const r2 = v => Math.round(v * 100) / 100, p4 = v => Math.round(v * 1e6) / 1e4;      // рубли до копейки, проценты до 0,0001
-  Object.assign(s, { name: row.a, price0: r2(price), disc: 0, buy: r2(x.cost), lotShip: 0, ff: r2(x.ff), costOther: 0, vol: 0,
+  Object.assign(s, { name: row.a, price0: r2(price), disc: 0, buy: r2(x.cost), lotShip: 0, ff: r2(x.ff), costOther: r2(x.dop), vol: 0,
     tax: "custom", taxRate: p4(x.tR), nds: 0, taxBase: "sale", perMonth: Math.round(x.units) });
   if (FADS === "pct") { s.adsMode = "pct"; s.drr = p4(x.drr); } else { s.adsMode = "rub"; s.adsRub = r2(x.ads); }
   const spp = row.spp > 0 && row.spp < 0.95 ? row.spp : 0;                          // СПП / соинвест с витрины (лист «Цены витрина» панели)
@@ -1322,7 +1354,7 @@ function acShow() {
     box.innerHTML = AC.length ? AC.map((o, i) => `<button type="button" role="option" aria-selected="${i === ACI}" data-ac="${i}">
         <span class="n">${mpTag(o.mp)}${esc(o.r.a)}</span>
         <span class="r ${o.n ? tone(o.n.margin, t) : ""}">${o.n ? pct(o.n.margin) : ""}</span>
-        <span class="s">${o.now ? "наша до СПП " + rub(o.now) : "цены нет"} · ${o.x ? NF0.format(o.x.units) + " шт за месяц" : "нет продаж в месяце"}${cab(o.mp, o.r.ip) ? " · " + cab(o.mp, o.r.ip) : ""}</span></button>`).join("")
+        <span class="s">${o.now ? "наша до СПП " + rub(o.now) : "цены нет"} · ${soldTxt(o.r, o.x)}${cab(o.mp, o.r.ip) ? " · " + cab(o.mp, o.r.ip) : ""}</span></button>`).join("")
       : '<div class="tip">Такого артикула нет в панелях. Можно вписать название и считать вручную.</div>';
   }
   box.classList.remove("hidden"); $("#name").setAttribute("aria-expanded", "true");
@@ -1331,7 +1363,7 @@ function acPick(i) {
   const o = AC[i]; if (!o) return;
   $("#ac").classList.add("hidden");
   if (o.x) { S = factToState(o.mp, o.r, o.x, o.now || o.x.price); toast("Подставил «" + o.r.a + "»: цена сейчас и расходы из факта — правьте любые цифры"); }
-  else { S.name = o.r.a; S.mp = o.mp; if (o.now) S.price0 = o.now; S.disc = 0; toast("У товара нет продаж в месяце — подставил цену, остальное заполните"); }
+  else { S = emptyToState(o.mp, o.r); toast(emptyTip(o.r)); }
   saveDraft(); writeForm(); render();
 }
 $("#name").addEventListener("input", acShow);
