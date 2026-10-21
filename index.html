@@ -341,7 +341,7 @@ a.btn{text-decoration:none;color:inherit}
       <input id="fq" type="search" placeholder="Найти товар — начните печатать" autocomplete="off" enterkeyhint="search"><button id="fqClear" class="hidden" aria-label="Очистить">✕</button></div>
     <div class="sumbar">
       <div class="seg" id="sumMp"><button data-sf="all">Все</button><button data-sf="wb"><span class="mpi wb"></span>WB</button><button data-sf="ozon"><span class="mpi ozon"></span>Ozon</button><button data-sf="ym"><span class="mpi ym"></span>ЯМ</button></div>
-      <select class="sel" id="fsort" aria-label="Порядок"><option value="sales">по выручке</option><option value="unit">по юнитке: сначала низкая маржа</option><option value="panel">по панели: сначала низкая маржа</option><option value="drr">по ДРР: сначала высокий</option><option value="name">по алфавиту</option></select>
+      <select class="sel" id="fsort" aria-label="Порядок"><option value="sales">по выручке за месяц</option><option value="unit">по юнитке: сначала низкая маржа</option><option value="panel">по панели: сначала низкая маржа</option><option value="drr">по ДРР: сначала высокий</option><option value="name">по алфавиту</option></select>
     </div>
     <div class="sumbar sumbar2">
       <div class="mprow" style="gap:8px">Панель за <div class="seg" id="sumPer"><button data-per="week">Неделю</button><button data-per="w2">2 недели</button><button data-per="month">Месяц</button></div></div>
@@ -1105,7 +1105,7 @@ function sumItems() {
     if (FSORT === "unit") return low(a.n && a.n.margin) - low(b.n && b.n.margin);
     if (FSORT === "panel") return low(a.pm.m) - low(b.pm.m);
     if (FSORT === "drr") return high(b.pm.drr) - high(a.pm.drr);
-    return num((b.pr || b.r).sales) - num((a.pr || a.r).sales);
+    return num(b.r.sales) - num(a.r.sales);       // всегда за месяц: смена срока не двигает строки, меняются только «По панели» и ДРР
   });
   return out;
 }
