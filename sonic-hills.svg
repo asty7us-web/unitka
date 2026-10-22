@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1600" height="400" viewBox="0 0 1600 400">
+<!-- холмы темы «Соник» (Юнитка): полоса повторяется по горизонтали без шва (края на одной высоте, клетка 50 px — 32 клетки на полосу);
+     дальние холмы с пальмами, ближняя земля в клетку с травяным краем, подсолнухи. Свой рисунок по мотивам 16-битных платформеров -->
+<defs>
+  <pattern id="chk" width="50" height="50" patternUnits="userSpaceOnUse">
+    <rect width="50" height="50" fill="#cf6b16"/><rect width="25" height="25" fill="#853409"/><rect x="25" y="25" width="25" height="25" fill="#853409"/>
+  </pattern>
+  <linearGradient id="hf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7ee03c"/><stop offset=".55" stop-color="#3fb81a"/><stop offset="1" stop-color="#2c9e01"/></linearGradient>
+  <g id="palm">
+    <g stroke="#5c3a00" stroke-width="2.5">
+      <rect x="-7" y="-14" width="14" height="16" rx="4" fill="#c88a10"/><rect x="-6.5" y="-27" width="13" height="14" rx="4" fill="#b47a00"/>
+      <rect x="-6" y="-40" width="12" height="14" rx="4" fill="#c88a10"/><rect x="-5" y="-53" width="11" height="14" rx="4" fill="#b47a00"/>
+      <rect x="-4" y="-66" width="11" height="14" rx="4" fill="#c88a10"/><rect x="-3" y="-79" width="10" height="14" rx="4" fill="#b47a00"/>
+      <rect x="-2" y="-92" width="10" height="14" rx="4" fill="#c88a10"/><rect x="-1" y="-104" width="9" height="13" rx="4" fill="#b47a00"/>
+    </g>
+    <g stroke="#155c08" stroke-width="2.5" stroke-linejoin="round">
+      <path d="M4 -106 L-44 -96 L-30 -110 L-52 -118 L-14 -122Z" fill="#46b81c"/>
+      <path d="M4 -106 L50 -94 L38 -110 L58 -116 L20 -124Z" fill="#46b81c"/>
+      <path d="M4 -106 L-30 -76 L-28 -92 L-46 -86 L-14 -112Z" fill="#2f9a12"/>
+      <path d="M4 -106 L36 -74 L36 -92 L52 -84 L20 -112Z" fill="#2f9a12"/>
+      <path d="M4 -106 L-18 -140 L-4 -132 L0 -148 L12 -126Z" fill="#5fd02a"/>
+      <path d="M4 -106 L30 -138 L28 -124 L44 -128 L16 -110Z" fill="#5fd02a"/>
+    </g>
+    <circle cx="-2" cy="-102" r="5" fill="#8a5200" stroke="#3d2400" stroke-width="2"/><circle cx="9" cy="-100" r="5" fill="#8a5200" stroke="#3d2400" stroke-width="2"/>
+  </g>
+  <g id="sun">
+    <path d="M0 2 V-34" stroke="#1d7a10" stroke-width="4"/>
+    <path d="M0 -14 C-10 -22 -16 -16 -16 -12 C-8 -10 -4 -12 0 -14Z M0 -20 C10 -28 16 -22 16 -18 C8 -16 4 -18 0 -20Z" fill="#3fbf1c" stroke="#155c08" stroke-width="1.5"/>
+    <g fill="#ffd21f" stroke="#a86200" stroke-width="1.5">
+      <ellipse cx="0" cy="-54" rx="4.5" ry="8"/><ellipse cx="0" cy="-34" rx="4.5" ry="8"/><ellipse cx="-10" cy="-44" rx="8" ry="4.5"/><ellipse cx="10" cy="-44" rx="8" ry="4.5"/>
+      <ellipse cx="-7" cy="-51" rx="4.5" ry="7" transform="rotate(-45 -7 -51)"/><ellipse cx="7" cy="-51" rx="4.5" ry="7" transform="rotate(45 7 -51)"/>
+      <ellipse cx="-7" cy="-37" rx="4.5" ry="7" transform="rotate(45 -7 -37)"/><ellipse cx="7" cy="-37" rx="4.5" ry="7" transform="rotate(-45 7 -37)"/>
+    </g>
+    <circle cx="0" cy="-44" r="6.5" fill="#7a3d0a" stroke="#3d1c00" stroke-width="1.5"/>
+  </g>
+</defs>
+<g transform="translate(0 100)">
+  <!-- дальние холмы: заливка без обводки по краям, контур — отдельной линией сверху -->
+  <path d="M0 150 C120 128 260 92 380 138 S640 182 800 132 S1100 82 1220 136 S1480 172 1600 150 V300 H0Z" fill="url(#hf)"/>
+  <path id="hl" d="M0 150 C120 128 260 92 380 138 S640 182 800 132 S1100 82 1220 136 S1480 172 1600 150" fill="none" stroke="#1d6a0a" stroke-width="4"/>
+  <use xlink:href="#hl" x="-1600"/><use xlink:href="#hl" x="1600"/>
+  <path d="M30 170 C140 150 300 152 420 170 M820 162 C960 136 1120 128 1250 158" fill="none" stroke="#9ce94d" stroke-width="5" stroke-linecap="round" opacity=".7"/>
+  <use xlink:href="#palm" transform="translate(250 108)"/>
+  <use xlink:href="#palm" transform="translate(1160 116)"/>
+  <use xlink:href="#palm" transform="translate(1226 138) scale(.8)"/>
+  <!-- ближняя земля: клетка и травяной край -->
+  <path d="M0 222 C160 196 330 196 480 216 S800 242 960 218 S1280 192 1440 212 S1560 228 1600 222 V300 H0Z" fill="url(#chk)"/>
+  <g id="gl">
+    <path d="M0 222 C160 196 330 196 480 216 S800 242 960 218 S1280 192 1440 212 S1560 228 1600 222" fill="none" stroke="#155c08" stroke-width="30"/>
+    <path d="M0 222 C160 196 330 196 480 216 S800 242 960 218 S1280 192 1440 212 S1560 228 1600 222" fill="none" stroke="#3fbf1c" stroke-width="22"/>
+    <path d="M0 214 C160 188 330 188 480 208 S800 234 960 210 S1280 184 1440 204 S1560 220 1600 214" fill="none" stroke="#9ce94d" stroke-width="6"/>
+  </g>
+  <use xlink:href="#gl" x="-1600"/><use xlink:href="#gl" x="1600"/>
+  <use xlink:href="#sun" transform="translate(640 214)"/>
+  <use xlink:href="#sun" transform="translate(676 220) scale(.8)"/>
+  <use xlink:href="#sun" transform="translate(1380 206)"/>
+</g>
+</svg>
