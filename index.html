@@ -85,53 +85,75 @@ try { var t = JSON.parse(localStorage.getItem("unitka.theme")); if (/^(light|dar
 [data-theme="comic"] nav.tabs button[aria-current="page"]{background:#111;color:#ffe14d}
 [data-theme="comic"] .toast{background:var(--accent);color:#fff;border:2.5px solid #111;box-shadow:4px 4px 0 #111}
 [data-theme="comic"] input[type=range]::-webkit-slider-thumb{border:3px solid #111;border-radius:7px;box-shadow:2px 2px 0 #111}
-/* «Far Cry 3» — весёлая, по обложке игры: день на острове — шапка синим небом с облаками, белое «потрёпанное» название и красная «Ю»,
-   как красная «3» в логотипе; под шапкой полоса бирюзового моря с пеной, страница — песок пляжа с зерном, сверху вкладки баннер-обложка (картинка NeuralBox), фон — та же сцена размытая;
-   акцент — красный (цифра «3», майка Вааса), шапка списка — синее небо; рваные края у кнопок и выбранного; заголовки Rubik Dirt, текст Roboto Condensed */
+/* «Far Cry 3» — весёлая, погружение (22.10.2026; картинки NeuralBox — Код\unitka\farcry): страница — стена хижины с мачете, ножами, топором,
+   автоматом, масками и черепами (fc3-wall.webp, чётко, без размытия); сверху вкладки — баннер-обложка (fc3-hero.webp: лагерь на пляже, череп на шесте,
+   мачете в песке, тот самый тип с пистолетом) с белым «ЮНИТКА» и вопросом про безумие; под шапкой и по низу баннера — красная лента татау;
+   карточки — листы дневника (старая бумага, обожжённые края); черепа у заголовков и на ползунке, прицел вместо курсора; Rubik Dirt + Roboto Condensed.
+   Картинки грузятся, только когда выбрана эта тема */
 :root[data-theme="farcry"]{
   color-scheme: light;
-  --bg:#ead9b3; --surface:#fdf8ec; --surface-2:#f3e8cf; --ink:#1e1912; --ink-2:#5a4e3b; --muted:#887a60;
-  --line:#e6d8b8; --ring:rgba(80,60,25,.18); --accent:#d42a2a; --accent-wash:#fbe0d9;
-  --good:#2b7a2f; --good-bg:#e1efd5; --bad:#b8321f; --bad-bg:#f8e0d8; --warn-bg:#f7eacb; --mid:#9a6a00;
-  --s1:#2a6db8; --s2:#d42a2a; --s3:#2b8a3e; --s4:#e0a21a; --s5:#2bb5c0; --s6:#2b7a2f;
-  --shadow:0 4px 14px rgba(90,65,25,.14); --r:6px;
+  --bg:#1d140c; --surface:#efe2c0; --surface-2:#e3d1a6; --ink:#21170c; --ink-2:#5b4529; --muted:#8a7350;
+  --line:#d3bd8e; --ring:rgba(60,38,12,.3); --accent:#c8241d; --accent-wash:#f1cdbf;
+  --good:#2c6a26; --good-bg:#dcead0; --bad:#b0221a; --bad-bg:#f4d5cb; --warn-bg:#f1e1b8; --mid:#8f5d00;
+  --s1:#2a6db8; --s2:#c8241d; --s3:#2c7a32; --s4:#d99a18; --s5:#2bb5c0; --s6:#2c6a26;
+  --shadow:0 12px 28px rgba(0,0,0,.55),0 2px 0 rgba(0,0,0,.35); --r:3px;
   --font:"Roboto Condensed",system-ui,sans-serif; --font-h:"Rubik Dirt","Roboto Condensed",system-ui,sans-serif;
   --rough:polygon(0 7%,4% 0,52% 4%,97% 0,100% 14%,99% 58%,100% 93%,95% 100%,48% 96%,3% 100%,0 86%,1% 40%);
-  --sky:linear-gradient(180deg,#0f3570 0%,#1f5aa6 55%,#3d86cc 100%);
+  --paper:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .42 0 0 0 0 .28 0 0 0 0 .1 0 0 0 .2 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  --burn:inset 0 0 0 1px rgba(70,40,10,.25),inset 0 0 38px rgba(110,62,18,.45);
+  --aim:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Cg fill='none' stroke='%23fff' stroke-width='4' opacity='.85'%3E%3Ccircle cx='16' cy='16' r='9'/%3E%3Cpath d='M16 2v8M16 22v8M2 16h8M22 16h8'/%3E%3C/g%3E%3Cg fill='none' stroke='%23c8241d' stroke-width='2'%3E%3Ccircle cx='16' cy='16' r='9'/%3E%3Cpath d='M16 2v8M16 22v8M2 16h8M22 16h8'/%3E%3C/g%3E%3Ccircle cx='16' cy='16' r='1.6' fill='%23c8241d'/%3E%3C/svg%3E") 16 16,crosshair;
+  --fct:clamp(42px,6.8vw,96px); --fcp:min(2.6vw,30px); --fcl:min(3.6vw,42px);
 }
-[data-theme="farcry"] body{background-color:#ead9b3;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .38 0 0 0 0 .27 0 0 0 0 .1 0 0 0 .26 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"),
-    radial-gradient(1400px 520px at 50% -220px,rgba(255,255,255,.45),transparent 70%)}
-/* картинка темы — NeuralBox (Nano Banana Pro, 22.10.2026, Код\unitka\farcry): фон страницы — та же сцена, размытая и осветлённая под песок;
-   сверху каждой вкладки — баннер как обложка диска, с белым «ЮНИТКА» как надпись на обложке. Грузится, только когда выбрана тема */
-[data-theme="farcry"] body::before{content:"";position:fixed;inset:-24px;z-index:-1;pointer-events:none;
-  background:linear-gradient(rgba(236,221,186,.66),rgba(236,221,186,.66)),url("farcry-bg.webp") 70% 40%/cover;filter:blur(12px) saturate(1.1)}
-[data-theme="farcry"] main::before{content:"ЮНИТКА";display:flex;align-items:flex-start;box-sizing:border-box;height:clamp(180px,27vw,330px);margin:0 0 16px;padding:3.2% 0 0 4%;
-  border-radius:var(--r);background:url("farcry-bg.webp") 72% 30%/cover;box-shadow:0 10px 26px rgba(40,25,5,.3);
-  font:400 clamp(40px,6.4vw,86px)/1 var(--font-h);letter-spacing:.02em;color:#fff;text-shadow:0 3px 0 rgba(0,0,0,.35),0 0 24px rgba(0,0,0,.45)}
-[data-theme="farcry"] header{border-bottom:0;background:radial-gradient(260px 60px at 78% 118%,rgba(255,255,255,.8),transparent 70%),radial-gradient(200px 40px at 61% 125%,rgba(255,255,255,.6),transparent 70%),
-  radial-gradient(340px 70px at 94% 100%,rgba(255,255,255,.55),transparent 70%),radial-gradient(240px 50px at 30% 130%,rgba(255,255,255,.35),transparent 70%),var(--sky)}
-[data-theme="farcry"] header::after{content:"";position:absolute;left:0;right:0;top:100%;height:12px;pointer-events:none;
-  background:linear-gradient(180deg,#1f9fb0 0,#3fc6cc 40%,#c4f1ee 62%,#fffaf0 76%,rgba(234,217,179,0) 100%)}
+[data-theme="farcry"] body{background:#1d140c;cursor:var(--aim)}
+[data-theme="farcry"] body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:radial-gradient(ellipse at 50% 42%,transparent 42%,rgba(0,0,0,.6) 100%),url("fc3-wall.webp") center/cover}
+[data-theme="farcry"] :is(input,textarea){cursor:text} [data-theme="farcry"] :is(select,input[type=range]){cursor:pointer}
+[data-theme="farcry"] .item{cursor:var(--aim)}
+/* шапка — тёмные доски, под ней лента татау */
+[data-theme="farcry"] header{background:linear-gradient(180deg,#0e0905,#1c120a);border-bottom:0;box-shadow:0 6px 18px rgba(0,0,0,.5)}
+[data-theme="farcry"] header::after{content:"";position:absolute;left:0;right:0;top:100%;height:20px;pointer-events:none;
+  background:url("fc3-tatau-red.png") 0 0/auto 20px repeat-x;filter:drop-shadow(0 2px 2px rgba(0,0,0,.7))}
 [data-theme="farcry"] .brand{font-size:23px;letter-spacing:.02em}
-[data-theme="farcry"] .brand span{color:#fff;text-transform:uppercase;text-shadow:0 2px 0 rgba(0,0,0,.35),0 0 12px rgba(0,0,0,.25)}
+[data-theme="farcry"] .brand span{color:#f4efe4;text-transform:uppercase;text-shadow:0 2px 0 rgba(0,0,0,.6)}
 [data-theme="farcry"] .brand i{background:none;width:auto;height:auto;border-radius:0;font-family:var(--font-h);font-size:31px;line-height:1;color:var(--accent);
-  text-shadow:-1px -1px 0 #3a0808,1px -1px 0 #3a0808,-1px 1px 0 #3a0808,1px 1px 0 #3a0808,0 3px 0 rgba(0,0,0,.3);transform:rotate(-4deg)}
-[data-theme="farcry"] nav.tabs button[aria-current="page"]{background:transparent;color:var(--accent);box-shadow:inset 0 -3px 0 var(--accent);border-radius:0}
+  text-shadow:-1px -1px 0 #3a0808,1px -1px 0 #3a0808,-1px 1px 0 #3a0808,1px 1px 0 #3a0808,0 3px 0 rgba(0,0,0,.4);transform:rotate(-4deg)}
+/* баннер-обложка сверху вкладки + вопрос Вааса */
+[data-theme="farcry"] main{position:relative;padding-top:32px}
+[data-theme="farcry"] main::before{content:"ЮНИТКА";display:flex;align-items:flex-start;box-sizing:border-box;height:clamp(190px,30vw,380px);margin:0 0 30px;padding:var(--fcp) 0 0 var(--fcl);
+  border-radius:var(--r);background:url("fc3-tatau-red.png") 0 100%/auto 18px repeat-x,linear-gradient(180deg,rgba(0,0,0,.3),transparent 38%),url("fc3-hero.webp") 60% 32%/cover;
+  box-shadow:0 14px 34px rgba(0,0,0,.6),0 0 0 2px #0e0905;
+  font:400 var(--fct)/1 var(--font-h);letter-spacing:.02em;color:#f4efe4;text-shadow:0 4px 0 rgba(0,0,0,.45),0 0 26px rgba(0,0,0,.55)}
+[data-theme="farcry"] main::after{content:"«Знаешь, что такое безумие?»";position:absolute;pointer-events:none;
+  left:calc(16px + var(--fcl) + 4px);top:calc(32px + var(--fcp) + var(--fct) + 10px);
+  font:italic 700 clamp(14px,1.7vw,22px)/1.2 var(--font);color:#f4efe4;text-shadow:0 2px 0 rgba(0,0,0,.6),0 0 14px rgba(0,0,0,.7)}
+/* листы дневника */
+[data-theme="farcry"] :is(.card,details.sec,.search,.sumtot,.tmenu,.ac,.tour-tip,.seg,.inp,select.sel,.btn,.chip,.themeb,.namebar input,.lock input,.shurl){background-color:var(--surface);background-image:var(--paper)}
+[data-theme="farcry"] :is(.card,details.sec,.search,.sumtot){border:0;box-shadow:var(--burn),var(--shadow)}
+[data-theme="farcry"] :is(.btn,.chip,.themeb,.seg,.inp,select.sel){border:1px solid rgba(60,38,12,.38)}
 [data-theme="farcry"] :is(.btn.pri,.chip.on,.seg button[aria-pressed="true"]){background:var(--accent);color:#fff;border-color:transparent;clip-path:var(--rough);box-shadow:none;font-weight:700}
-[data-theme="farcry"] .seg{background:var(--surface);border:1px solid var(--ring)}
-[data-theme="farcry"] :is(.card,details.sec){border-color:rgba(80,60,25,.16)}
-[data-theme="farcry"] :is(.h,.tmenu .tgrp){text-transform:uppercase;letter-spacing:.06em}
-[data-theme="farcry"] .lhead{background:#1f5aa6;color:#fff} [data-theme="farcry"] .lhead span small{color:rgba(255,255,255,.75)}
+[data-theme="farcry"] .seg button:not([aria-pressed="true"]){background:transparent}
+[data-theme="farcry"] .lhead{background:#21160c;color:#efe2c0;top:calc(var(--hdr,57px) + 16px)} [data-theme="farcry"] .lhead span small{color:#c9ad74}
+[data-theme="farcry"] :is(.detail,.res){top:calc(var(--hdr,57px) + 26px)}
+[data-theme="farcry"] .item:hover{background:rgba(120,80,30,.1)}
 [data-theme="farcry"] .item.sel{background:var(--accent-wash);box-shadow:inset 4px 0 0 var(--accent)}
-[data-theme="farcry"] .kpi{background:#f6ecd5;border:1px solid var(--line)}
+[data-theme="farcry"] .kpi{background:rgba(110,70,20,.08);border:1px dashed rgba(90,55,15,.42)}
 [data-theme="farcry"] :is(.kpi b,.sumtot b){font-weight:700}
-[data-theme="farcry"] .detail .title{font-size:20px}
-[data-theme="farcry"] input[type=range]::-webkit-slider-thumb{background:var(--accent);border-color:#fff;border-radius:3px;transform:rotate(45deg)}
+[data-theme="farcry"] .detail .title{font-size:21px}
+[data-theme="farcry"] :is(.h,.tmenu .tgrp){text-transform:uppercase;letter-spacing:.06em}
+[data-theme="farcry"] .h{padding-left:24px;background:url("fc3-skull-red.png") 0 50%/auto 17px no-repeat}
+[data-theme="farcry"] details.sec>summary{padding-left:44px;background:url("fc3-skull-red.png") 16px 50%/auto 18px no-repeat}
+/* текст прямо на стене — светлый */
+[data-theme="farcry"] :is(.mprow,.perline){color:#efe2c0;text-shadow:0 1px 2px #000,0 0 8px rgba(0,0,0,.8)}
+[data-theme="farcry"] .mprow .seg{text-shadow:none}
+/* ползунок — череп, дорожка — верёвка */
+[data-theme="farcry"] input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:3px;background:repeating-linear-gradient(90deg,#6b4a22 0 6px,#8a6430 6px 12px)}
+[data-theme="farcry"] input[type=range]::-webkit-slider-thumb{width:30px;height:30px;margin-top:-12px;border-radius:50%;border:2px solid #1d140c;
+  background:#c8241d url("fc3-skull.png") 50% 45%/auto 16px no-repeat;box-shadow:0 2px 6px rgba(0,0,0,.5)}
 [data-theme="farcry"] .toast{background:var(--accent);color:#fff;clip-path:var(--rough)}
+[data-theme="farcry"] .mini{background:#1d140c;color:#efe2c0;box-shadow:0 -2px 0 #c8241d,0 6px 20px rgba(0,0,0,.5)}
 @media (min-width: 861px){
-  [data-theme="farcry"] nav.tabs button{color:rgba(255,255,255,.9)}
-  [data-theme="farcry"] nav.tabs button[aria-current="page"]{color:#fff;background:rgba(255,255,255,.16);border-radius:6px 6px 0 0}
+  [data-theme="farcry"] nav.tabs button{color:rgba(244,239,228,.88)}
+  [data-theme="farcry"] nav.tabs button[aria-current="page"]{color:#fff;background:rgba(200,36,29,.22);box-shadow:inset 0 -3px 0 var(--accent);border-radius:4px 4px 0 0}
 }
 /* «Тетрадь» — спокойная: лист в клетку, синие «чернила», заголовки и цифры с засечками, вместо теней — тонкие линии, шрифты PT Sans + PT Serif */
 :root[data-theme="paper"]{
@@ -442,10 +464,16 @@ a.btn{text-decoration:none;color:inherit}
   .back{display:inline-flex}
 }
 @media (max-width: 860px){
-  [data-theme="farcry"] nav.tabs{border-top:3px solid #3fc6cc}
-  [data-theme="farcry"] main::before{background-image:url("farcry-hero-m.webp");background-position:center;height:46vw;margin:-2px 0 12px;
-    justify-content:flex-end;padding:4% 5% 0 0;font-size:9vw}
-  [data-theme="farcry"] body::before{background-image:linear-gradient(rgba(236,221,186,.66),rgba(236,221,186,.66)),url("farcry-hero-m.webp")}
+  [data-theme="farcry"] nav.tabs{background:linear-gradient(180deg,#1c120a,#0e0905);border-top:0}
+  [data-theme="farcry"] nav.tabs::before{content:"";position:absolute;left:0;right:0;bottom:100%;height:14px;pointer-events:none;background:url("fc3-tatau-red.png") 0 100%/auto 14px repeat-x}
+  [data-theme="farcry"] nav.tabs button{color:#e9dcbc}
+  [data-theme="farcry"] nav.tabs button[aria-current="page"]{color:#ff6a5a;box-shadow:inset 0 -3px 0 #c8241d;border-radius:0}
+  [data-theme="farcry"] body::before{background-image:radial-gradient(ellipse at 50% 42%,transparent 42%,rgba(0,0,0,.6) 100%),url("fc3-wall-m.webp")}
+  [data-theme="farcry"] main{padding-top:26px}
+  [data-theme="farcry"] main::before{height:48vw;margin:0 0 22px;font-size:8vw;
+    background:url("fc3-tatau-red.png") 0 100%/auto 14px repeat-x,linear-gradient(180deg,rgba(0,0,0,.3),transparent 40%),url("fc3-hero-m.webp") center/cover}
+  [data-theme="farcry"] main::after{top:calc(26px + var(--fcp) + 8vw + 6px);left:calc(12px + var(--fcl) + 2px);max-width:40%;font-size:12px}
+  [data-theme="farcry"] .detail-wrap.open .detail{box-shadow:var(--burn)}
   [data-theme="dusk"] nav.tabs{background:rgba(19,27,30,.86);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
   [data-theme="dusk"] .detail-wrap.open .backbar{background:var(--solid)}
   [data-theme="comic"] nav.tabs{border-top:3px solid #111}
@@ -677,7 +705,7 @@ const TH = {
   dark: ["Тёмная", "dark", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/></svg>'],
   /* весёлые */
   comic: ["Комикс", "comic", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 2.5l2.2 4.6 5-1.4-2.3 4.6 4.3 3-5.2.8.4 5.2-4.4-3-4.4 3 .4-5.2-5.2-.8 4.3-3-2.3-4.6 5 1.4Z"/></svg>'],
-  farcry: ["Far Cry 3", "farcry", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"><path d="M11 21.5c0-5 .6-8.8 2.2-12"/><path d="M13.2 9.5C10.8 6.6 7 5.8 3.5 7.4c3.2-.3 6.4.6 9.7 2.1Z"/><path d="M13.2 9.5c.6-3.3 3.3-5.5 7-5.4-3 .9-5.2 2.8-7 5.4Z"/><path d="M13.2 9.5c-.5-3-2.3-5.3-4.8-6.4 1.8 1.8 3.4 3.8 4.8 6.4Z"/><path d="M13.2 9.5c3-.4 5.9 1 7.3 3.7-2.1-1.6-4.6-2.6-7.3-3.7Z"/></svg>'],
+  farcry: ["Far Cry 3", "farcry", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3a7 7 0 0 0-7 7c0 2.4 1.2 4.3 3 5.4V18a1 1 0 0 0 1 1h1v2h4v-2h1a1 1 0 0 0 1-1v-2.6c1.8-1.1 3-3 3-5.4a7 7 0 0 0-7-7Z"/><circle cx="9.3" cy="10.6" r="1.5" fill="currentColor"/><circle cx="14.7" cy="10.6" r="1.5" fill="currentColor"/></svg>'],
   /* спокойные */
   paper: ["Тетрадь", "paper", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"><path d="M4 20h4.5L19.5 9 15 4.5 4 15.5Z"/><path d="M13 6.5 17.5 11"/></svg>'],
   dusk: ["Сумерки", "dusk", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6.5 13.5a5.5 5.5 0 0 1 11 0"/><path d="M3 13.5h18M6 17h12M9 20.5h6M12 3.5v2.5M4.6 6.6l1.7 1.7M19.4 6.6l-1.7 1.7"/></svg>']
@@ -688,7 +716,7 @@ const SWATCH = {          /* кружки тем — векторные, без 
   beige: '<svg class="sw" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8.6" fill="#f2eee5" stroke="#8a8a85" stroke-width="1.2"/><circle cx="10" cy="10" r="3.6" fill="#c2613f"/></svg>',
   dark: '<svg class="sw" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8.6" fill="#1a1a19" stroke="#8a8a85" stroke-width="1.2"/></svg>',
   comic: '<svg class="sw" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8.2" fill="#ffe14d" stroke="#111" stroke-width="2"/><circle cx="10" cy="10" r="3.6" fill="#ff2e7e" stroke="#111" stroke-width="1.2"/></svg>',
-  farcry: '<svg class="sw" viewBox="0 0 20 20"><defs><linearGradient id="swFc" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1f5aa6"/><stop offset=".5" stop-color="#5b9ad6"/><stop offset=".5" stop-color="#3fc6cc"/><stop offset=".64" stop-color="#3fc6cc"/><stop offset=".64" stop-color="#ead9b3"/></linearGradient></defs><circle cx="10" cy="10" r="8.6" fill="url(#swFc)" stroke="#8a8a85" stroke-width="1.2"/><path d="M12.2 4.6h2.6l-1.3 1.6c.9.2 1.4.9 1.4 1.7 0 1.1-.9 1.8-2.1 1.8-.5 0-1-.1-1.3-.3l.3-.9c.3.2.6.2.9.2.5 0 .9-.3.9-.8s-.4-.8-1-.8h-.5l1.1-1.4h-1z" fill="#d42a2a" stroke="#2a0606" stroke-width=".35"/></svg>',
+  farcry: '<svg class="sw" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8.6" fill="#2a1d12" stroke="#c8241d" stroke-width="1.6"/><path d="M10 4.6a4.2 4.2 0 0 0-4.2 4.2c0 1.4.7 2.6 1.8 3.2v1.6h1v1.2h2.8V14h1v-1.6c1.1-.6 1.8-1.8 1.8-3.2A4.2 4.2 0 0 0 10 4.6Z" fill="#efe2c0"/><circle cx="8.4" cy="9.2" r=".9" fill="#2a1d12"/><circle cx="11.6" cy="9.2" r=".9" fill="#2a1d12"/></svg>',
   paper: '<svg class="sw" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8.6" fill="#fbfaf5" stroke="#8a8a85" stroke-width="1.2"/><path d="M4.5 7.5h11M3.6 11h12.8M4.5 14.5h11M7.5 2.5v15M12.5 2.5v15" stroke="#2c4fb3" stroke-width=".8" opacity=".45"/></svg>',
   dusk: '<svg class="sw" viewBox="0 0 20 20"><defs><linearGradient id="swDusk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2d4c50"/><stop offset="1" stop-color="#3b3653"/></linearGradient></defs><circle cx="10" cy="10" r="8.6" fill="url(#swDusk)" stroke="#8a8a85" stroke-width="1.2"/><circle cx="10" cy="10" r="3.4" fill="#7fc8b4"/></svg>'
 };
