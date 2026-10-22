@@ -86,7 +86,7 @@ try { var t = JSON.parse(localStorage.getItem("unitka.theme")); if (/^(light|dar
 [data-theme="comic"] .toast{background:var(--accent);color:#fff;border:2.5px solid #111;box-shadow:4px 4px 0 #111}
 [data-theme="comic"] input[type=range]::-webkit-slider-thumb{border:3px solid #111;border-radius:7px;box-shadow:2px 2px 0 #111}
 /* «Far Cry 3» — весёлая, по обложке игры: день на острове — шапка синим небом с облаками, белое «потрёпанное» название и красная «Ю»,
-   как красная «3» в логотипе; под шапкой полоса бирюзового моря с пеной, страница — песок пляжа с зерном, по верхним углам зелёные пальмы;
+   как красная «3» в логотипе; под шапкой полоса бирюзового моря с пеной, страница — песок пляжа с зерном, сверху вкладки баннер-обложка (картинка NeuralBox), фон — та же сцена размытая;
    акцент — красный (цифра «3», майка Вааса), шапка списка — синее небо; рваные края у кнопок и выбранного; заголовки Rubik Dirt, текст Roboto Condensed */
 :root[data-theme="farcry"]{
   color-scheme: light;
@@ -102,10 +102,13 @@ try { var t = JSON.parse(localStorage.getItem("unitka.theme")); if (/^(light|dar
 [data-theme="farcry"] body{background-color:#ead9b3;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .38 0 0 0 0 .27 0 0 0 0 .1 0 0 0 .26 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"),
     radial-gradient(1400px 520px at 50% -220px,rgba(255,255,255,.45),transparent 70%)}
-[data-theme="farcry"] body::before,[data-theme="farcry"] body::after{content:"";position:absolute;z-index:-1;top:calc(var(--hdr,57px) + 8px);width:300px;height:240px;pointer-events:none;
-  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 240'%3E%3Cpath d='M0 0C120-6 220 14 300 56 200 32 110 28 0 22Z' fill='%232b8a39'/%3E%3Cpath d='M0 0C90 10 180 50 260 130 170 80 90 52 0 34Z' fill='%231e6b2b'/%3E%3Cpath d='M0 0C70 22 140 80 190 180 130 100 70 62 0 44Z' fill='%2317541f'/%3E%3Cpath d='M0 0C60 40 110 110 130 220 95 130 55 80 0 58Z' fill='%232b8a39'/%3E%3Cpath d='M0 0C30 50 50 120 46 210 34 130 18 84 0 70Z' fill='%231e6b2b'/%3E%3Cg fill='none' stroke='%2378c25a' stroke-width='1.6' opacity='.7'%3E%3Cpath d='M0 0C120-2 220 18 300 56'/%3E%3Cpath d='M0 0C90 14 180 54 260 130'/%3E%3Cpath d='M0 0C70 26 140 84 190 180'/%3E%3Cpath d='M0 0C60 44 110 114 130 220'/%3E%3Cpath d='M0 0C30 54 50 124 46 210'/%3E%3C/g%3E%3C/svg%3E") no-repeat left top/contain}
-[data-theme="farcry"] body::before{left:0;width:min(320px,max(70px,calc((100vw - 1180px) / 2 + 30px)));height:auto;aspect-ratio:300/240}
-[data-theme="farcry"] body::after{right:0;transform:scaleX(-1);width:min(250px,max(56px,calc((100vw - 1180px) / 2 + 10px)));height:auto;aspect-ratio:300/240}
+/* картинка темы — NeuralBox (Nano Banana Pro, 22.10.2026, Код\unitka\farcry): фон страницы — та же сцена, размытая и осветлённая под песок;
+   сверху каждой вкладки — баннер как обложка диска, с белым «ЮНИТКА» как надпись на обложке. Грузится, только когда выбрана тема */
+[data-theme="farcry"] body::before{content:"";position:fixed;inset:-24px;z-index:-1;pointer-events:none;
+  background:linear-gradient(rgba(236,221,186,.66),rgba(236,221,186,.66)),url("farcry-bg.webp") 70% 40%/cover;filter:blur(12px) saturate(1.1)}
+[data-theme="farcry"] main::before{content:"ЮНИТКА";display:flex;align-items:flex-start;box-sizing:border-box;height:clamp(180px,27vw,330px);margin:0 0 16px;padding:3.2% 0 0 4%;
+  border-radius:var(--r);background:url("farcry-bg.webp") 72% 30%/cover;box-shadow:0 10px 26px rgba(40,25,5,.3);
+  font:400 clamp(40px,6.4vw,86px)/1 var(--font-h);letter-spacing:.02em;color:#fff;text-shadow:0 3px 0 rgba(0,0,0,.35),0 0 24px rgba(0,0,0,.45)}
 [data-theme="farcry"] header{border-bottom:0;background:radial-gradient(260px 60px at 78% 118%,rgba(255,255,255,.8),transparent 70%),radial-gradient(200px 40px at 61% 125%,rgba(255,255,255,.6),transparent 70%),
   radial-gradient(340px 70px at 94% 100%,rgba(255,255,255,.55),transparent 70%),radial-gradient(240px 50px at 30% 130%,rgba(255,255,255,.35),transparent 70%),var(--sky)}
 [data-theme="farcry"] header::after{content:"";position:absolute;left:0;right:0;top:100%;height:12px;pointer-events:none;
@@ -440,7 +443,9 @@ a.btn{text-decoration:none;color:inherit}
 }
 @media (max-width: 860px){
   [data-theme="farcry"] nav.tabs{border-top:3px solid #3fc6cc}
-  [data-theme="farcry"] body::before{width:150px} [data-theme="farcry"] body::after{width:110px}
+  [data-theme="farcry"] main::before{background-image:url("farcry-hero-m.webp");background-position:center;height:46vw;margin:-2px 0 12px;
+    justify-content:flex-end;padding:4% 5% 0 0;font-size:9vw}
+  [data-theme="farcry"] body::before{background-image:linear-gradient(rgba(236,221,186,.66),rgba(236,221,186,.66)),url("farcry-hero-m.webp")}
   [data-theme="dusk"] nav.tabs{background:rgba(19,27,30,.86);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
   [data-theme="dusk"] .detail-wrap.open .backbar{background:var(--solid)}
   [data-theme="comic"] nav.tabs{border-top:3px solid #111}
