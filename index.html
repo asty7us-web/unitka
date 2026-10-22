@@ -14,10 +14,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <script>/* шрифты тем — Google Fonts, грузятся только когда тема выбрана */
 var TFONT = { comic: "Rubik:wght@400;500;600;700;800&family=Unbounded:wght@600;800", jim: "Rubik:wght@400;500;600;700;800&family=Rubik+Wet+Paint&family=Press+Start+2P", farcry: "Rubik+Dirt&family=Roboto+Condensed:wght@400;500;600;700",
-  paper: "PT+Sans:wght@400;700&family=PT+Serif:wght@400;700", dusk: "Nunito:wght@400;500;600;700;800" };
+  paper: "PT+Sans:wght@400;700&family=PT+Serif:wght@400;700", dusk: "Nunito:wght@400;500;600;700;800",
+  sonic: "Exo+2:ital,wght@0,400;0,500;0,600;0,700;0,800;1,800;1,900&family=Russo+One" };
 function themeFont(t) { if (!TFONT[t] || document.getElementById("tf-" + t)) return; var l = document.createElement("link"); l.id = "tf-" + t; l.rel = "stylesheet";
   l.href = "https://fonts.googleapis.com/css2?family=" + TFONT[t] + "&display=swap"; document.head.appendChild(l); }
-try { var t = JSON.parse(localStorage.getItem("unitka.theme")); if (/^(light|dark|beige|comic|farcry|jim|paper|dusk)$/.test(t)) { document.documentElement.setAttribute("data-theme", t); themeFont(t); } } catch (e) {}</script>
+try { var t = JSON.parse(localStorage.getItem("unitka.theme")); if (/^(light|dark|beige|comic|farcry|jim|sonic|paper|dusk)$/.test(t)) { document.documentElement.setAttribute("data-theme", t); themeFont(t); } } catch (e) {}</script>
 <style>
 :root{
   color-scheme: light;
@@ -224,6 +225,108 @@ try { var t = JSON.parse(localStorage.getItem("unitka.theme")); if (/^(light|dar
   background:radial-gradient(circle at 35% 32%,#f2ffc8 0 12%,#9fe83a 34%,#4c9a10 78%);box-shadow:0 0 12px rgba(122,211,33,.9)}
 [data-theme="jim"] .toast{background:var(--slime);color:#1a1022;border:3px solid #1a1022;box-shadow:4px 4px 0 #1a1022}
 [data-theme="jim"] .mini{background:#3a1859;color:#fff3c4;border:3px solid #1a1022}
+/* «Соник» — весёлая, по мотивам 16-битных платформеров с синим небом (22.10.2026; пейзаж баннера — NeuralBox Nano Banana Pro, Код\unitka\sonic):
+   фон — небо, облака в два слоя (дальние плывут медленнее ближних, при прокрутке облака и кольца уходят вверх с разной скоростью — параллакс),
+   внизу холмы с клетчатой землёй, пальмами и подсолнухами (векторные sonic-clouds.svg, sonic-hills.svg); сверху вкладки баннер-пейзаж с золотым
+   «ЮНИТКА», над ним крутятся и блестят кольца, по нему пробегают линии скорости; под шапкой — земля в клетку с травой. Карточки — игровые панели
+   с тёмно-синей обводкой и тенью, главные кнопки золотые, заголовки с кольцом, ползунок — кольцо. Шрифты Russo One + Exo 2.
+   Движение — только transform и opacity, на своих слоях #sxDeco и #sxRings (не предки меню и итога, их создаёт sonicDeco() только в этой теме);
+   prefers-reduced-motion — без движения. Персонажей нет — свой рисунок по мотивам */
+:root[data-theme="sonic"]{
+  color-scheme: light;
+  --bg:#1d5fe6; --surface:#ffffff; --surface-2:#edf3ff; --ink:#0a1a4a; --ink-2:#34508e; --muted:#6a7fae;
+  --line:#d7e3fb; --ring:#0a1a4a; --accent:#1d5fe6; --accent-wash:#dde8ff;
+  --good:#12843a; --good-bg:#dcf4e2; --bad:#d6262b; --bad-bg:#ffdfe0; --warn-bg:#fff1bd; --mid:#a86200;
+  --s1:#1d5fe6; --s2:#e8262b; --s3:#2fae4a; --s4:#ffb400; --s5:#35c2ff; --s6:#12843a;
+  --shadow:0 5px 0 #0a1a4a; --r:18px;
+  --font:"Exo 2",system-ui,sans-serif; --font-h:"Russo One","Exo 2",system-ui,sans-serif;
+  --ol:-2px -2px 0 #0a1a4a,2px -2px 0 #0a1a4a,-2px 2px 0 #0a1a4a,2px 2px 0 #0a1a4a,0 -2px 0 #0a1a4a,0 2px 0 #0a1a4a,-2px 0 0 #0a1a4a,2px 0 0 #0a1a4a;
+  --ol3:-3px -3px 0 #0a1a4a,3px -3px 0 #0a1a4a,-3px 3px 0 #0a1a4a,3px 3px 0 #0a1a4a,0 -3px 0 #0a1a4a,0 3px 0 #0a1a4a,-3px 0 0 #0a1a4a,3px 0 0 #0a1a4a;
+  --ringi:radial-gradient(circle closest-side,transparent 0 56%,#a35f00 58%,#ffcf26 67%,#fff3a6 76%,#ffc81e 86%,#b86d00 97%,transparent 100%);
+  --chk:conic-gradient(#853409 25%,#cf6b16 0 50%,#853409 0 75%,#cf6b16 0) 0 0/14px 14px;
+  --sbh:clamp(200px,30vw,380px); --st:clamp(44px,7vw,100px); --sp:min(2.6vw,30px); --sl:min(3.6vw,42px);
+}
+[data-theme="sonic"] body{background:#1d5fe6}
+[data-theme="sonic"] body::before{content:"";position:fixed;inset:0;z-index:-2;pointer-events:none;background:linear-gradient(180deg,#0046e0 0%,#0f6efa 42%,#5fb0ff 78%,#a8dcff 100%)}
+/* живой фон: облака (два слоя с разной скоростью), холмы, кольца по краям */
+#sxDeco{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+#sxDeco .sxp{position:absolute;inset:0}
+#sxDeco .sxc{position:absolute;left:0;will-change:transform}
+#sxDeco .far{top:4vh;height:156px;width:calc(100% + 960px);background:url("sonic-clouds.svg") 0 0/960px 156px repeat-x;opacity:.6;animation:sx-far 150s linear infinite}
+#sxDeco .near{top:15vh;height:260px;width:calc(100% + 1600px);background:url("sonic-clouds.svg") 0 0/1600px 260px repeat-x;animation:sx-near 80s linear infinite}
+@keyframes sx-far{to{transform:translateX(-960px)}}
+@keyframes sx-near{to{transform:translateX(-1600px)}}
+#sxDeco .sxh{position:absolute;left:0;right:0;bottom:0;height:clamp(170px,30vh,300px);background:url("sonic-hills.svg") 0 100%/auto 100% repeat-x}
+#sxDeco .sl{position:absolute;width:36px;height:36px;animation:sx-bob 3.4s ease-in-out infinite}
+@keyframes sx-bob{50%{transform:translateY(-14px)}}
+/* кольцо: крутится (scaleX), рядом вспыхивает звёздочка */
+:is(#sxDeco,#sxRings) .rg{display:block;width:100%;height:100%;background:var(--ringi);animation:sx-spin 1.5s linear infinite}
+:is(#sxDeco,#sxRings) .sl::after{content:"";position:absolute;top:-10%;right:-10%;width:48%;height:48%;background:#fff;opacity:0;
+  clip-path:polygon(50% 0,61% 39%,100% 50%,61% 61%,50% 100%,39% 61%,0 50%,39% 39%);animation:sx-tw 2.6s ease-in-out infinite;animation-delay:inherit}
+@keyframes sx-spin{0%,100%{transform:scaleX(1)}25%,75%{transform:scaleX(.14)}50%{transform:scaleX(-1)}}
+@keyframes sx-tw{0%,62%,100%{opacity:0;transform:scale(.3) rotate(0)}78%{opacity:1;transform:scale(1) rotate(45deg)}}
+/* над баннером: кольца дугой и линии скорости */
+#sxRings{position:absolute;left:16px;right:16px;top:34px;height:var(--sbh);border-radius:var(--r);overflow:hidden;pointer-events:none;z-index:1}
+#sxRings .sl{position:absolute;left:var(--x);width:clamp(18px,2.5vw,34px);height:clamp(18px,2.5vw,34px);animation:sx-bob2 2.4s ease-in-out infinite}
+@keyframes sx-bob2{50%{transform:translateY(-5px)}}
+#sxRings .sp{position:absolute;left:100%;height:3px;border-radius:2px;background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.95));opacity:0;animation:sx-dash 3.4s linear infinite}
+@keyframes sx-dash{0%{transform:translateX(0);opacity:0}4%{opacity:1}34%{transform:translateX(-2200px);opacity:1}35%,100%{transform:translateX(-2200px);opacity:0}}
+@supports (animation-timeline: scroll()){
+  #sxDeco .sxp.cl{animation:sx-up linear both;animation-timeline:scroll(root)}
+  #sxDeco .sxp.rn{animation:sx-up2 linear both;animation-timeline:scroll(root)}
+  @keyframes sx-up{to{transform:translateY(-90px)}}
+  @keyframes sx-up2{to{transform:translateY(-240px)}}
+}
+@media (prefers-reduced-motion: reduce){
+  :is(#sxDeco,#sxRings) *,:is(#sxDeco,#sxRings) *::after{animation:none!important}
+  #sxRings .sp{display:none}
+}
+/* шапка — синяя, под ней земля в клетку с травой */
+[data-theme="sonic"] header{background:linear-gradient(180deg,#0b2c8f,#1748c9);border-bottom:0}
+[data-theme="sonic"] header::after{content:"";position:absolute;left:0;right:0;top:100%;height:14px;pointer-events:none;
+  background:linear-gradient(#3fbf1c 0 4px,#155c08 4px 6px,transparent 6px),var(--chk)}
+[data-theme="sonic"] .brand{font-size:22px}
+[data-theme="sonic"] .brand span{color:#fff;font-family:var(--font-h);font-weight:400;text-shadow:0 2px 0 #0a1a4a}
+[data-theme="sonic"] .brand i{width:30px;height:30px;border-radius:50%;background:radial-gradient(circle closest-side,#fff 0 57%,transparent 58%),var(--ringi);color:#0a1a4a;font:400 12px/1 var(--font-h)}
+[data-theme="sonic"] .themeb{border:2px solid #0a1a4a;box-shadow:0 3px 0 #0a1a4a}
+@media (min-width: 861px){
+  [data-theme="sonic"] nav.tabs button{color:#e6eeff}
+  [data-theme="sonic"] nav.tabs button[aria-current="page"]{color:#0a1a4a;background:linear-gradient(#ffe066,#ffc81e);border:2px solid #0a1a4a;box-shadow:0 3px 0 #0a1a4a}
+}
+/* баннер-пейзаж: «ЮНИТКА» золотом с толстой синей обводкой и подпись */
+[data-theme="sonic"] main{position:relative;padding-top:34px}
+[data-theme="sonic"] main::before{content:"ЮНИТКА";display:flex;align-items:flex-start;box-sizing:border-box;height:var(--sbh);margin:0 0 28px;padding:var(--sp) 0 0 var(--sl);
+  border:3px solid #0a1a4a;border-radius:var(--r);box-shadow:0 6px 0 #0a1a4a;
+  background:linear-gradient(100deg,rgba(0,40,170,.42),rgba(0,40,170,0) 42%),url("sonic-hill.webp") 50% 42%/cover;
+  font:italic 900 var(--st)/1 "Exo 2",var(--font);letter-spacing:.01em;color:#ffd21f;text-shadow:var(--ol3),0 8px 0 #0a1a4a,0 10px 22px rgba(0,0,40,.45)}
+[data-theme="sonic"] main::after{content:"Быстрее ветра — к прибыли!";position:absolute;pointer-events:none;z-index:2;left:calc(16px + var(--sl) + 8px);top:calc(34px + var(--sp) + var(--st) + 20px);
+  font:italic 800 clamp(13px,1.6vw,21px)/1.1 "Exo 2",var(--font);color:#fff;text-shadow:var(--ol);transform:rotate(-3deg)}
+/* игровые панели */
+[data-theme="sonic"] :is(.card,details.sec,.search,.sumtot){border:3px solid #0a1a4a;box-shadow:var(--shadow)}
+[data-theme="sonic"] :is(.btn,.chip,.seg,.inp,select.sel,.namebar input,.lock input,.shurl,.tmenu,.ac){border:2px solid #0a1a4a}
+[data-theme="sonic"] :is(.btn,.chip){box-shadow:0 3px 0 #0a1a4a;transition:transform .08s,box-shadow .08s}
+[data-theme="sonic"] :is(.btn,.chip,.themeb):active{transform:translateY(3px);box-shadow:0 0 0 #0a1a4a}
+[data-theme="sonic"] :is(.btn.pri,.chip.on){background:linear-gradient(#ffe066,#ffc81e 55%,#ffab08);color:#0a1a4a;font-weight:800}
+[data-theme="sonic"] .seg{background:var(--surface)}
+[data-theme="sonic"] .seg button[aria-pressed="true"]{background:#1d5fe6;color:#fff;box-shadow:inset 0 -3px 0 rgba(0,0,0,.25)}
+[data-theme="sonic"] .lhead{background:#0b2c8f;color:#fff;top:calc(var(--hdr,57px) + 14px);border-bottom:3px solid #0a1a4a} [data-theme="sonic"] .lhead span small{color:#b9cdff}
+[data-theme="sonic"] :is(.detail,.res){top:calc(var(--hdr,57px) + 24px)}
+[data-theme="sonic"] .item:hover{background:#f1f6ff} [data-theme="sonic"] .item.sel{background:var(--accent-wash);box-shadow:inset 6px 0 0 #ffc81e}
+[data-theme="sonic"] .kpi{background:#f4f8ff;border:2px solid #0a1a4a;box-shadow:0 2px 0 #0a1a4a}
+[data-theme="sonic"] :is(.kpi b,.sumtot b){font-weight:800}
+[data-theme="sonic"] .hero .big{font-family:"Exo 2",var(--font);font-style:italic;font-weight:900}
+[data-theme="sonic"] .detail .title{font-size:21px}
+[data-theme="sonic"] .h{font:400 13px/1.5 var(--font-h);text-transform:uppercase;letter-spacing:.03em;padding-left:25px;background:var(--ringi) 0 50%/19px 19px no-repeat;align-items:center}
+[data-theme="sonic"] .h span{font:500 13px/1.3 var(--font);text-transform:none;letter-spacing:0}
+[data-theme="sonic"] .tmenu .tgrp{font-family:var(--font-h);font-weight:400}
+[data-theme="sonic"] details.sec>summary{padding-left:46px;background:var(--ringi) 15px 50%/21px 21px no-repeat}
+[data-theme="sonic"] :is(.mprow,.perline){color:#fff;text-shadow:0 2px 0 #0a1a4a,0 0 8px rgba(0,0,40,.5)}
+[data-theme="sonic"] .mprow .seg{text-shadow:none}
+[data-theme="sonic"] input[type=range]::-webkit-slider-runnable-track{height:8px;border-radius:4px;border:2px solid #0a1a4a;background:linear-gradient(90deg,#1d5fe6,#35c2ff)}
+[data-theme="sonic"] input[type=range]::-webkit-slider-thumb{width:32px;height:32px;margin-top:-14px;border:0;border-radius:50%;background:var(--ringi);box-shadow:none}
+[data-theme="sonic"] input[type=range]::-moz-range-thumb{width:28px;height:28px;border:0;border-radius:50%;background:var(--ringi)}
+[data-theme="sonic"] .toast{background:#ffc81e;color:#0a1a4a;border:3px solid #0a1a4a;box-shadow:0 4px 0 #0a1a4a}
+[data-theme="sonic"] .mini{background:#0b2c8f;color:#fff;border:3px solid #0a1a4a;box-shadow:0 -3px 0 #ffc81e,0 6px 20px rgba(0,0,0,.35)}
 /* «Тетрадь» — спокойная: лист в клетку, синие «чернила», заголовки и цифры с засечками, вместо теней — тонкие линии, шрифты PT Sans + PT Serif */
 :root[data-theme="paper"]{
   color-scheme: light;
@@ -583,6 +686,19 @@ a.btn{text-decoration:none;color:inherit}
   [data-theme="dusk"] nav.tabs{background:rgba(19,27,30,.86);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
   [data-theme="dusk"] .detail-wrap.open .backbar{background:var(--solid)}
   [data-theme="comic"] nav.tabs{border-top:3px solid #111}
+  [data-theme="sonic"] nav.tabs{background:#0b2c8f;border-top:0}
+  [data-theme="sonic"] nav.tabs::before{content:"";position:absolute;left:0;right:0;bottom:100%;height:12px;pointer-events:none;
+    background:linear-gradient(#3fbf1c 0 4px,#155c08 4px 6px,transparent 6px),var(--chk)}
+  [data-theme="sonic"] nav.tabs button{color:#e6eeff}
+  [data-theme="sonic"] nav.tabs button[aria-current="page"]{color:#ffd21f}
+  [data-theme="sonic"] main{padding-top:28px}
+  :root[data-theme="sonic"]{--sbh:50vw;--st:9.5vw}
+  [data-theme="sonic"] main::before{margin:0 0 22px;background:linear-gradient(100deg,rgba(0,40,170,.42),rgba(0,40,170,0) 55%),url("sonic-hill-m.webp") 55% 42%/cover}
+  [data-theme="sonic"] main::after{top:calc(28px + var(--sp) + var(--st) + 12px);left:calc(12px + var(--sl) + 4px);font-size:11.5px;max-width:58%}
+  #sxRings{left:12px;right:12px;top:28px}
+  #sxRings .sl{left:var(--mx)}
+  #sxDeco .sl{display:none}
+  #sxDeco .near{top:10vh}
 }
 @media (max-width: 380px){ .inp{width:116px} .hero .big{font-size:30px} .lhead,.item{grid-template-columns:minmax(0,1fr) 54px 54px 54px} }
 </style>
@@ -769,7 +885,7 @@ a.btn{text-decoration:none;color:inherit}
       <p>Перенесите эту папку в <b>«Документы»</b> и не удаляйте: браузер берёт расширение из неё.</p></div>
       <svg viewBox="0 0 300 120" role="img" aria-label="Правой кнопкой по архиву — «Извлечь всё…» — появится папка unitka-ext"><rect class="xs-win" x="1" y="1" width="298" height="118" rx="10"/>
         <rect x="18" y="26" width="32" height="40" rx="4" fill="#f2c94c"/><path d="M34 26v8m0 3v8m0 3v6" stroke="#8a6d10" stroke-width="4" stroke-dasharray="2.5 2.5"/>
-        <text class="xs-t" x="34" y="82" text-anchor="middle">unitka-ext.zip</text>
+        <text class="xs-t" x="36" y="82" text-anchor="middle" style="font-size:9.5px">unitka-ext.zip</text>
         <rect class="xs-win" x="70" y="18" width="120" height="84" rx="7" style="filter:drop-shadow(0 2px 4px rgba(0,0,0,.15))"/>
         <text class="xs-t" x="82" y="38">Открыть</text><rect class="xs-wash" x="74" y="47" width="112" height="22" rx="5"/><text class="xs-b" x="82" y="62">Извлечь всё…</text>
         <text class="xs-t" x="82" y="86">Копировать</text><rect class="xs-hl" x="71" y="44" width="118" height="28" rx="7"/>
@@ -927,6 +1043,7 @@ const TH = {
   comic: ["Комикс", "comic", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 2.5l2.2 4.6 5-1.4-2.3 4.6 4.3 3-5.2.8.4 5.2-4.4-3-4.4 3 .4-5.2-5.2-.8 4.3-3-2.3-4.6 5 1.4Z"/></svg>'],
   farcry: ["Far Cry 3", "farcry", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3a7 7 0 0 0-7 7c0 2.4 1.2 4.3 3 5.4V18a1 1 0 0 0 1 1h1v2h4v-2h1a1 1 0 0 0 1-1v-2.6c1.8-1.1 3-3 3-5.4a7 7 0 0 0-7-7Z"/><circle cx="9.3" cy="10.6" r="1.5" fill="currentColor"/><circle cx="14.7" cy="10.6" r="1.5" fill="currentColor"/></svg>'],
   jim: ["Червяк Джим", "jim", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 21.5c-2.6 0-3.8-1.9-2.8-3.8 1.1-2 4-2.1 5.2-4 1.2-1.8-.6-3.8 1-5.6 1.4-1.6 3.6-1.5 5.1-.6"/><circle cx="15.6" cy="5.2" r="2.3"/><circle cx="19.6" cy="5.9" r="2.3"/></svg>'],
+  sonic: ["Соник", "sonic", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><ellipse cx="15" cy="12" rx="5.6" ry="7"/><ellipse cx="15" cy="12" rx="2.4" ry="3.6"/><path d="M2.5 8.5h5M1.5 12h5M2.5 15.5h5"/></svg>'],
   /* спокойные */
   paper: ["Тетрадь", "paper", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"><path d="M4 20h4.5L19.5 9 15 4.5 4 15.5Z"/><path d="M13 6.5 17.5 11"/></svg>'],
   dusk: ["Сумерки", "dusk", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6.5 13.5a5.5 5.5 0 0 1 11 0"/><path d="M3 13.5h18M6 17h12M9 20.5h6M12 3.5v2.5M4.6 6.6l1.7 1.7M19.4 6.6l-1.7 1.7"/></svg>']
@@ -939,13 +1056,36 @@ const SWATCH = {          /* кружки тем — векторные, без 
   comic: '<svg class="sw" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8.2" fill="#ffe14d" stroke="#111" stroke-width="2"/><circle cx="10" cy="10" r="3.6" fill="#ff2e7e" stroke="#111" stroke-width="1.2"/></svg>',
   farcry: '<svg class="sw" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8.6" fill="#2a1d12" stroke="#c8241d" stroke-width="1.6"/><path d="M10 4.6a4.2 4.2 0 0 0-4.2 4.2c0 1.4.7 2.6 1.8 3.2v1.6h1v1.2h2.8V14h1v-1.6c1.1-.6 1.8-1.8 1.8-3.2A4.2 4.2 0 0 0 10 4.6Z" fill="#efe2c0"/><circle cx="8.4" cy="9.2" r=".9" fill="#2a1d12"/><circle cx="11.6" cy="9.2" r=".9" fill="#2a1d12"/></svg>',
   jim: '<svg class="sw" viewBox="0 0 20 20"><defs><linearGradient id="swJim" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a1263"/><stop offset=".62" stop-color="#d9532c"/><stop offset=".62" stop-color="#7ad321"/></linearGradient></defs><circle cx="10" cy="10" r="8.4" fill="url(#swJim)" stroke="#1a1022" stroke-width="1.6"/><circle cx="8.3" cy="7.6" r="2" fill="#fff" stroke="#1a1022" stroke-width=".8"/><circle cx="11.9" cy="7.6" r="2" fill="#fff" stroke="#1a1022" stroke-width=".8"/><circle cx="8.7" cy="7.8" r=".7" fill="#1a1022"/><circle cx="12.3" cy="7.8" r=".7" fill="#1a1022"/></svg>',
+  sonic: '<svg class="sw" viewBox="0 0 20 20"><defs><linearGradient id="swSon" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0f6efa"/><stop offset=".66" stop-color="#5fb0ff"/><stop offset=".66" stop-color="#3fbf1c"/><stop offset=".76" stop-color="#3fbf1c"/><stop offset=".76" stop-color="#cf6b16"/></linearGradient></defs><circle cx="10" cy="10" r="8.4" fill="url(#swSon)" stroke="#0a1a4a" stroke-width="1.6"/><circle cx="10" cy="8" r="3.4" fill="none" stroke="#ffc81e" stroke-width="1.9"/></svg>',
   paper: '<svg class="sw" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8.6" fill="#fbfaf5" stroke="#8a8a85" stroke-width="1.2"/><path d="M4.5 7.5h11M3.6 11h12.8M4.5 14.5h11M7.5 2.5v15M12.5 2.5v15" stroke="#2c4fb3" stroke-width=".8" opacity=".45"/></svg>',
   dusk: '<svg class="sw" viewBox="0 0 20 20"><defs><linearGradient id="swDusk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2d4c50"/><stop offset="1" stop-color="#3b3653"/></linearGradient></defs><circle cx="10" cy="10" r="8.6" fill="url(#swDusk)" stroke="#8a8a85" stroke-width="1.2"/><circle cx="10" cy="10" r="3.4" fill="#7fc8b4"/></svg>'
 };
+/* «Соник»: живые слои — облака в два слоя, холмы, кольца по краям (#sxDeco), над баннером кольца дугой и линии скорости (#sxRings).
+   Есть только в этой теме; стили и анимации — в CSS «Соника» */
+function sonicDeco(on) {
+  const d = $("#sxDeco"), r = $("#sxRings");
+  if (!on) { if (d) d.remove(); if (r) r.remove(); return; }
+  const ring = (st, dl) => `<i class="sl" style="${st};animation-delay:${dl}s"><b class="rg" style="animation-delay:${dl}s"></b></i>`;
+  if (!d) {
+    const el = document.createElement("div"); el.id = "sxDeco"; el.setAttribute("aria-hidden", "true");
+    el.innerHTML = '<div class="sxp cl"><i class="sxc far"></i><i class="sxc near"></i></div><i class="sxh"></i><div class="sxp rn">' +
+      [["2.5%", "30%"], ["94.5%", "21%"], ["4%", "64%"], ["93%", "55%"]].map(([x, y], i) => ring(`left:${x};top:${y}`, -i * 0.7)).join("") + "</div>";
+    document.body.appendChild(el);
+  }
+  if (!r) {
+    const el = document.createElement("div"); el.id = "sxRings"; el.setAttribute("aria-hidden", "true");
+    // линии скорости — ниже надписи; кольца дугой — правее неё (на телефоне надпись шире, кольца правее: --mx)
+    el.innerHTML = [[54, 140, 0], [63, 90, -.9], [71, 170, -1.6], [80, 110, -2.3], [89, 130, -2.9]]
+        .map(([y, w, dl]) => `<i class="sp" style="top:${y}%;width:${w}px;animation-delay:${dl}s"></i>`).join("") +
+      [[57, 21], [62, 14], [67, 11], [72, 14], [77, 21]].map(([x, y], i) => ring(`--x:${x}%;--mx:${x + 9}%;top:${y}%`, -i * 0.12)).join("");
+    $("main").prepend(el);
+  }
+}
 function applyTheme() {
   if (!TH[THEME]) THEME = "auto";
   if (THEME === "auto") document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme", THEME);
   themeFont(THEME);
+  sonicDeco(THEME === "sonic");
   $("#bTheme").innerHTML = TH[THEME][2] + "<span>" + TH[THEME][0] + "</span>";
   $("#bTheme").title = "Тема: " + TH[THEME][0].toLowerCase();
   const grp = { comic: "Весёлые", paper: "Спокойные" };
