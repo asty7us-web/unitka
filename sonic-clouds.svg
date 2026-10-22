@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1600" height="260" viewBox="0 0 1600 260">
+<!-- облака темы «Соник» (Юнитка): полоса повторяется по горизонтали без шва; белые, низ голубой, тонкая голубая обводка — как на баннере -->
+<defs>
+  <symbol id="cu" viewBox="0 0 240 130" overflow="visible">
+    <circle cx="78" cy="70" r="40"/><circle cx="128" cy="50" r="50"/><circle cx="183" cy="74" r="36"/><circle cx="42" cy="90" r="26"/>
+    <rect x="30" y="82" width="186" height="38" rx="19"/>
+  </symbol>
+  <g id="cl">
+    <use xlink:href="#cu" width="240" height="130" fill="none" stroke="#7fb4ff" stroke-width="7"/>
+    <use xlink:href="#cu" width="240" height="130" fill="#fff"/>
+    <path d="M40 104 h166 a8 8 0 0 1 0 14 h-166 a8 8 0 0 1 0-14Z" fill="#cbe6ff"/>
+    <path d="M58 64 a30 30 0 0 1 40-20 M112 30 a40 40 0 0 1 44 -6" fill="none" stroke="#eaf5ff" stroke-width="6" stroke-linecap="round"/>
+  </g>
+  <g id="st">
+    <rect x="0" y="0" width="300" height="14" rx="7" fill="#fff" stroke="#8fc0ff" stroke-width="3"/>
+  </g>
+</defs>
+<use xlink:href="#cl" transform="translate(40 40) scale(1.05)"/>
+<use xlink:href="#cl" transform="translate(470 92) scale(.72)"/>
+<use xlink:href="#cl" transform="translate(820 24) scale(1.25)"/>
+<use xlink:href="#cl" transform="translate(1260 110) scale(.6)"/>
+<use xlink:href="#st" transform="translate(300 190) scale(1 .9)"/>
+<use xlink:href="#st" transform="translate(380 214) scale(.55 .7)"/>
+<use xlink:href="#st" transform="translate(1090 214) scale(1.1 .9)"/>
+<use xlink:href="#st" transform="translate(1200 238) scale(.6 .7)"/>
+</svg>
