@@ -381,6 +381,11 @@ select.sel{height:38px;border-radius:9px;border:1px solid transparent;background
 .rows .m{color:var(--ink-2);font-weight:400}
 .note{font-size:12.5px;color:var(--ink-2);line-height:1.4}
 .warn{background:var(--warn-bg);border-radius:10px;padding:8px 10px;font-size:13px}
+.schbox{font-size:12.5px;line-height:1.45;color:var(--ink-2);background:var(--surface-2);border-radius:10px;padding:8px 10px;margin:2px 0 6px}
+.schbox:empty{display:none}
+.schbox b{color:var(--ink)}
+.schbox .src{margin-top:5px;color:var(--muted)}
+.schbox .warn{margin-top:6px;color:var(--ink)}
 table.t{width:100%;border-collapse:collapse;font-size:13.5px;font-variant-numeric:tabular-nums}
 table.t th{font-weight:600;color:var(--ink-2);text-align:right;padding:5px 4px;border-bottom:1px solid var(--line);font-size:12.5px}
 table.t td{text-align:right;padding:6px 4px;border-bottom:1px solid var(--line)}
@@ -497,6 +502,29 @@ details.how ul{padding-left:18px;margin:6px 0}
 .shurl{width:100%;height:42px;border-radius:10px;border:1px solid var(--ring);background:var(--surface-2);padding:0 10px;font-size:14px;color:var(--ink-2)}
 a.btn{text-decoration:none;color:inherit}
 @media (max-width:860px){.modal{align-items:flex-end;padding:0}.modal .sheet{border-radius:16px 16px 0 0;padding-bottom:calc(16px + env(safe-area-inset-bottom))}}
+/* ── расширение: полоска в «Сводке» и окно «Как поставить» ── */
+.extbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px;padding:10px 12px;border-radius:12px;background:var(--accent-wash);color:var(--ink)}
+.extbar>span{flex:1 1 220px;font-size:13px;line-height:1.35}
+.extbar svg{width:22px;height:22px;flex:none;color:var(--accent)}
+.modal .sheet.xg{width:min(780px,100%);max-height:min(92vh,980px);overflow:auto;overscroll-behavior:contain}
+.xg ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px;counter-reset:xg}
+.xg li{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:14px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:12px;counter-increment:xg}
+.xg h5{margin:0 0 5px;font-size:15.5px;line-height:1.3;display:flex;gap:9px;align-items:center}
+.xg h5::before{content:counter(xg);width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;font-size:14px;flex:none}
+.xg p{margin:0 0 6px;font-size:14px;line-height:1.45;color:var(--ink-2)} .xg p:last-child{margin-bottom:0}
+.xg p b{color:var(--ink)}
+.xg li>svg{width:100%;height:auto;display:block;border-radius:10px}
+.xg .addr{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:6px 0}
+.xg code{font:600 15px/1 ui-monospace,Consolas,monospace;background:var(--surface-2);border:1px solid var(--ring);border-radius:8px;padding:9px 10px;user-select:all}
+.xg [data-xi]{display:none}
+.xg[data-xb="chrome"] [data-xi~="chrome"],.xg[data-xb="yandex"] [data-xi~="yandex"],.xg[data-xb="opera"] [data-xi~="opera"]{display:revert}
+.xs-win{fill:var(--surface);stroke:var(--line)} .xs-bar{fill:var(--surface-2)} .xs-ln{stroke:var(--line);fill:none}
+.xs-t{fill:var(--ink);font:600 11.5px var(--font)} .xs-m{fill:var(--muted);font:500 10.5px var(--font)} .xs-b{fill:var(--ink);font:700 12px var(--font)}
+.xs-blue{fill:#2a78d6} .xs-wash{fill:var(--accent-wash)} .xs-w{fill:#fff;font:700 11px var(--font)}
+.xs-hl{fill:none;stroke:#e5484d;stroke-width:2.5;animation:xs-blink 1.6s ease-in-out infinite}
+@keyframes xs-blink{50%{opacity:.35}}
+@media (prefers-reduced-motion: reduce){.xs-hl{animation:none}}
+@media (max-width:860px){.xg li{grid-template-columns:minmax(0,1fr)}.xg li>svg{max-width:420px}}
 
 /* ── телефон ── */
 @media (max-width: 860px){
@@ -645,7 +673,8 @@ a.btn{text-decoration:none;color:inherit}
       <details class="sec" open data-sec="mp">
         <summary><span id="mpTitle">Расходы площадки</span> <span class="sum" data-sum="mp"></span></summary>
         <div class="fields">
-          <div class="f"><span>Схема работы</span><span class="seg sm" id="schemeSeg"></span></div>
+          <div class="f"><span>Схема работы</span><span class="seg sm" id="schemeSeg" role="group" aria-label="Схема работы"></span></div>
+          <div class="schbox" id="schBox" aria-live="polite"></div>
           <label class="f"><span>Комиссия</span><span class="inp"><input data-f="comm" inputmode="decimal"><i>%</i></span></label>
           <label class="f"><span>Эквайринг<small id="acqHint">от цены покупателя</small></span><span class="inp"><input data-f="acq" inputmode="decimal"><i>%</i></span></label>
           <label class="f"><span>Логистика до покупателя<small id="logiHint">за одну доставку</small></span><span class="inp"><input data-f="logi" inputmode="decimal"><i>₽</i></span></label>
@@ -717,6 +746,119 @@ a.btn{text-decoration:none;color:inherit}
   <div class="note">Откроется на любом телефоне или компьютере с теми же цифрами — пароль не нужен, цифры только этого расчёта.</div>
   <input id="shareUrl" class="shurl" readonly>
   <div class="chips"><button class="btn pri" id="shCopy">Скопировать</button><a class="btn tg" id="shTg" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="12" fill="#229ed9"/><path fill="#fff" d="M5.3 11.7 16.9 7.2c.6-.2 1.1.1.9.9l-2 9.3c-.1.7-.5.8-1.1.5l-3-2.2-1.5 1.4c-.2.2-.3.3-.6.3l.2-3.1 5.6-5.1c.2-.2 0-.3-.4-.1L8.1 13.4l-3-.9c-.6-.2-.6-.6.2-.8Z"/></svg>Отправить в Telegram</a><button class="btn hidden" id="shMore">Ещё…</button></div>
+</div></div>
+
+<!-- ═════════ как поставить расширение (ссылка на окно: …/unitka/#ext) ═════════ -->
+<div class="modal hidden" id="extBox" role="dialog" aria-label="Как поставить расширение"><div class="card sheet xg" data-xb="chrome">
+  <div class="h" style="font-size:17px;margin:0">Как поставить расширение «Юнитка на карточке» <button class="tour-x" id="xgClose" aria-label="Закрыть" style="position:static">✕</button></div>
+  <div class="note" style="font-size:13.5px">Под ценой на карточке WB и Ozon появится рамка: прибыль с 1 шт, маржа и цена безубыточности. Ставится один раз, минут за 5.
+    Работает на компьютере — в Chrome, Яндекс Браузере или Opera, на телефоне нет. Ваш браузер:</div>
+  <div class="seg" id="xgB" role="group" aria-label="Браузер"><button data-xbb="chrome">Chrome</button><button data-xbb="yandex">Яндекс Браузер</button><button data-xbb="opera">Opera</button></div>
+  <ol>
+    <li><div><h5>Скачайте архив</h5>
+      <p>Нажмите кнопку — файл <b>unitka-ext.zip</b> сохранится в папку <b>«Загрузки»</b>.</p>
+      <a class="btn pri sm" href="unitka-ext.zip" download>Скачать unitka-ext.zip</a></div>
+      <svg viewBox="0 0 300 120" role="img" aria-label="Архив скачался в «Загрузки»"><rect class="xs-win" x="1" y="1" width="298" height="118" rx="10"/>
+        <rect class="xs-bar" x="1" y="1" width="298" height="24" rx="10"/><circle cx="16" cy="13" r="4" fill="#ff5f57"/><circle cx="29" cy="13" r="4" fill="#febc2e"/><circle cx="42" cy="13" r="4" fill="#28c840"/>
+        <text class="xs-m" x="58" y="17">Загрузки</text>
+        <rect x="128" y="40" width="44" height="54" rx="5" fill="#f2c94c"/><path d="M150 40v10m0 4v10m0 4v8" stroke="#8a6d10" stroke-width="5" stroke-dasharray="3 3"/><rect x="143" y="76" width="14" height="10" rx="2" fill="#8a6d10"/>
+        <text class="xs-b" x="150" y="110" text-anchor="middle">unitka-ext.zip</text></svg></li>
+
+    <li><div><h5>Распакуйте архив</h5>
+      <p>Откройте <b>«Загрузки»</b>, нажмите на <b>unitka-ext.zip</b> правой кнопкой мыши → <b>«Извлечь всё…»</b> → <b>«Извлечь»</b>. Появится обычная папка <b>unitka-ext</b>.</p>
+      <p>Перенесите эту папку в <b>«Документы»</b> и не удаляйте: браузер берёт расширение из неё.</p></div>
+      <svg viewBox="0 0 300 120" role="img" aria-label="Правой кнопкой по архиву — «Извлечь всё…» — появится папка unitka-ext"><rect class="xs-win" x="1" y="1" width="298" height="118" rx="10"/>
+        <rect x="18" y="26" width="32" height="40" rx="4" fill="#f2c94c"/><path d="M34 26v8m0 3v8m0 3v6" stroke="#8a6d10" stroke-width="4" stroke-dasharray="2.5 2.5"/>
+        <text class="xs-t" x="34" y="82" text-anchor="middle">unitka-ext.zip</text>
+        <rect class="xs-win" x="70" y="18" width="120" height="84" rx="7" style="filter:drop-shadow(0 2px 4px rgba(0,0,0,.15))"/>
+        <text class="xs-t" x="82" y="38">Открыть</text><rect class="xs-wash" x="74" y="47" width="112" height="22" rx="5"/><text class="xs-b" x="82" y="62">Извлечь всё…</text>
+        <text class="xs-t" x="82" y="86">Копировать</text><rect class="xs-hl" x="71" y="44" width="118" height="28" rx="7"/>
+        <path d="M198 58h28" stroke="var(--muted)" stroke-width="2.5"/><path d="m222 52 8 6-8 6" fill="none" stroke="var(--muted)" stroke-width="2.5"/>
+        <path d="M240 36h16l5 6h25v40h-46Z" fill="#f2b84b"/><path d="M240 46h46v36h-46Z" fill="#ffd36b"/>
+        <text class="xs-b" x="263" y="98" text-anchor="middle">unitka-ext</text></svg></li>
+
+    <li><div><h5>Откройте страницу расширений</h5>
+      <p>Скопируйте адрес кнопкой, вставьте его в адресную строку браузера (там, где пишут адреса сайтов) и нажмите <b>Enter</b>:</p>
+      <div class="addr"><code data-xi="chrome">chrome://extensions</code><code data-xi="yandex">browser://extensions</code><code data-xi="opera">opera://extensions</code><button class="btn sm" id="xgCopy">Скопировать</button></div>
+      <p class="note" style="font-size:12.5px">Просто нажать на адрес нельзя — браузер не открывает такие страницы по ссылке.</p></div>
+      <svg viewBox="0 0 300 120" role="img" aria-label="Адрес страницы расширений в адресной строке"><rect class="xs-win" x="1" y="1" width="298" height="118" rx="10"/>
+        <rect class="xs-bar" x="1" y="1" width="298" height="40" rx="10"/><path d="M12 21h10m-4-4-4 4 4 4M30 21h10m-4-4 4 4-4 4" class="xs-ln" stroke-width="1.8" style="stroke:var(--muted)"/>
+        <rect class="xs-win" x="52" y="10" width="236" height="22" rx="11"/>
+        <text class="xs-t" x="64" y="25" data-xi="chrome">chrome://extensions</text><text class="xs-t" x="64" y="25" data-xi="yandex">browser://extensions</text><text class="xs-t" x="64" y="25" data-xi="opera">opera://extensions</text>
+        <rect class="xs-hl" x="49" y="7" width="242" height="28" rx="14"/>
+        <rect class="xs-bar" x="196" y="62" width="70" height="36" rx="7"/><text class="xs-b" x="231" y="85" text-anchor="middle">Enter ⏎</text>
+        <text class="xs-m" x="20" y="78">вставить: Ctrl + V</text><text class="xs-m" x="20" y="94">и нажать Enter</text></svg></li>
+
+    <li><div><h5>Включите «Режим разработчика»</h5>
+      <p>Справа вверху на странице расширений — переключатель <b>«Режим разработчика»</b>. Нажмите на него, чтобы он стал синим. Это безопасно: так ставят свои расширения не из магазина.</p></div>
+      <svg viewBox="0 0 300 120" role="img" aria-label="Переключатель «Режим разработчика» справа вверху"><rect class="xs-win" x="1" y="1" width="298" height="118" rx="10"/>
+        <rect class="xs-bar" x="1" y="1" width="298" height="36" rx="10"/><text class="xs-b" x="14" y="24">Расширения</text>
+        <text class="xs-t" x="134" y="24" style="font-size:10.5px">Режим разработчика</text><rect class="xs-blue" x="262" y="13" width="28" height="15" rx="7.5"/><circle cx="282.5" cy="20.5" r="5.5" fill="#fff"/>
+        <rect class="xs-hl" x="127" y="7" width="168" height="27" rx="8"/>
+        <rect class="xs-bar" x="14" y="52" width="130" height="54" rx="7"/><rect class="xs-bar" x="156" y="52" width="130" height="54" rx="7"/>
+        <rect x="24" y="62" width="18" height="18" rx="4" fill="var(--line)"/><rect x="48" y="64" width="70" height="6" rx="3" fill="var(--line)"/><rect x="48" y="74" width="50" height="5" rx="2.5" fill="var(--line)"/>
+        <rect x="166" y="62" width="18" height="18" rx="4" fill="var(--line)"/><rect x="190" y="64" width="70" height="6" rx="3" fill="var(--line)"/><rect x="190" y="74" width="50" height="5" rx="2.5" fill="var(--line)"/></svg></li>
+
+    <li><div><h5>«Загрузить распакованное расширение» → папка unitka-ext</h5>
+      <p>Слева вверху появились кнопки. Нажмите <b>«Загрузить распакованное расширение»</b>. Откроется окно выбора папки: найдите <b>«Документы»</b> → нажмите один раз на папку <b>unitka-ext</b> → кнопка <b>«Выбор папки»</b>.</p>
+      <p>В списке расширений появится <b>«Юнитка на карточке»</b> с синим значком «Ю».</p></div>
+      <svg viewBox="0 0 300 120" role="img" aria-label="Кнопка «Загрузить распакованное расширение», затем папка unitka-ext и «Выбор папки»"><rect class="xs-win" x="1" y="1" width="298" height="118" rx="10"/>
+        <rect class="xs-bar" x="1" y="1" width="298" height="30" rx="10"/>
+        <rect class="xs-win" x="10" y="7" width="150" height="18" rx="5"/><text class="xs-t" x="85" y="20" text-anchor="middle" style="font-size:9.6px">Загрузить распакованное</text>
+        <rect class="xs-hl" x="7" y="4" width="156" height="24" rx="7"/>
+        <rect class="xs-win" x="170" y="7" width="54" height="18" rx="5"/><text class="xs-m" x="197" y="20" text-anchor="middle" style="font-size:9.5px">Упаковать</text>
+        <rect class="xs-win" x="230" y="7" width="58" height="18" rx="5"/><text class="xs-m" x="259" y="20" text-anchor="middle" style="font-size:9.5px">Обновить</text>
+        <rect class="xs-win" x="40" y="40" width="220" height="72" rx="7" style="filter:drop-shadow(0 2px 6px rgba(0,0,0,.18))"/><text class="xs-m" x="50" y="54">Документы</text>
+        <rect class="xs-wash" x="46" y="60" width="120" height="20" rx="4"/><path d="M52 64h8l2 3h12v10h-22Z" fill="#f2b84b"/><text class="xs-b" x="80" y="75">unitka-ext</text>
+        <rect class="xs-blue" x="172" y="87" width="80" height="19" rx="4"/><text class="xs-w" x="212" y="100.5" text-anchor="middle" style="font-size:9.5px">Выбор папки</text>
+        <rect class="xs-hl" x="169" y="84" width="86" height="25" rx="6"/></svg></li>
+
+    <li><div><h5>Закрепите значок «Ю»</h5>
+      <p data-xi="chrome">Справа от адресной строки нажмите на значок-<b>пазл</b> «Расширения» и на <b>булавку</b> рядом с «Юнитка на карточке». Синий «Ю» встанет рядом с адресом.</p>
+      <p data-xi="opera">Справа от адресной строки нажмите на значок-<b>кубик</b> «Расширения» и на <b>булавку</b> рядом с «Юнитка на карточке». Синий «Ю» встанет рядом с адресом.</p>
+      <p data-xi="yandex">Синий значок <b>«Ю»</b> сам появится справа от адресной строки. Если его не видно — он мог спрятаться в меню расширений справа от адреса: откройте его и закрепите «Юнитка на карточке».</p></div>
+      <svg viewBox="0 0 300 120" role="img" aria-label="Закрепить значок расширения на панели"><rect class="xs-win" x="1" y="1" width="298" height="118" rx="10"/>
+        <rect class="xs-bar" x="1" y="1" width="298" height="36" rx="10"/><rect class="xs-win" x="10" y="9" width="200" height="20" rx="10"/><text class="xs-m" x="22" y="23">wildberries.ru</text>
+        <g data-xi="chrome"><path d="M226 13h5a2.5 2.5 0 0 1 5 0h5v5a2.5 2.5 0 0 1 0 5v5h-5a2.5 2.5 0 0 0-5 0h-5Z" fill="none" stroke="var(--ink-2)" stroke-width="1.6"/><rect class="xs-hl" x="219" y="7" width="28" height="26" rx="7"/></g>
+        <g data-xi="opera"><path d="M233 11l9 5v10l-9 5-9-5V16Z M224 16l9 5 9-5 M233 21v10" fill="none" stroke="var(--ink-2)" stroke-width="1.6"/><rect class="xs-hl" x="219" y="7" width="28" height="26" rx="7"/></g>
+        <rect class="xs-blue" x="256" y="10" width="20" height="20" rx="6"/><text class="xs-w" x="266" y="24.5" text-anchor="middle">Ю</text>
+        <g data-xi="yandex"><rect class="xs-hl" x="252" y="6" width="28" height="28" rx="8"/></g>
+        <g data-xi="chrome opera"><rect class="xs-win" x="96" y="44" width="190" height="62" rx="7" style="filter:drop-shadow(0 2px 6px rgba(0,0,0,.18))"/><text class="xs-m" x="108" y="60">Расширения</text>
+          <rect class="xs-blue" x="108" y="70" width="18" height="18" rx="5"/><text class="xs-w" x="117" y="83" text-anchor="middle" style="font-size:10px">Ю</text><text class="xs-t" x="134" y="83">Юнитка на карточке</text>
+          <path d="M268 72l6 6-3 1-4 5-1-1 1-3-4 4-1-1 4-4-3 1-1-1 5-4 1-3Z" fill="#2a78d6"/><rect class="xs-hl" x="258" y="68" width="24" height="22" rx="6"/></g>
+        <g data-xi="yandex"><text class="xs-t" x="150" y="76" text-anchor="middle">«Ю» появится справа от адреса</text><path d="M240 64q14-6 22-24" fill="none" stroke="var(--muted)" stroke-width="2"/></g></svg></li>
+
+    <li><div><h5>Введите пароль</h5>
+      <p>Нажмите на синий <b>«Ю»</b>, впишите <b>пароль от «Сводки» Юнитки</b> (тот же, что на этом сайте) и нажмите <b>«Открыть»</b>. Пароль запомнится в этом браузере.</p>
+      <p class="note" style="font-size:12.5px">Без пароля расширение тоже работает, но все товары считает как чужие — себестоимость спросит на карточке.</p></div>
+      <svg viewBox="0 0 300 120" role="img" aria-label="Окно расширения: пароль и кнопка «Открыть»"><rect class="xs-win" x="1" y="1" width="298" height="118" rx="10"/>
+        <rect class="xs-blue" x="16" y="14" width="20" height="20" rx="6"/><text class="xs-w" x="26" y="28.5" text-anchor="middle">Ю</text><text class="xs-b" x="44" y="29">Юнитка на карточке</text>
+        <text class="xs-m" x="16" y="56">Факт наших товаров</text>
+        <rect class="xs-bar" x="16" y="64" width="180" height="30" rx="7"/><text class="xs-m" x="28" y="83">●●●●●●●●●●●●</text>
+        <rect class="xs-blue" x="204" y="64" width="80" height="30" rx="7"/><text class="xs-w" x="244" y="83" text-anchor="middle">Открыть</text>
+        <rect class="xs-hl" x="12" y="60" width="276" height="38" rx="9"/></svg></li>
+
+    <li><div><h5>Проверьте</h5>
+      <p>Откройте любую карточку WB или Ozon — под ценой появится рамка <b>«Юнитка»</b> с прибылью и маржой. Наш товар — с меткой «наш товар», чужой — расширение попросит вписать себестоимость.</p>
+      <div class="chips"><a class="btn sm" href="https://www.wildberries.ru/catalog/1483385127/detail.aspx" target="_blank" rel="noopener">Карточка WB</a><a class="btn sm" href="https://www.ozon.ru/product/5171412462/" target="_blank" rel="noopener">Карточка Ozon</a></div>
+      <p class="note" style="font-size:12.5px;margin-top:6px">Рамки нет — обновите страницу карточки (клавиша F5).</p></div>
+      <svg viewBox="0 0 300 120" role="img" aria-label="Карточка товара: под ценой рамка «Юнитка» с прибылью"><rect class="xs-win" x="1" y="1" width="298" height="118" rx="10"/>
+        <rect x="12" y="12" width="70" height="94" rx="6" fill="var(--surface-2)"/><path d="M28 80l14-18 10 12 8-8 12 14Z" fill="var(--line)"/><circle cx="62" cy="38" r="7" fill="var(--line)"/>
+        <text x="94" y="30" style="font:800 19px var(--font);fill:#cb11ab">593 ₽</text><text class="xs-m" x="160" y="30" style="text-decoration:line-through">990 ₽</text>
+        <rect x="94" y="40" width="194" height="66" rx="8" fill="var(--surface)" stroke="#2a78d6" stroke-width="1.8"/>
+        <rect x="102" y="48" width="16" height="16" rx="4.5" fill="#2a78d6"/><text class="xs-w" x="110" y="60" text-anchor="middle" style="font-size:9.5px">Ю</text>
+        <text class="xs-b" x="124" y="60" style="font-size:11px">Юнитка · наш товар</text>
+        <text class="xs-m" x="102" y="80">прибыль с 1 шт</text><text x="280" y="81" text-anchor="end" style="font:800 14px var(--font);fill:#1a8a1a">98 ₽</text>
+        <text class="xs-m" x="102" y="97">маржа</text><text class="xs-t" x="280" y="97" text-anchor="end">16,5%</text>
+        <rect class="xs-hl" x="90" y="36" width="202" height="74" rx="10"/></svg></li>
+  </ol>
+  <details class="how"><summary>Что-то не получилось</summary><ul>
+    <li><b>«Не найден файл манифеста»</b> — выбрана не та папка. Нужна папка <b>unitka-ext</b>, внутри которой лежат файлы manifest.json, core.js и другие. Если внутри неё ещё одна unitka-ext — выберите внутреннюю.</li>
+    <li><b>Нет кнопки «Загрузить распакованное расширение»</b> — не включён «Режим разработчика» (шаг 4).</li>
+    <li><b>Пропало после перезапуска</b> — папку unitka-ext удалили или перенесли. Положите её обратно и повторите шаг 5.</li>
+    <li><b>Вышла новая версия</b> — скачайте архив заново, распакуйте и замените файлы в той же папке unitka-ext, потом на странице расширений нажмите круглую стрелку «Обновить» у «Юнитка на карточке».</li>
+    <li>Расширение ничего не отправляет и не меняет в кабинетах — только читает цену со страницы и считает.</li>
+  </ul></details>
 </div></div>
 
 <script>
@@ -831,6 +973,93 @@ const MPS = {
           fees: Object.assign({ scheme: "FBS", comm: 15, acq: 1.6, logi: 0, logiPct: 7.35, back: 0, buyout: 90, stor: 0, accept: 0, other: 0, otherPct: 0, soinv: 0, spp: 0 }, OZX),
           acqHint: "приём платежа, от цены покупателя", logiHint: "₽ за доставку; процент — строкой ниже" }
 };
+/* ═════════ схема работы ═════════
+   У товара из панели (S.tar) — тарифы каждой схемы именно для него (unitka.py fact → shemy.py, поле t строки), «По панели» — факт.
+   Без товара — типовые разницы схем (genProfile). При смене схемы поля схемы берутся из тарифа новой; что было на старой,
+   с правками, лежит в S.keep и вернётся, если выбрать её снова (S.auto — что подставилось само, по нему видно правки). */
+const SCH_KEYS = ["comm", "acq", "logi", "logiPct", "proc", "lastPct", "lastMax", "nonloc", "xdock", "back", "buyout", "stor", "accept"];
+const pickSch = f => { const o = {}; SCH_KEYS.forEach(k => { if (f && f[k] !== undefined) o[k] = f[k]; }); return o; };
+const SCH_TIP = {
+  wb: "типовые разницы схем WB: комиссия FBS обычно на 4,5 п.п. выше FBW (тарифы WB по предметам), хранения и приёмки на FBS нет. Найдите свой товар по артикулу — подставлю тарифы его предмета и объёма.",
+  ozon: "типовые разницы схем Ozon: комиссия FBO и FBS обычно одна; на FBS +10 ₽ за обработку (drop-off) и нет хранения на складе Ozon; на rFBS доставку оплачиваете сами — впишите её в «Логистику». Найдите свой товар — подставлю его тарифы и среднюю логистику его отправлений.",
+  ym: "у Маркета тарифы FBY и FBS сейчас одинаковые (размещение, приём платежа, доставка, средняя миля — по API тарифов), на FBS нет хранения на складе Маркета. Найдите свой товар — подставлю тарифы его категории."
+};
+const FLBL = { comm: ["комиссия", "%"], acq: ["эквайринг", "%"], logi: ["логистика", "₽"], logiPct: ["логистика", "%"], proc: ["обработка", "₽"],
+  lastPct: ["последняя миля", "%"], lastMax: ["последняя миля, не больше", "₽"], nonloc: ["нелокальные", "%"], xdock: ["кросс-докинг", "₽/л"],
+  back: ["возврат невыкупа", "₽"], buyout: ["выкуп", "%"], stor: ["хранение", "₽"], accept: ["приёмка", "₽"] };
+const schName = x => (x === "fact" ? "По панели" : x);
+const tarOf = (s, mp) => (s.tar && s.tar.mp === mp ? s.tar : null);
+const schemesOf = (s, mp) => (tarOf(s, mp) && s.tar.fact ? ["fact"] : []).concat(MPS[mp].schemes);
+/* без тарифа товара: что меняется при переходе со схемы x на y (f — поля схемы x) */
+function genProfile(mp, y, x, f) {
+  const mine = ((LS.get("defaults", {}).sch || {})[mp] || {})[y];
+  if (mine) return Object.assign({}, mine);                       // «Запомнить по умолчанию» на этой схеме
+  const d = defaults().fees[mp], o = {};
+  if (mp === "wb") {
+    if (x === "FBW" && y === "FBS") o.comm = Math.round((num(f.comm) + 4.5) * 100) / 100;
+    if (x === "FBS" && y === "FBW") o.comm = Math.max(0, Math.round((num(f.comm) - 4.5) * 100) / 100);
+    if (y === "FBS") Object.assign(o, { stor: 0, accept: 0 }); else if (x === "FBS") Object.assign(o, { stor: d.stor, accept: d.accept });
+  } else if (mp === "ozon") {
+    if (y === "rFBS") Object.assign(o, { logi: 0, proc: 0, back: 0, stor: 0, accept: 0, xdock: 0, lastPct: 0, lastMax: 0, nonloc: 0 });
+    else {
+      if (x === "rFBS") Object.assign(o, { logi: d.logi, back: d.back, lastPct: d.lastPct, lastMax: d.lastMax, nonloc: d.nonloc, xdock: d.xdock });
+      o.proc = y === "FBS" ? 10 : 0;
+      if (y === "FBS") Object.assign(o, { stor: 0, accept: 0 }); else if (x === "FBS") Object.assign(o, { stor: d.stor, accept: d.accept });
+    }
+  } else if (mp === "ym") {
+    if (y === "FBS") Object.assign(o, { stor: 0, accept: 0 }); else if (x === "FBS") Object.assign(o, { stor: d.stor, accept: d.accept });
+  }
+  return o;
+}
+/* тариф схемы y товара (t — строка панели .t, m — общее площадки .tq; формат — shemy.py) → поля «Расчёта» */
+const OZ0 = { lastPct: 0, lastMax: 0, nonloc: 0, xdock: 0 };
+function tarVals(mp, y, t, m) {
+  const a = t && t[y]; if (!a) return null;
+  let o;
+  if (mp === "wb") { o = { comm: a[0], back: (m && m.back) || 50, stor: y === "FBW" ? a[2] || 0 : 0, accept: 0 }; if (a[1] != null) o.logi = a[1]; }
+  else if (mp === "ozon") o = y === "rFBS" ? Object.assign({ comm: a[0], logi: 0, proc: 0, back: 0, stor: 0, accept: 0 }, OZ0)
+    : Object.assign({ comm: a[0], logi: a[1], back: a[2], proc: a[3] }, OZ0, y === "FBS" ? { stor: 0, accept: 0 } : {});
+  else o = Object.assign({ comm: a[0], acq: a[1], logi: a[2], logiPct: a[3] }, y === "FBS" ? { stor: 0, accept: 0 } : {});
+  if (t.bo) o.buyout = t.bo;
+  return o;
+}
+/* откуда цифры тарифа схемы — строкой под переключателем */
+function tarQ(mp, y, t, m) {
+  const a = t[y], n2 = v => NF2.format(v), d = m || {};
+  if (mp === "wb") {
+    const b = (d.box || {})[y];
+    let q = `тариф WB${d.day ? " на " + d.day : ""} для предмета «${t.s}»: комиссия ${y} ${n2(a[0])}%`;
+    if (a[1] != null) q += `; логистика ${n2(t.v)} л → ${rub(a[1])}` + (b ? (t.v <= 1 ? ` (до 1 л — фикс WB × коэф. склада ${n2(b[3] / 100)}` : ` (${n2(b[1])} ₽ за 1-й литр + ${n2(b[2])} ₽ × ещё ${n2(t.v - 1)} л`) + `, склад «${b[0]}»)` : "");
+    else q += "; объёма в карточке нет — логистику не менял";
+    return q + `; возврат невыкупа ${d.back || 50} ₽` + (y === "FBW" ? "; хранение — из панели" : "; хранения и приёмки на FBS нет");
+  }
+  if (mp === "ozon") {
+    if (y === "rFBS") return `комиссия rFBS ${n2(a[0])}% — тариф Ozon; доставку до покупателя оплачиваете сами — впишите её в «Логистику до покупателя»`;
+    const per = d.per ? " за " + d.per : "";
+    let q = `комиссия ${y} ${n2(a[0])}% — тариф Ozon (с бустингом); логистика ${rub(a[1])} — ` +
+      (a[4] > 0 ? `средняя по ${a[4]} вашим отправлениям ${y}${per}: магистраль, последняя миля, до ПВЗ (тариф магистрали ${NF0.format(a[6])}–${NF0.format(a[7])} ₽)`
+        : a[4] < 0 ? `магистраль — средняя по ${-a[4]} отправлениям FBO и FBS${per} (сетка одна) + последняя миля по тарифу`
+        : `тариф Ozon: магистраль от ${NF0.format(a[6])} ₽ (до ${NF0.format(a[7])} ₽ — дальше и дольше) + последняя миля`);
+    if (y === "FBS") q += `; обработка (drop-off) ${rub(a[3])}`;
+    q += `; возврат невыкупа ${rub(a[2])} — ` + (a[5] ? `средний по ${a[5]} возвратам` : "как доставка + 15 ₽ приёмка в ПВЗ");
+    return q + (y === "FBO" ? "; хранение FBO — ваше значение" : "");
+  }
+  return `тариф Маркета${d.day ? " на " + d.day : ""} для категории «${t.c}» при цене ${rub(t.p)}: размещение ${n2(a[0])}%, приём платежа ${n2(a[1])}%, ` +
+    (a[3] ? `доставка покупателю ${n2(a[3])}% (не больше 1 000 ₽) + средняя миля ${rub(a[2])}` : `доставка ${rub(a[2])}`) + (y === "FBY" ? "; хранение FBY — ваше значение" : "; хранения на FBS нет");
+}
+/* поля схемы y: тариф товара (own) или типовые разницы; q — откуда цифры */
+function schProfile(s, mp, y, x, f) {
+  const t = tarOf(s, mp), v = t && tarVals(mp, y, t.t, t.m);
+  if (v) return { vals: v, q: tarQ(mp, y, t.t, t.m), own: true };
+  return { vals: genProfile(mp, y, x, f), q: (t ? "тарифа этого товара в данных нет — " : "") + SCH_TIP[mp], own: false };
+}
+/* поля площадки mp, если выбрать схему y (для таблицы «по схемам»): что было на ней, иначе её тариф */
+function feesFor(s, mp, y) {
+  const f = s.fees[mp];
+  if (y === f.scheme) return f;
+  const k = s.keep && s.keep[mp + "|" + y];
+  return Object.assign(clone(f), k || schProfile(s, mp, y, f.scheme, f).vals, { scheme: y });
+}
 const TAX = {
   ausn_d:  { name: "АУСН «Доходы»", rate: 8, kind: "income", nds: false },
   ausn_dr: { name: "АУСН «Доходы − расходы»", rate: 20, kind: "profit", min: 0.03, nds: false },
@@ -849,12 +1078,17 @@ function defaults() {
                        d.common || {}, { fees });
 }
 function newState(mp) {
-  return Object.assign({ v: 2, name: "", mp: mp || "wb", price0: 1500, disc: 0, buy: 400, lotShip: 0, lotQty: 100, ff: 0, costOther: 0, vol: 0 }, defaults());
+  const s = Object.assign({ v: 2, name: "", mp: mp || "wb", price0: 1500, disc: 0, buy: 400, lotShip: 0, lotQty: 100, ff: 0, costOther: 0, vol: 0 }, defaults());
+  for (const k in MPS) { if (!MPS[k].schemes.includes(s.fees[k].scheme)) s.fees[k].scheme = MPS[k].fees.scheme; }
+  s.keep = {}; s.auto = {};
+  for (const k in MPS) s.auto[k + "|" + s.fees[k].scheme] = pickSch(s.fees[k]);
+  return s;
 }
 function fixState(s) {
   const base = newState(s && s.mp);
   s = Object.assign(base, s || {});
   for (const k in MPS) s.fees[k] = Object.assign({}, MPS[k].fees, (s.fees || {})[k] || {});
+  for (const k in MPS) { const sc = s.fees[k].scheme; if (!MPS[k].schemes.includes(sc) && !(sc === "fact" && s.tar && s.tar.mp === k && s.tar.fact)) s.fees[k].scheme = MPS[k].fees.scheme; }
   if (!MPS[s.mp]) s.mp = "wb";
   if (!TAX[s.tax]) s.tax = "ausn_d";
   return s;
@@ -920,6 +1154,7 @@ function saveDraft() { LS.set("draft", S); }
 /* ═════════ форма расчёта ═════════ */
 $("#taxSel").innerHTML = Object.entries(TAX).map(([k, t]) => `<option value="${k}">${t.name}</option>`).join("");
 function writeForm() {
+  SCHMSG = null;
   $("#name").value = S.name || "";
   $$("[data-k]").forEach(el => {
     const v = S[el.dataset.k];
@@ -938,7 +1173,9 @@ function writeFees() {
   $("#mpTitle").textContent = "Расходы " + m.short;
   $("#acqHint").textContent = m.acqHint;
   $("#logiHint").textContent = m.logiHint;
-  $("#schemeSeg").innerHTML = m.schemes.map(x => `<button data-scheme="${x}" aria-pressed="${f.scheme === x}">${x}</button>`).join("");
+  $("#schemeSeg").innerHTML = schemesOf(S, S.mp).map(x => `<button data-scheme="${x}" aria-pressed="${f.scheme === x}"` +
+    (x === "fact" ? ' title="Расходы на 1 шт по факту панели — как продавали"' : "") + `>${schName(x)}</button>`).join("");
+  $("#schBox").innerHTML = SCHMSG && SCHMSG.mp === S.mp && SCHMSG.sch === f.scheme ? SCHMSG.html : schSrc();
   $$("[data-only]").forEach(el => { const i = el.querySelector("input"), v = i.dataset.f ? f[i.dataset.f] : S[i.dataset.k];
     el.classList.toggle("hidden", el.dataset.only !== S.mp && !num(v)); });
   $$("#mpSeg button").forEach(b => b.setAttribute("aria-pressed", b.dataset.mp === S.mp));
@@ -980,17 +1217,61 @@ $("#form").addEventListener("click", e => {
   const b = e.target.closest("button");
   if (!b) return;
   if (b.dataset.mp) { if (b.dataset.mp !== S.mp) { S.mp = b.dataset.mp; saveDraft(); writeFees(); render(); } }
-  else if (b.dataset.scheme) { S.fees[S.mp].scheme = b.dataset.scheme; writeFees(); saveDraft(); schedule(); }
+  else if (b.dataset.scheme) setScheme(b.dataset.scheme);
   else if (b.dataset.ads) { S.adsMode = b.dataset.ads; syncToggles(); saveDraft(); schedule(); }
   else if (b.dataset.base) { S.taxBase = b.dataset.base; syncToggles(); saveDraft(); schedule(); }
   else if (b.dataset.act === "saveDefaults") {
-    const d = LS.get("defaults", {});
-    d.fees = d.fees || {}; d.fees[S.mp] = clone(S.fees[S.mp]);
+    const d = LS.get("defaults", {}), f = S.fees[S.mp];
+    d.fees = d.fees || {}; d.fees[S.mp] = clone(f);
+    if (f.scheme === "fact") d.fees[S.mp].scheme = MPS[S.mp].fees.scheme;
+    else { d.sch = d.sch || {}; d.sch[S.mp] = d.sch[S.mp] || {}; d.sch[S.mp][f.scheme] = pickSch(f); }      // своя схема — свои цифры
     d.common = {}; COMMON_KEYS.forEach(k => d.common[k] = S[k]);
     LS.set("defaults", d); toast("Запомнил: новые расчёты начнутся с этих значений");
   }
 });
 $("#form").addEventListener("focusout", e => { if (e.target.id === "pSale") syncSale(true); });
+
+/* ═════════ смена схемы: поля схемы — из тарифа новой, старые (с правками) — в S.keep ═════════ */
+let SCHMSG = null;            // что поменялось при последней смене — в рамке под переключателем, пока не сменят товар или площадку
+const fv = (k, v) => { const u = FLBL[k][1]; return u === "%" ? NF2.format(num(v)) + "%" : u === "₽" ? rub(num(v)) : NF2.format(num(v)) + " " + u; };
+function schSrc() {           /* откуда цифры текущей схемы — постоянная подпись */
+  const f = S.fees[S.mp], t = tarOf(S, S.mp), x = f.scheme;
+  if (x === "fact") {
+    const mon = t.src || (FACT && FACT.mp[S.mp] ? String(FACT.mp[S.mp].month).toLowerCase() : "");
+    const inf = S.mp === "ozon" && t.t && t.t.i ? "отправлений" + (t.m && t.m.per ? " за " + t.m.per : "") + ": " + t.t.i : "";
+    return `<b>По панели</b> — расходы на 1 шт по факту панели${mon ? " за " + esc(mon) : ""}, как продавали${inf ? " (" + esc(inf) + ")" : ""}: логистика уже на проданную шт с возвратами, поэтому выкуп 100%.` +
+      (t.t ? ` Выберите схему — подставлю её тарифы для этого товара.` : "");
+  }
+  const own = t && t.t && t.t[x], auto = S.auto && S.auto[S.mp + "|" + x];
+  const same = auto && SCH_KEYS.every(k => auto[k] === undefined || Math.abs(num(f[k]) - num(auto[k])) < 1e-9);
+  if (own && same) return `<b>${MPS[S.mp].short} ${x}</b> — ${esc(tarQ(S.mp, x, t.t, t.m))}.`;
+  if (own) return `<b>${MPS[S.mp].short} ${x}</b>: часть цифр поправлена вручную. По тарифу — ${esc(tarQ(S.mp, x, t.t, t.m))}.`;
+  return `<b>${MPS[S.mp].short} ${x}</b> — ${esc((t ? "тарифа этого товара в данных нет; " : "") + SCH_TIP[S.mp])}`;
+}
+function setScheme(y) {
+  const mp = S.mp, f = S.fees[mp], x = f.scheme;
+  if (x === y) return;
+  S.keep = S.keep || {}; S.auto = S.auto || {};
+  const kx = mp + "|" + x, ky = mp + "|" + y, before = pickSch(f), auto = S.auto[kx];
+  const edited = auto ? SCH_KEYS.filter(k => auto[k] !== undefined && Math.abs(num(f[k]) - num(auto[k])) > 1e-9) : [];
+  S.keep[kx] = before;
+  let head, q = "";
+  if (S.keep[ky]) { Object.assign(f, S.keep[ky]); head = "вернул цифры, которые были на этой схеме"; }
+  else {
+    const p = schProfile(S, mp, y, x, f);
+    Object.assign(f, p.vals); S.auto[ky] = pickSch(f); q = p.q;
+    head = y === "fact" ? "факт панели" : p.own ? "тарифы этого товара" : "типовые ставки схемы";
+  }
+  f.scheme = y;
+  const diff = k => fv(k, before[k]) !== fv(k, f[k]);            // как на экране: 0,01 ₽ → 0 ₽ не пишем
+  const ch = SCH_KEYS.filter(diff).map(k => `${FLBL[k][0]} ${fv(k, before[k])} → <b>${fv(k, f[k])}</b>`);
+  const lost = edited.filter(diff);
+  SCHMSG = { mp, sch: y, html:
+    `<b>${schName(x)} → ${schName(y)}</b> · ${head}: ${ch.length ? ch.join(" · ") : "цифры те же — по тарифам площадки эти схемы не отличаются"}.` +
+    (q ? `<div class="src">${esc(q.replace(/\.$/, ""))}.</div>` : "") +
+    (lost.length ? `<div class="warn">Ваши правки на ${esc(schName(x))} (${lost.map(k => FLBL[k][0] + " " + fv(k, before[k])).join(", ")}) убрал из расчёта — они сохранены и вернутся, если снова выбрать ${esc(schName(x))}.</div>` : "") };
+  saveDraft(); writeFees(); schedule();
+}
 
 /* ═════════ итог расчёта ═════════ */
 let queued = false;           // одна перерисовка на пачку событий; не rAF — он стоит в фоновых вкладках
@@ -1041,8 +1322,12 @@ function render() {
     return `<tr class="${k === S.mp ? "cur" : ""}"><td>${MPS[k].short}</td><td class="${tone(x.margin, t)}">${rub(x.profit)}</td><td class="${tone(x.margin, t)}">${pct(x.margin)}</td><td>${y ? rub(y.p) : "—"}</td></tr>`;
   }).join("");
   const slMin = Math.round(r.P0 * 0.5), slMax = Math.round(r.P0 * 1.5) || 100;
+  const schRows = schemesOf(S, S.mp).map(y => {
+    const s2 = Object.assign({}, S, { fees: Object.assign({}, S.fees, { [S.mp]: feesFor(S, S.mp, y) }) }), x = calc(s2), py = priceTarget(s2, S.mp, t);
+    return `<tr class="${y === f.scheme ? "cur" : ""}"><td>${schName(y)}</td><td>${rub(x.mpSum)}</td><td class="${tone(x.margin, t)}">${rub(x.profit)}</td><td class="${tone(x.margin, t)}">${pct(x.margin)}</td><td>${py ? rub(py.p) : "—"}</td></tr>`;
+  }).join("");
   $("#res").innerHTML = `
-    <div class="hero"><div class="lbl">Прибыль с 1 проданной шт · ${m.short}</div><div class="big ${tone(r.margin, t)}">${rub(r.profit)}</div></div>
+    <div class="hero"><div class="lbl">Прибыль с 1 проданной шт · ${m.short} ${schName(f.scheme)}</div><div class="big ${tone(r.margin, t)}">${rub(r.profit)}</div></div>
     <div class="kpis">
       <div class="kpi"><b class="${tone(r.margin, t)}">${pct(r.margin)}</b><span>маржа · цель ${NF1.format(t * 100)}%</span></div>
       <div class="kpi"><b class="${tone(r.roi, tr)}">${pct(r.roi, 0)}</b><span>ROI · цель ${NF0.format(tr * 100)}%</span></div>
@@ -1074,6 +1359,9 @@ function render() {
       <tbody>${whatIfRows(S, S.mp, r.P0, pm)}</tbody></table></div>
       <div class="note" style="margin-top:4px">* сколько продавать в месяц, чтобы прибыль осталась как сейчас при ${NF0.format(pm)} шт</div>
     </div>
+    <div><div class="h">Та же цена по схемам ${m.short}</div>
+      <table class="t" id="schTab"><thead><tr><th></th><th>Расходы ${m.short}</th><th>Прибыль/шт</th><th>Маржа</th><th>Цена под ${NF1.format(t * 100)}%</th></tr></thead><tbody>${schRows}</tbody></table>
+      <div class="note" style="margin-top:4px">${tarOf(S, S.mp) && S.tar.t ? "Схемы — по тарифам этого товара" + (S.tar.fact ? ", «По панели» — факт" : "") : "Схемы — по типовым разницам; найдите товар по артикулу, чтобы взять его тарифы"}. Переключатель — в «Расходах ${m.short}».</div></div>
     <div><div class="h">Та же цена на других площадках</div>
       <table class="t"><thead><tr><th></th><th>Прибыль/шт</th><th>Маржа</th><th>Цена под ${NF1.format(t * 100)}%</th></tr></thead><tbody>${others}</tbody></table>
       <div class="note" style="margin-top:4px">По расходам, заданным для каждой площадки (переключатель «Площадка» над названием).</div></div>
@@ -1082,6 +1370,7 @@ function render() {
       <li>Эквайринг — от цены покупателя (после скидки площадки).</li>
       <li>Логистика на проданную шт = доставка ÷ выкуп + обратная × (1 ÷ выкуп − 1): невыкупы возят туда и обратно.</li>
       <li>Ozon: доставка = тариф + обработка + последняя миля (% от цены, не больше потолка) + нелокальные + кросс-докинг × литры.</li>
+      <li>Схема работы меняет комиссию, логистику, обработку, возврат, выкуп, хранение и приёмку на тариф этой схемы: для своего товара — его тарифы (WB — предмет и объём карточки, Ozon — тариф и средняя логистика его отправлений этой схемы, ЯМ — калькулятор тарифов Маркета), без товара — типовые разницы. «По панели» — факт, как продавали. Что вы поправили на схеме, сохраняется и возвращается вместе с ней.</li>
       <li>«Доходы − расходы» — ставка с прибыли до налога, не меньше минимального (УСН 1%, АУСН 3% от доходов).</li>
       <li>Соинвест — доля цены, с которой налог не платится (как в таблице Вики для Ozon).</li>
       <li>Маржа = прибыль ÷ цена продажи. ROI = прибыль ÷ себестоимость. Цвет: зелёный — от цели, жёлтый — от 0 до цели, красный — минус.</li></ul></details>`;
@@ -1147,6 +1436,33 @@ $("#shCopy").onclick = async () => {
   toast("Ссылка скопирована"); $("#shareBox").classList.add("hidden");
 };
 $("#shMore").onclick = async () => { try { await navigator.share({ title: "Юнитка: " + (S.name || "расчёт"), url: $("#shareUrl").value }); } catch (e) {} };
+
+/* ═════════ как поставить расширение: окно с шагами, браузер угадываем; ссылка …/unitka/#ext открывает сразу ═════════ */
+const XB_ADDR = { chrome: "chrome://extensions", yandex: "browser://extensions", opera: "opera://extensions" };
+function xbSet(b) {
+  $("#extBox .xg").dataset.xb = b; LS.set("xb", b);
+  $$("#xgB button").forEach(x => x.setAttribute("aria-pressed", x.dataset.xbb === b));
+}
+function extOpen(step) {
+  const ua = navigator.userAgent;
+  xbSet(LS.get("xb", null) || (/OPR\//.test(ua) ? "opera" : /YaBrowser\//.test(ua) ? "yandex" : "chrome"));
+  $("#extBox").classList.remove("hidden");
+  const sh = $("#extBox .sheet"); sh.scrollTop = 0;
+  if (step) { const li = $$("#extBox li")[step - 1]; if (li) sh.scrollTop = li.offsetTop - sh.offsetTop - 8; }
+}
+const extClose = () => { $("#extBox").classList.add("hidden"); if (location.hash === "#ext") history.replaceState(null, "", location.pathname + location.search); };
+$("#xgClose").onclick = extClose;
+$("#extBox").addEventListener("click", e => { if (e.target.id === "extBox") extClose(); const b = e.target.closest("[data-xbb]"); if (b) xbSet(b.dataset.xbb); });
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("#extBox").classList.contains("hidden")) extClose(); });
+$("#xgCopy").onclick = async () => {
+  const a = XB_ADDR[$("#extBox .xg").dataset.xb];
+  try { await navigator.clipboard.writeText(a); toast("Скопировано: " + a + " — вставьте в адресную строку"); }
+  catch (e) { toast("Выделите адрес мышкой и скопируйте: " + a); }
+};
+document.addEventListener("click", e => {
+  if (e.target.closest("[data-ext-how]")) extOpen();
+  else if (e.target.closest("[data-ext-dl]")) setTimeout(() => extOpen(2), 400);     // скачал — сразу «что дальше»
+});
 $("#bNew").onclick = () => { S = newState(S.mp); saveDraft(); writeForm(); render(); window.scrollTo(0, 0); toast("Новый расчёт"); };
 $("#bSave").onclick = () => {
   const list = LS.get("saved", []);
@@ -1421,7 +1737,9 @@ function renderFact(keepDetail) {
       Продано в месяце меньше 3 шт — расходы берутся вместе с прошлыми месяцами (до полугода), под товаром написано, за какие.
       <b>По панели</b> — что получилось по факту за выбранный срок: валовая прибыль ÷ выручка. <b>ДРР</b> — реклама ÷ выручка за тот же срок.
       Цвет: зелёный — от ${NF1.format(t * 100)}%, жёлтый — от 0 до ${NF1.format(t * 100)}%, красный — минус. Обновлено ${upd.toLocaleDateString("ru-RU")} ${upd.toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" })}.
-      <br><a class="linkbtn" href="unitka-ext.zip" download>Скачать расширение для компьютера (Opera, Chrome)</a></div>`;
+      <div class="extbar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M9 4h3a2 2 0 0 1 4 0h3v5a2 2 0 0 1 0 4v6h-6a2 2 0 0 0-4 0H4v-5a2 2 0 0 0 0-4V4Z"/></svg>
+        <span><b>Расширение для компьютера</b> — прибыль и маржа прямо на карточке WB и Ozon (Chrome, Яндекс Браузер, Opera).</span>
+        <a class="btn sm" href="unitka-ext.zip" download data-ext-dl>Скачать</a><button class="btn sm pri" data-ext-how>Как поставить</button></div></div>`;
   if (keepDetail) return;
   if (!isPhone() && (!FSEL || !items.some(o => o.key === FSEL))) { FSEL = sold.length ? sold[0].key : null; FPRICE = null; markSel(); }
   renderDetail();
@@ -1559,9 +1877,9 @@ $("#detail").addEventListener("click", e => {
     const v = Math.round(FPRICE || base); $("#fP").value = inField(v); $("#fR").value = v; keepScroll(paintDetail);
   }
   if (b.id === "bToCalc" && row) {
-    S = x ? factToState(mp, row, x, FPRICE || now || x.price) : emptyToState(mp, row);
+    S = withMeta(x ? factToState(mp, row, x, FPRICE || now || x.price) : emptyToState(mp, row));
     saveDraft(); writeForm(); setTab("calc"); render(); window.scrollTo(0, 0);
-    toast(x ? "Цифры товара перенесены в расчёт — правьте любые" : emptyTip(row));
+    toast(x ? "Цифры товара перенесены в расчёт — правьте любые" + (row.t ? "; схема — переключатель в «Расходах»" : "") : emptyTip(row, mp));
   }
 });
 /* товар без продаж → расчёт: цена сейчас, себестоимость, ФФ и доукомплектовка из панели; комиссия, логистика, налог и ДРР — настройки площадки */
@@ -1571,15 +1889,22 @@ function emptyToState(mp, row) {
     tax: "ausn_d", taxBase: "sale", nds: 0 });
   if (t) s.taxRate = t;
   if (num(row.now) > 0) s.price0 = r2(num(row.now));
+  // комиссия, логистика, возврат и выкуп — тариф схемы по умолчанию для этого товара (shemy.py), если он есть
+  s.tar = { mp, a: row.a, fact: false, t: row.t || null, m: FACT && FACT.mp[mp] ? FACT.mp[mp].tq || null : null };
+  const f = s.fees[mp], v = tarVals(mp, f.scheme, row.t, s.tar.m);
+  if (v) Object.assign(f, v);
+  s.auto = { [mp + "|" + f.scheme]: pickSch(f) };
   return s;
 }
+/* товар из факта → расчёт: общее площадки для пояснений к тарифам схем (в factToState его нет — она общая с расширением) */
+function withMeta(s) { if (s.tar && FACT && FACT.mp[s.tar.mp]) s.tar.m = FACT.mp[s.tar.mp].tq || null; return s; }
 /* АУСН как в панели площадки: налог ÷ выручка (медиана по товарам), в % */
 function mpTax(mp) {
   const v = ((FACT && FACT.mp[mp] && FACT.mp[mp].rows) || []).filter(r => num(r.sales) > 0 && num(r.tax) > 0).map(r => num(r.tax) / num(r.sales)).sort((a, b) => a - b);
   return v.length ? Math.round(v[v.length >> 1] * 1e6) / 1e4 : null;
 }
-const emptyTip = row => (row.c1 ? "Подставил цену, себестоимость и ФФ из панели" : "Себестоимости в панели нет — впишите закупку") +
-  "; комиссия, логистика и ДРР — по настройкам площадки, проверьте";
+const emptyTip = (row, mp) => (row.c1 ? "Подставил цену, себестоимость и ФФ из панели" : "Себестоимости в панели нет — впишите закупку") +
+  (row.t && row.t[S.fees[mp].scheme] ? "; комиссия и логистика — тариф " + S.fees[mp].scheme + " для этого товара, ДРР — по настройкам" : "; комиссия, логистика и ДРР — по настройкам площадки, проверьте");
 /* строка панели → состояние расчёта, которое даёт ту же прибыль, что факт (при цене price) */
 function factToState(mp, row, x, price) {
   const s = newState(mp), f = s.fees[mp];
@@ -1589,7 +1914,10 @@ function factToState(mp, row, x, price) {
   if (FADS === "pct") { s.adsMode = "pct"; s.drr = p4(x.drr); } else { s.adsMode = "rub"; s.adsRub = r2(x.ads); }
   const spp = row.spp > 0 && row.spp < 0.95 ? row.spp : 0;                          // СПП / соинвест с витрины (лист «Цены витрина» панели)
   Object.assign(f, OZX, { comm: p4(x.cR), acq: p4(x.aR / (1 - spp)), spp: p4(spp), logi: r2(x.logi), logiPct: 0, back: 0, buyout: 100,
-    stor: r2(x.stor), accept: 0, other: r2(x.loyal + x.resid), otherPct: 0, soinv: 0 });
+    stor: r2(x.stor), accept: 0, other: r2(x.loyal + x.resid), otherPct: 0, soinv: 0, scheme: "fact" });
+  // схема «По панели»: факт как продавали; тарифы схем этого товара (shemy.py) — для переключателя схемы
+  s.tar = { mp, a: row.a, fact: true, src: x.src || "", t: row.t || null };
+  s.auto = { [mp + "|fact"]: pickSch(f) };
   return s;
 }
 function renderFactKeep() { const y = window.scrollY; renderFact(true); window.scrollTo(0, y); }
@@ -1638,8 +1966,8 @@ function acShow() {
 function acPick(i) {
   const o = AC[i]; if (!o) return;
   $("#ac").classList.add("hidden");
-  if (o.x) { S = factToState(o.mp, o.r, o.x, o.now || o.x.price); toast("Подставил «" + o.r.a + "»: цена сейчас и расходы из факта — правьте любые цифры"); }
-  else { S = emptyToState(o.mp, o.r); toast(emptyTip(o.r)); }
+  if (o.x) { S = withMeta(factToState(o.mp, o.r, o.x, o.now || o.x.price)); toast("Подставил «" + o.r.a + "»: цена сейчас и расходы из факта — правьте любые цифры"); }
+  else { S = emptyToState(o.mp, o.r); toast(emptyTip(o.r, o.mp)); }
   saveDraft(); writeForm(); render();
 }
 $("#name").addEventListener("input", acShow);
@@ -1802,6 +2130,7 @@ function setHdr() { document.documentElement.style.setProperty("--hdr", $("heade
   if (h.get("k") || h.get("c") || h.get("z")) history.replaceState(null, "", location.pathname + location.search);
   if (isPhone()) $$("details.sec").forEach(d => { if (!["price", "cost", "mp"].includes(d.dataset.sec)) d.open = false; });
   writeForm(); render(); setTab(["sum", "calc", "saved"].includes(TAB) ? TAB : "sum");
+  if (location.hash === "#ext") extOpen();
 })();
 </script>
 </body>
