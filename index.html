@@ -13,11 +13,11 @@
 <meta name="apple-mobile-web-app-title" content="Юнитка">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <script>/* шрифты тем — Google Fonts, грузятся только когда тема выбрана */
-var TFONT = { comic: "Rubik:wght@400;500;600;700;800&family=Unbounded:wght@600;800", farcry: "Rubik+Dirt&family=Roboto+Condensed:wght@400;500;600;700",
+var TFONT = { comic: "Rubik:wght@400;500;600;700;800&family=Unbounded:wght@600;800", jim: "Rubik:wght@400;500;600;700;800&family=Rubik+Wet+Paint&family=Press+Start+2P", farcry: "Rubik+Dirt&family=Roboto+Condensed:wght@400;500;600;700",
   paper: "PT+Sans:wght@400;700&family=PT+Serif:wght@400;700", dusk: "Nunito:wght@400;500;600;700;800" };
 function themeFont(t) { if (!TFONT[t] || document.getElementById("tf-" + t)) return; var l = document.createElement("link"); l.id = "tf-" + t; l.rel = "stylesheet";
   l.href = "https://fonts.googleapis.com/css2?family=" + TFONT[t] + "&display=swap"; document.head.appendChild(l); }
-try { var t = JSON.parse(localStorage.getItem("unitka.theme")); if (/^(light|dark|beige|comic|farcry|paper|dusk)$/.test(t)) { document.documentElement.setAttribute("data-theme", t); themeFont(t); } } catch (e) {}</script>
+try { var t = JSON.parse(localStorage.getItem("unitka.theme")); if (/^(light|dark|beige|comic|farcry|jim|paper|dusk)$/.test(t)) { document.documentElement.setAttribute("data-theme", t); themeFont(t); } } catch (e) {}</script>
 <style>
 :root{
   color-scheme: light;
@@ -155,6 +155,75 @@ try { var t = JSON.parse(localStorage.getItem("unitka.theme")); if (/^(light|dar
   [data-theme="farcry"] nav.tabs button{color:rgba(244,239,228,.88)}
   [data-theme="farcry"] nav.tabs button[aria-current="page"]{color:#fff;background:rgba(200,36,29,.22);box-shadow:inset 0 -3px 0 var(--accent);border-radius:4px 4px 0 0}
 }
+/* «Червяк Джим» — весёлая, погружение в мультяшную игру 90-х (22.10.2026; картинки NeuralBox — Код\unitka\jim): страница — свалка-город на фиолетовом
+   закате (jim-junk.webp); сверху вкладки баннер со свалкой и Джимом с бластером, «ЮНИТКА» зелёной краской и «Groovy!»; по шапке стекает слизь,
+   над страницей пролетает корова; карточки — мультяшные панели с толстой обводкой и жёсткой тенью; заголовки пиксельным шрифтом с кляксой слизи,
+   разделы «Расчёта» с бластером; ползунок — плазменный шар, курсор — бластер. Шрифты Rubik Wet Paint + Press Start 2P + Rubik. Грузится только в этой теме */
+:root[data-theme="jim"]{
+  color-scheme: light;
+  --bg:#2b1240; --surface:#fffbea; --surface-2:#f6efd6; --ink:#1a1022; --ink-2:#4d3a5c; --muted:#7b6a86;
+  --line:#e6dbbd; --ring:#1a1022; --accent:#e0331f; --accent-wash:#ffd6de;
+  --good:#2b8a14; --good-bg:#dff4cc; --bad:#d8261b; --bad-bg:#ffd9d4; --warn-bg:#fff1bf; --mid:#a86400;
+  --s1:#7ad321; --s2:#e0331f; --s3:#3a9df0; --s4:#ffc21a; --s5:#f48fb1; --s6:#2b8a14;
+  --shadow:5px 5px 0 #1a1022; --r:16px;
+  --font:"Rubik",system-ui,sans-serif; --font-h:"Rubik Wet Paint","Rubik",system-ui,sans-serif; --pix:"Press Start 2P",monospace;
+  --slime:#7ad321;
+  --outline:-2px -2px 0 #1a1022,2px -2px 0 #1a1022,-2px 2px 0 #1a1022,2px 2px 0 #1a1022,0 -2px 0 #1a1022,0 2px 0 #1a1022,-2px 0 0 #1a1022,2px 0 0 #1a1022;
+  --jt:clamp(40px,6.4vw,92px); --jp:min(2.4vw,28px); --jl:min(3.4vw,40px);
+}
+[data-theme="jim"] body{background:#2b1240;cursor:url("jim-cursor.png") 29 7,auto}
+[data-theme="jim"] body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:linear-gradient(rgba(43,18,64,.15),rgba(43,18,64,.45)),url("jim-junk.webp") center 40%/cover}
+/* корова пролетает над страницей раз в полминуты */
+[data-theme="jim"] body::after{content:"";position:fixed;z-index:45;top:calc(var(--hdr,57px) + 30px);left:-160px;width:130px;height:112px;pointer-events:none;
+  background:url("jim-cow.png") center/contain no-repeat;animation:jim-cow 30s linear 4s infinite}
+@keyframes jim-cow{0%{transform:translate(0,40px) rotate(-10deg)}8%{transform:translate(calc(50vw + 80px),-20px) rotate(4deg)}16%{transform:translate(calc(100vw + 320px),10px) rotate(12deg)}100%{transform:translate(calc(100vw + 320px),10px)}}
+@media (prefers-reduced-motion: reduce){ [data-theme="jim"] body::after{display:none} }
+[data-theme="jim"] :is(input,textarea){cursor:text} [data-theme="jim"] :is(select,input[type=range]){cursor:pointer}
+/* шапка — закат, по низу стекает слизь */
+[data-theme="jim"] header{background:linear-gradient(180deg,#3a1263 0%,#7a1f86 55%,#d9532c 100%);border-bottom:3px solid #1a1022}
+[data-theme="jim"] header::after{content:"";position:absolute;left:0;right:0;top:100%;height:22px;pointer-events:none;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='22'%3E%3Cpath d='M0 0h140v5c-8 0-10 3-11 9-1 6-6 6-7 0-1-5-4-7-10-7-7 0-9 2-10 4s-5 3-6 0-4-4-9-4c-6 0-8 3-9 11-1 7-7 7-8 0-1-6-3-10-11-10-6 0-8 2-9 5-1 4-6 4-7 0-1-3-4-5-9-5-6 0-8 4-9 8-1 5-6 5-7 0-1-4-3-6-8-6V0z' fill='%237ad321' stroke='%231a1022' stroke-width='2'/%3E%3C/svg%3E") 0 -2px/140px 22px repeat-x}
+[data-theme="jim"] .brand{font-size:24px;letter-spacing:.02em}
+[data-theme="jim"] .brand span{color:var(--slime);text-shadow:var(--outline),0 4px 0 #1a1022}
+[data-theme="jim"] .brand i{width:28px;height:44px;margin:-8px 0 -6px;background:url("jim-worm.png") center/contain no-repeat;color:transparent;border-radius:0;transform:rotate(-6deg)}
+@media (min-width: 861px){
+  [data-theme="jim"] nav.tabs button{color:#fff3c4}
+  [data-theme="jim"] nav.tabs button[aria-current="page"]{color:#1a1022;background:var(--slime);box-shadow:3px 3px 0 #1a1022;border:2px solid #1a1022}
+}
+/* баннер: свалка + Джим, «ЮНИТКА» зелёной краской, «Groovy!» */
+[data-theme="jim"] main{position:relative;padding-top:34px}
+[data-theme="jim"] main::before{content:"ЮНИТКА";display:flex;align-items:flex-start;box-sizing:border-box;height:clamp(190px,29vw,370px);margin:0 0 26px;padding:var(--jp) 0 0 var(--jl);
+  border:3px solid #1a1022;border-radius:var(--r);box-shadow:6px 6px 0 #1a1022;
+  background:url("jim-char.webp") right 4% bottom -3%/auto 100% no-repeat,url("jim-junk.webp") center 42%/cover;
+  font:400 var(--jt)/1 var(--font-h);letter-spacing:.02em;color:var(--slime);text-shadow:var(--outline),0 6px 0 #1a1022}
+[data-theme="jim"] main::after{content:"Groovy!";position:absolute;pointer-events:none;left:calc(16px + var(--jl) + 6px);top:calc(34px + var(--jp) + var(--jt) + 16px);
+  font:400 clamp(12px,1.5vw,20px)/1 var(--pix);color:#ffc21a;text-shadow:var(--outline);transform:rotate(-4deg)}
+/* мультяшные панели */
+[data-theme="jim"] :is(.card,details.sec,.search,.sumtot){border:3px solid #1a1022;box-shadow:var(--shadow)}
+[data-theme="jim"] :is(.btn,.chip,.themeb,.seg,.inp,select.sel,.namebar input,.lock input,.shurl,.tmenu,.ac){border:2px solid #1a1022}
+[data-theme="jim"] :is(.btn,.chip,.themeb){box-shadow:3px 3px 0 #1a1022;transition:transform .08s,box-shadow .08s}
+[data-theme="jim"] :is(.btn,.chip,.themeb):active{transform:translate(3px,3px);box-shadow:0 0 0 #1a1022}
+[data-theme="jim"] :is(.btn.pri,.chip.on){background:var(--slime);color:#1a1022;font-weight:700}
+[data-theme="jim"] .seg{background:var(--surface)}
+[data-theme="jim"] .seg button[aria-pressed="true"]{background:var(--accent);color:#fff;box-shadow:inset 0 -3px 0 rgba(0,0,0,.25)}
+[data-theme="jim"] .lhead{background:#3a1859;color:#fff3c4;top:calc(var(--hdr,57px) + 14px);border-bottom:3px solid #1a1022} [data-theme="jim"] .lhead span small{color:#c9b6e0}
+[data-theme="jim"] :is(.detail,.res){top:calc(var(--hdr,57px) + 24px)}
+[data-theme="jim"] .item:hover{background:#f3ffe0} [data-theme="jim"] .item.sel{background:var(--accent-wash);box-shadow:inset 6px 0 0 var(--slime)}
+[data-theme="jim"] .kpi{background:#fff;border:2px solid #1a1022;box-shadow:2px 2px 0 #1a1022}
+[data-theme="jim"] :is(.kpi b,.sumtot b){font-weight:800}
+[data-theme="jim"] .detail .title{font-size:24px;color:var(--ink)}
+[data-theme="jim"] .h{font:400 11px/1.6 var(--pix);text-transform:uppercase;padding-left:26px;background:url("jim-slime.png") 0 50%/auto 20px no-repeat;align-items:center}
+[data-theme="jim"] .h span{font:500 13px/1.3 var(--font);text-transform:none}
+[data-theme="jim"] .tmenu .tgrp{font-family:var(--pix);font-size:9px}
+[data-theme="jim"] details.sec>summary{padding-left:50px;background:url("jim-blaster.png") 12px 50%/auto 22px no-repeat}
+[data-theme="jim"] :is(.mprow,.perline){color:#fff3c4;text-shadow:0 2px 0 #1a1022,0 0 8px rgba(0,0,0,.6)}
+[data-theme="jim"] .mprow .seg{text-shadow:none}
+[data-theme="jim"] input[type=range]::-webkit-slider-runnable-track{height:8px;border-radius:4px;border:2px solid #1a1022;background:#3a1859}
+[data-theme="jim"] input[type=range]::-webkit-slider-thumb{width:28px;height:28px;margin-top:-12px;border:2px solid #1a1022;border-radius:50%;
+  background:radial-gradient(circle at 35% 32%,#f2ffc8 0 12%,#9fe83a 34%,#4c9a10 78%);box-shadow:0 0 12px rgba(122,211,33,.9)}
+[data-theme="jim"] .toast{background:var(--slime);color:#1a1022;border:3px solid #1a1022;box-shadow:4px 4px 0 #1a1022}
+[data-theme="jim"] .mini{background:#3a1859;color:#fff3c4;border:3px solid #1a1022}
 /* «Тетрадь» — спокойная: лист в клетку, синие «чернила», заголовки и цифры с засечками, вместо теней — тонкие линии, шрифты PT Sans + PT Serif */
 :root[data-theme="paper"]{
   color-scheme: light;
@@ -474,6 +543,15 @@ a.btn{text-decoration:none;color:inherit}
     background:url("fc3-tatau-red.png") 0 100%/auto 14px repeat-x,linear-gradient(180deg,rgba(0,0,0,.3),transparent 40%),url("fc3-hero-m.webp") center/cover}
   [data-theme="farcry"] main::after{top:calc(26px + var(--fcp) + 8vw + 6px);left:calc(12px + var(--fcl) + 2px);max-width:40%;font-size:12px}
   [data-theme="farcry"] .detail-wrap.open .detail{box-shadow:var(--burn)}
+  [data-theme="jim"] nav.tabs{background:#3a1859;border-top:4px solid var(--slime)}
+  [data-theme="jim"] nav.tabs button{color:#fff3c4}
+  [data-theme="jim"] nav.tabs button[aria-current="page"]{color:var(--slime)}
+  [data-theme="jim"] body::before{background-image:linear-gradient(rgba(43,18,64,.15),rgba(43,18,64,.45)),url("jim-junk-m.webp")}
+  [data-theme="jim"] body::after{width:90px;height:78px}
+  [data-theme="jim"] main{padding-top:28px}
+  [data-theme="jim"] main::before{height:54vw;margin:0 0 20px;font-size:8vw;
+    background:url("jim-char.webp") right 3% bottom -6%/auto 104% no-repeat,url("jim-junk-m.webp") 30% 38%/cover}
+  [data-theme="jim"] main::after{top:calc(28px + var(--jp) + 8vw + 12px);left:calc(12px + var(--jl) + 4px);font-size:10px}
   [data-theme="dusk"] nav.tabs{background:rgba(19,27,30,.86);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
   [data-theme="dusk"] .detail-wrap.open .backbar{background:var(--solid)}
   [data-theme="comic"] nav.tabs{border-top:3px solid #111}
@@ -706,6 +784,7 @@ const TH = {
   /* весёлые */
   comic: ["Комикс", "comic", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 2.5l2.2 4.6 5-1.4-2.3 4.6 4.3 3-5.2.8.4 5.2-4.4-3-4.4 3 .4-5.2-5.2-.8 4.3-3-2.3-4.6 5 1.4Z"/></svg>'],
   farcry: ["Far Cry 3", "farcry", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3a7 7 0 0 0-7 7c0 2.4 1.2 4.3 3 5.4V18a1 1 0 0 0 1 1h1v2h4v-2h1a1 1 0 0 0 1-1v-2.6c1.8-1.1 3-3 3-5.4a7 7 0 0 0-7-7Z"/><circle cx="9.3" cy="10.6" r="1.5" fill="currentColor"/><circle cx="14.7" cy="10.6" r="1.5" fill="currentColor"/></svg>'],
+  jim: ["Червяк Джим", "jim", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 21.5c-2.6 0-3.8-1.9-2.8-3.8 1.1-2 4-2.1 5.2-4 1.2-1.8-.6-3.8 1-5.6 1.4-1.6 3.6-1.5 5.1-.6"/><circle cx="15.6" cy="5.2" r="2.3"/><circle cx="19.6" cy="5.9" r="2.3"/></svg>'],
   /* спокойные */
   paper: ["Тетрадь", "paper", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"><path d="M4 20h4.5L19.5 9 15 4.5 4 15.5Z"/><path d="M13 6.5 17.5 11"/></svg>'],
   dusk: ["Сумерки", "dusk", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6.5 13.5a5.5 5.5 0 0 1 11 0"/><path d="M3 13.5h18M6 17h12M9 20.5h6M12 3.5v2.5M4.6 6.6l1.7 1.7M19.4 6.6l-1.7 1.7"/></svg>']
@@ -717,6 +796,7 @@ const SWATCH = {          /* кружки тем — векторные, без 
   dark: '<svg class="sw" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8.6" fill="#1a1a19" stroke="#8a8a85" stroke-width="1.2"/></svg>',
   comic: '<svg class="sw" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8.2" fill="#ffe14d" stroke="#111" stroke-width="2"/><circle cx="10" cy="10" r="3.6" fill="#ff2e7e" stroke="#111" stroke-width="1.2"/></svg>',
   farcry: '<svg class="sw" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8.6" fill="#2a1d12" stroke="#c8241d" stroke-width="1.6"/><path d="M10 4.6a4.2 4.2 0 0 0-4.2 4.2c0 1.4.7 2.6 1.8 3.2v1.6h1v1.2h2.8V14h1v-1.6c1.1-.6 1.8-1.8 1.8-3.2A4.2 4.2 0 0 0 10 4.6Z" fill="#efe2c0"/><circle cx="8.4" cy="9.2" r=".9" fill="#2a1d12"/><circle cx="11.6" cy="9.2" r=".9" fill="#2a1d12"/></svg>',
+  jim: '<svg class="sw" viewBox="0 0 20 20"><defs><linearGradient id="swJim" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a1263"/><stop offset=".62" stop-color="#d9532c"/><stop offset=".62" stop-color="#7ad321"/></linearGradient></defs><circle cx="10" cy="10" r="8.4" fill="url(#swJim)" stroke="#1a1022" stroke-width="1.6"/><circle cx="8.3" cy="7.6" r="2" fill="#fff" stroke="#1a1022" stroke-width=".8"/><circle cx="11.9" cy="7.6" r="2" fill="#fff" stroke="#1a1022" stroke-width=".8"/><circle cx="8.7" cy="7.8" r=".7" fill="#1a1022"/><circle cx="12.3" cy="7.8" r=".7" fill="#1a1022"/></svg>',
   paper: '<svg class="sw" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8.6" fill="#fbfaf5" stroke="#8a8a85" stroke-width="1.2"/><path d="M4.5 7.5h11M3.6 11h12.8M4.5 14.5h11M7.5 2.5v15M12.5 2.5v15" stroke="#2c4fb3" stroke-width=".8" opacity=".45"/></svg>',
   dusk: '<svg class="sw" viewBox="0 0 20 20"><defs><linearGradient id="swDusk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2d4c50"/><stop offset="1" stop-color="#3b3653"/></linearGradient></defs><circle cx="10" cy="10" r="8.6" fill="url(#swDusk)" stroke="#8a8a85" stroke-width="1.2"/><circle cx="10" cy="10" r="3.4" fill="#7fc8b4"/></svg>'
 };
