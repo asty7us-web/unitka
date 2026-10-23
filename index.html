@@ -231,7 +231,7 @@ try { var t = JSON.parse(localStorage.getItem("unitka.theme")); if (/^(light|dar
    «ЮНИТКА», над ним крутятся и блестят кольца, по нему пробегают линии скорости; под шапкой — земля в клетку с травой. Карточки — игровые панели
    с тёмно-синей обводкой и тенью, главные кнопки золотые, заголовки с кольцом, ползунок — кольцо. Шрифты Russo One + Exo 2.
    Движение — только transform и opacity, на своих слоях #sxDeco и #sxRings (не предки меню и итога, их создаёт sonicDeco() только в этой теме);
-   prefers-reduced-motion — без движения. Персонажей нет — свой рисунок по мотивам */
+   prefers-reduced-motion — без движения. С 23.10 на баннере сам Соник (NeuralBox, вырезан с пурпурного фона): бежит к петле и раз в 18 с пролетает */
 :root[data-theme="sonic"]{
   color-scheme: light;
   --bg:#1d5fe6; --surface:#ffffff; --surface-2:#edf3ff; --ink:#0a1a4a; --ink-2:#34508e; --muted:#6a7fae;
@@ -267,7 +267,18 @@ try { var t = JSON.parse(localStorage.getItem("unitka.theme")); if (/^(light|dar
 @keyframes sx-tw{0%,62%,100%{opacity:0;transform:scale(.3) rotate(0)}78%{opacity:1;transform:scale(1) rotate(45deg)}}
 /* над баннером: кольца дугой и линии скорости */
 #sxRings{position:absolute;left:16px;right:16px;top:34px;height:var(--sbh);border-radius:var(--r);overflow:hidden;pointer-events:none;z-index:1}
-#sxRings .sl{position:absolute;left:var(--x);width:clamp(18px,2.5vw,34px);height:clamp(18px,2.5vw,34px);animation:sx-bob2 2.4s ease-in-out infinite}
+#sxRings .sl{position:absolute;left:var(--x);top:var(--y);width:clamp(18px,2.5vw,34px);height:clamp(18px,2.5vw,34px);animation:sx-bob2 2.4s ease-in-out infinite}
+/* сам Соник (NeuralBox, Код\unitka\sonic): бежит к петле, чуть подпрыгивает на бегу; раз в 18 с срывается вправо и влетает слева со шлейфом */
+#sxRings .hero{position:absolute;left:44%;bottom:2%;height:80%;aspect-ratio:760/711;animation:sx-run 18s linear 4s infinite}
+#sxRings .hero b{display:block;width:100%;height:100%;background:url("sonic-char.webp") center/contain no-repeat;animation:sx-trot .5s ease-in-out infinite alternate}
+#sxRings .hero::before{content:"";position:absolute;right:62%;top:30%;width:170%;height:44%;opacity:0;animation:sx-trail 18s linear 4s infinite;
+  background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.95)) 0 6%/100% 5% no-repeat,linear-gradient(90deg,rgba(60,150,255,0),rgba(60,150,255,.9)) 30% 26%/70% 6% no-repeat,
+    linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.95)) 0 50%/90% 4% no-repeat,linear-gradient(90deg,rgba(60,150,255,0),rgba(60,150,255,.9)) 0 72%/100% 6% no-repeat,
+    linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.95)) 40% 94%/60% 4% no-repeat}
+@keyframes sx-run{0%,78%{transform:translateX(0);animation-timing-function:cubic-bezier(.55,0,1,.45)}83%{transform:translateX(110vw)}
+  83.01%{transform:translateX(-130vw);animation-timing-function:cubic-bezier(0,.55,.45,1)}90%,100%{transform:translateX(0)}}
+@keyframes sx-trail{0%,77%{opacity:0}79%,88%{opacity:1}92%,100%{opacity:0}}
+@keyframes sx-trot{to{transform:translateY(-3.5%)}}
 @keyframes sx-bob2{50%{transform:translateY(-5px)}}
 #sxRings .sp{position:absolute;left:100%;height:3px;border-radius:2px;background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.95));opacity:0;animation:sx-dash 3.4s linear infinite}
 @keyframes sx-dash{0%{transform:translateX(0);opacity:0}4%{opacity:1}34%{transform:translateX(-2200px);opacity:1}35%,100%{transform:translateX(-2200px);opacity:0}}
@@ -278,7 +289,7 @@ try { var t = JSON.parse(localStorage.getItem("unitka.theme")); if (/^(light|dar
   @keyframes sx-up2{to{transform:translateY(-240px)}}
 }
 @media (prefers-reduced-motion: reduce){
-  :is(#sxDeco,#sxRings) *,:is(#sxDeco,#sxRings) *::after{animation:none!important}
+  :is(#sxDeco,#sxRings) *,:is(#sxDeco,#sxRings) *::after,:is(#sxDeco,#sxRings) *::before{animation:none!important}
   #sxRings .sp{display:none}
 }
 /* шапка — синяя, под ней земля в клетку с травой */
@@ -696,7 +707,8 @@ a.btn{text-decoration:none;color:inherit}
   [data-theme="sonic"] main::before{margin:0 0 22px;background:linear-gradient(100deg,rgba(0,40,170,.42),rgba(0,40,170,0) 55%),url("sonic-hill-m.webp") 55% 42%/cover}
   [data-theme="sonic"] main::after{top:calc(28px + var(--sp) + var(--st) + 12px);left:calc(12px + var(--sl) + 4px);font-size:11.5px;max-width:58%}
   #sxRings{left:12px;right:12px;top:28px}
-  #sxRings .sl{left:var(--mx)}
+  #sxRings .sl{left:var(--mx);top:var(--my)}
+  #sxRings .hero{left:52%;height:76%}
   #sxDeco .sl{display:none}
   #sxDeco .near{top:10vh}
 }
@@ -1074,10 +1086,13 @@ function sonicDeco(on) {
   }
   if (!r) {
     const el = document.createElement("div"); el.id = "sxRings"; el.setAttribute("aria-hidden", "true");
-    // линии скорости — ниже надписи; кольца дугой — правее неё (на телефоне надпись шире, кольца правее: --mx)
+    // линии скорости — ниже надписи, за Соником; сам Соник бежит к петле; кольца дугой — впереди него над петлёй
+    // (на телефоне надпись шире — Соник правее, кольца над его головой: --mx/--my)
     el.innerHTML = [[54, 140, 0], [63, 90, -.9], [71, 170, -1.6], [80, 110, -2.3], [89, 130, -2.9]]
         .map(([y, w, dl]) => `<i class="sp" style="top:${y}%;width:${w}px;animation-delay:${dl}s"></i>`).join("") +
-      [[57, 21], [62, 14], [67, 11], [72, 14], [77, 21]].map(([x, y], i) => ring(`--x:${x}%;--mx:${x + 9}%;top:${y}%`, -i * 0.12)).join("");
+      '<i class="hero"><b></b></i>' +
+      [[70, 24, 60, 10], [74, 16, 67, 5], [78, 12, 74, 3], [82, 16, 81, 5], [86, 24, 88, 10]]
+        .map(([x, y, mx, my], i) => ring(`--x:${x}%;--y:${y}%;--mx:${mx}%;--my:${my}%`, -i * 0.12)).join("");
     $("main").prepend(el);
   }
 }
