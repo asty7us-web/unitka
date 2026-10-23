@@ -1,10 +1,12 @@
 /* Юнитка · тема «Пасьянс» (23.10.2026, Андрей: «сделай тему пасьянса и игру пасьянс — плавно, объёмно, красиво, чтобы менялась вся тема»).
    Пасьянс «Косынка» (Klondike): 7 столбцов, колода, сброс, 4 дома. Карты нарисованы кодом на canvas (чётко на любом экране, с тенью —
    объём), каждая карта плавно едет к своему месту (пружина), переворачивается в 3D (сжатие по ширине + подъём), при перетаскивании
-   стопка тянется за пальцем «верёвочкой». Тап по карте — сама уходит туда, куда можно (сначала в дом); тап по колоде — сдача 1 или 3;
+   стопка тянется за пальцем «верёвочкой». Тап по карте — сама уходит туда, куда можно (сначала в дом); тап по колоде — сдача по 1
+   (выбор «по 1 / по 3» Андрей убрал 23.10);
    «Отменить» без ограничений, «Подсказка», «Собрать» (когда все открыты), победа — каскад прыгающих карт, как в старом Windows.
-   Партия сохраняется (localStorage unitka.ptGame) — вернулся, продолжил. На лице баннера — веер карт (Solitaire.fan).
-   API: Solitaire.mount(canvas, {onStat}) → {resume, pause, destroy, newGame, undo, hint, auto, setDraw, mute, dbg};
+   Партия сохраняется (localStorage unitka.ptGame) — вернулся, продолжил. Веер карт (Solitaire.fan) с 23.10 на баннере не стоит —
+   там живое видео ведущей; функция оставлена.
+   API: Solitaire.mount(canvas, {onStat}) → {resume, pause, destroy, newGame, undo, hint, auto, mute, music, musicOn, started, dbg};
         Solitaire.fan(canvas, {map}) → {pause, destroy}. */
 (function () {
 "use strict";
@@ -21,13 +23,66 @@ const FONT_H = '"Forum",Georgia,"Times New Roman",serif';
 const FONT = '"Montserrat",system-ui,sans-serif';
 const INK = "#1b1d22", RED_C = "#c41230", GOLD = "#d7b45a";
 
-/* ═════════ звук: мягкий шорох и щелчок карты (WebAudio, без файлов) ═════════ */
-const AU = { a: null, on: LSG("unitka.ptMute") !== "1" };
-function ac() { if (!AU.a) { try { AU.a = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { AU.a = null; } } if (AU.a && AU.a.state === "suspended") AU.a.resume(); return AU.a; }
+/* ═════════ звук (23.10, Андрей: «звук казино игр покера на айфоне, музыка»): настоящие записи карт и фишек — набор Kenney
+   «Casino Audio» (CC0), один файл site\pasyans-sfx.mp3 с отрезками SFX (Код\unitka\pasyans\make_sfx.py); музыка — лаунж-джаз казино
+   NeuralBox Suno, бесшовная петля site\pasyans-music.mp3 (make_music.py), играет только пока открыта игра. Всё через WebAudio;
+   на iPhone сессия «playback» — слышно и в беззвучном режиме. Пока файлы не догрузились — мягкий шорох кодом. ═════════ */
+const SFX = {"shuffle":[[0.12,3.0602]],"fan":[[3.3002,0.7208],[4.141,1.3054]],"slide":[[5.5664,0.388],[6.0744,0.584],[6.7783,0.5977],[7.4961,0.4565],[8.0726,0.6005],[8.793,0.5018]],"place":[[9.4149,0.607],[10.1418,0.3159],[10.5777,0.8727],[11.5704,0.6008]],"shove":[[12.2911,0.7659],[13.177,0.7668]],"chip":[[14.0638,0.1336],[14.3174,0.1279],[14.5652,0.3708],[15.0561,0.1877]],"chiplay":[[15.3637,0.1316],[15.6154,0.2271]],"chips":[[15.9624,0.58],[16.6624,0.8337],[17.6161,0.1221],[17.8582,0.1306]]};
+const AU = { a: null, on: LSG("unitka.ptMute") !== "1", mus: LSG("unitka.ptMusic") !== "0", sfx: null, ld: false, mb: null, ml: false, src: null, mg: null, want: false, off: 0, t0: 0 };
+function ac() {
+  if (!AU.a) {
+    try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch (e) {}
+    try { AU.a = window.__ptAC || new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { AU.a = null; }   // __ptAC — создан по нажатию «Сыграть»
+  }
+  if (AU.a && AU.a.state === "suspended" && !document.hidden) AU.a.resume();
+  if (AU.a && !AU.ld) { AU.ld = true; buf("pasyans-sfx.mp3", b => { AU.sfx = b; }); }
+  return AU.a;
+}
+function buf(url, cb) { fetch(url).then(r => r.arrayBuffer()).then(d => new Promise((ok, no) => AU.a.decodeAudioData(d, ok, no))).then(cb).catch(() => {}); }
+function seg(name, vol, at, dur) {                        // случайный отрезок из SFX[name]
+  const a = AU.a, list = SFX[name]; if (!a || !AU.sfx || !list) return false;
+  const [o, d] = list[Math.floor(Math.random() * list.length)], s = a.createBufferSource(), g = a.createGain(), t = a.currentTime + (at || 0), len = Math.min(d, dur || d);
+  s.buffer = AU.sfx; s.playbackRate.value = 0.96 + Math.random() * 0.08; g.gain.setValueAtTime(vol, t);
+  if (len < d) g.gain.linearRampToValueAtTime(0, t + len);                    // обрезанный (тасовка) — плавно гаснет
+  s.connect(g); g.connect(a.destination); s.start(t, o, len + 0.02); return true;
+}
+function edges(b) {                                       // у mp3 по краям тишина-заглушка — петля между первым и последним звуком
+  const d = b.getChannelData(0), n = d.length, lim = b.sampleRate * 0.2; let i = 0, j = n - 1;
+  while (i < lim && Math.abs(d[i]) < 1e-4) i++;
+  while (j > n - lim && Math.abs(d[j]) < 1e-4) j--;
+  return [i / b.sampleRate, (j + 1) / b.sampleRate];
+}
+function music(on) {                                      // фоновая музыка: плавно входит, при паузе — гаснет и продолжает с того же места
+  AU.want = on; const a = AU.a; if (!a) return;
+  if (on && AU.mus) {
+    if (!AU.mb) { if (!AU.ml) { AU.ml = true; buf("pasyans-music.mp3", b => { AU.mb = b; if (AU.want) music(true); }); } return; }
+    if (AU.src) return;
+    const [ls, le] = edges(AU.mb), s = a.createBufferSource(), g = a.createGain(), t = a.currentTime;
+    s.buffer = AU.mb; s.loop = true; s.loopStart = ls; s.loopEnd = le;
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.3, t + 1.6);
+    s.connect(g); g.connect(a.destination); s.start(t, ls + AU.off); AU.src = s; AU.mg = g; AU.t0 = t - AU.off; AU.len = le - ls;
+  } else if (AU.src) {
+    const s = AU.src, g = AU.mg, t = a.currentTime; AU.src = null; AU.off = (t - AU.t0) % AU.len;
+    g.gain.cancelScheduledValues(t); g.gain.setValueAtTime(g.gain.value, t); g.gain.linearRampToValueAtTime(0, t + 0.5); s.stop(t + 0.55);
+  }
+}
+document.addEventListener("visibilitychange", () => { if (!AU.a) return; if (document.hidden) AU.a.suspend(); else if (AU.want) AU.a.resume(); });
 function snd(kind) {
   if (!AU.on) return; const a = ac(); if (!a) return;
   const t = a.currentTime;
-  if (kind === "win") { [523, 659, 784, 1047, 1319].forEach((f, i) => { const o = a.createOscillator(), g = a.createGain(); o.type = "triangle"; o.frequency.value = f; g.gain.setValueAtTime(0.0001, t + i * 0.11); g.gain.exponentialRampToValueAtTime(0.06, t + i * 0.11 + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + i * 0.11 + 0.5); o.connect(g); g.connect(a.destination); o.start(t + i * 0.11); o.stop(t + i * 0.11 + 0.55); }); return; }
+  if (kind === "win") {
+    for (let i = 0; i < 6; i++) seg("chips", 0.7, 0.15 + i * 0.32);                                   // выигрыш — горсть фишек
+    [523, 659, 784, 1047, 1319].forEach((f, i) => { const o = a.createOscillator(), g = a.createGain(); o.type = "triangle"; o.frequency.value = f; g.gain.setValueAtTime(0.0001, t + i * 0.11); g.gain.exponentialRampToValueAtTime(0.06, t + i * 0.11 + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + i * 0.11 + 0.5); o.connect(g); g.connect(a.destination); o.start(t + i * 0.11); o.stop(t + i * 0.11 + 0.55); }); return;
+  }
+  if (kind === "deal" && seg("shuffle", 0.6, 0, 1.1)) { for (let i = 0; i < 9; i++) seg("slide", 0.32, 0.75 + i * 0.13); return; }   // тасовка, потом раздача
+  if (kind === "home" && seg("place", 0.5)) { seg("chip", 0.6, 0.06); return; }                     // карта в дом — щелчок фишки
+  if (kind === "recycle" && seg("fan", 0.55)) return;
+  if (kind === "back" && seg("shove", 0.45)) return;
+  if (kind === "hint" && seg("chiplay", 0.55)) return;
+  if (kind === "flip" && seg("slide", 0.42)) return;
+  if (kind === "place" && seg("place", 0.6)) return;
+  if (kind === "hint") return;
+  kind = kind === "home" ? "place" : kind === "recycle" || kind === "back" ? "deal" : kind;
   const dur = kind === "flip" ? 0.05 : kind === "deal" ? 0.035 : 0.07, n = Math.floor(a.sampleRate * dur), b = a.createBuffer(1, n, a.sampleRate), d = b.getChannelData(0);
   for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, kind === "place" ? 3 : 2);
   const s = a.createBufferSource(), f = a.createBiquadFilter(), g = a.createGain();
@@ -167,7 +222,7 @@ function mount(cv, opts) {
   const cards = [];
   for (const s of SUITS) for (let r = 1; r <= 13; r++) cards.push({ id: s + r, s, r, up: false, x: 0, y: 0, tx: 0, ty: 0, fl: 0, delay: 0, z: 0, pile: null });
   const byId = Object.fromEntries(cards.map(c => [c.id, c]));
-  const G = { stock: [], waste: [], found: [[], [], [], []], tab: [[], [], [], [], [], [], []], draw: +(LSG("unitka.ptDraw") || 1) === 3 ? 3 : 1,
+  const G = { stock: [], waste: [], found: [[], [], [], []], tab: [[], [], [], [], [], [], []], draw: 1,
     moves: 0, time: 0, started: false, won: false, hist: [], drag: null, hintT: 0, hint: null, cascade: null, autoRun: false, L: null, shake: null };
   const dbg = {};
 
@@ -211,7 +266,7 @@ function mount(cv, opts) {
     Object.assign(G, { moves: 0, time: 0, started: false, won: false, hist: [], hint: null, cascade: null, autoRun: false });
     targets();
     // раздача: все из колоды, по очереди, с переворотом верхних
-    const L = G.L; let d = 0;
+    const L = G.L; let d = silent || !AU.on ? 0 : 0.75;                 // со звуком — сначала тасовка, потом летят карты
     for (let i = 0; i < 7; i++) for (let j = i; j < 7; j++) { const c = G.tab[j][i]; c.x = L.colX(0); c.y = L.top; c.delay = silent ? 0 : d; d += 0.045; c.fl = 0; }
     for (const c of G.stock) { c.x = c.tx; c.y = c.ty; }
     if (!silent) snd("deal");
@@ -234,19 +289,19 @@ function mount(cv, opts) {
     if (G.cascade || G.autoRun || !G.hist.length) return;
     const prev = cards.map(c => [c, c.up]); restore(G.hist.pop(), false);
     for (const [c, was] of prev) if (was !== c.up) c.fl = was ? 1 : 0;           // переворот обратно — тоже плавно
-    G.moves++; save(); stat(); need(); snd("flip");
+    G.moves++; save(); stat(); need(); snd("back");
   }
   const canStack = (a, b) => b ? (b.up && !!RED[a.s] !== !!RED[b.s] && b.r === a.r + 1) : a.r === 13;   // a на b в столбце
   const canFound = (a, f) => f.length ? (f[f.length - 1].s === a.s && f[f.length - 1].r === a.r - 1) : a.r === 1;
   function flipTops() { for (const col of G.tab) { const t = col[col.length - 1]; if (t && !t.up) { t.up = true; snd("flip"); } } }
   function moveCards(list, dest) {
     const src = pileOf(list[0]); src.splice(src.indexOf(list[0]), list.length); dest.push(...list);
-    flipTops(); snd("place"); try { navigator.vibrate && navigator.vibrate(5); } catch (e) {}
+    flipTops(); snd(G.found.includes(dest) ? "home" : "place"); try { navigator.vibrate && navigator.vibrate(5); } catch (e) {}
   }
   function drawStock() {
     if (G.cascade || G.autoRun) return;
     push();
-    if (!G.stock.length) { if (!G.waste.length) { G.hist.pop(); return; } G.stock = G.waste.reverse(); G.waste = []; for (const c of G.stock) c.up = false; snd("deal"); }
+    if (!G.stock.length) { if (!G.waste.length) { G.hist.pop(); return; } G.stock = G.waste.reverse(); G.waste = []; for (const c of G.stock) c.up = false; snd("recycle"); }
     else { const n = Math.min(G.draw, G.stock.length); for (let i = 0; i < n; i++) { const c = G.stock.pop(); c.up = true; c.delay = i * 0.07; G.waste.push(c); } snd("flip"); }
     commit();
   }
@@ -294,7 +349,7 @@ function mount(cv, opts) {
     if (G.stock.length || G.waste.length) return { stock: true };
     return null;
   }
-  function hint() { G.hint = findHint() || { none: true }; G.hintT = 1.6; need(); }
+  function hint() { G.hint = findHint() || { none: true }; G.hintT = 1.6; snd("hint"); need(); }
 
   /* ── победа: каскад прыгающих карт со следом (как в старом Windows) ── */
   let trail = null;
@@ -347,6 +402,7 @@ function mount(cv, opts) {
     if (d.moved) { d.px = x; d.py = y; d.vx = d.vx * 0.6 + (x - d.lx) * 0.4; d.lx = x; need(); }
   };
   const onUp = e => {
+    ac();                                                   // на iPhone звук разрешается только на отпускании пальца
     const d = G.drag; if (!d || e.pointerId !== d.id) return;
     G.drag = null; for (const k of d.list) k.lift = 0;
     const lead = d.list[0];
@@ -363,7 +419,7 @@ function mount(cv, opts) {
       for (let j = 0; j < 7; j++) { const col = G.tab[j]; if (col.includes(lead)) continue; const dx = Math.abs(cx - (L.colX(j) + L.cw / 2)); const t = col[col.length - 1];
         if (dx < L.cw * 0.95 && dx < best && (t ? canStack(lead, t) : lead.r === 13)) { best = dx; dest = col; } }
     }
-    if (dest) tryMove(d.list, dest); else { targets(); snd("deal"); }
+    if (dest) tryMove(d.list, dest); else { targets(); snd("back"); }
     need();
   };
   cv.addEventListener("pointerdown", onDown); cv.addEventListener("pointermove", onMove); cv.addEventListener("pointerup", onUp); cv.addEventListener("pointercancel", onUp);
@@ -439,7 +495,7 @@ function mount(cv, opts) {
     }
   }
   const fmt = s => Math.floor(s / 60) + ":" + String(Math.floor(s % 60)).padStart(2, "0");
-  function stat() { if (opts.onStat) opts.onStat({ time: fmt(G.time), moves: G.moves, draw: G.draw, canAuto: canAuto(), canUndo: G.hist.length > 0, won: G.won }); }
+  function stat() { if (opts.onStat) opts.onStat({ time: fmt(G.time), moves: G.moves, canAuto: canAuto(), canUndo: G.hist.length > 0, won: G.won }); }
   const tick = setInterval(() => { if (running && G.started && !G.won && !document.hidden) { G.time++; stat(); if (G.time % 5 === 0) save(); } }, 1000);
   function resize() {
     const r = cv.getBoundingClientRect(); W = Math.max(1, r.width); H = Math.max(1, r.height); dpr = DPR();
@@ -454,15 +510,18 @@ function mount(cv, opts) {
   court(); COURT.cb.push(() => { spr.clear(); draw(); });           // картинки королей, дам и вальтов догрузились — перерисовать
   try { document.fonts && document.fonts.load('400 20px "Forum"').then(() => draw()); } catch (e) {}
   const inst = {
-    resume() { if (running) return; running = true; need(); draw(); },
-    pause() { running = false; if (raf) cancelAnimationFrame(raf); raf = 0; G.drag = null; save(); },
+    resume() { if (running) return; running = true; ac(); music(true); need(); draw(); },
+    pause() { running = false; music(false); if (raf) cancelAnimationFrame(raf); raf = 0; G.drag = null; save(); },
     destroy() { inst.pause(); clearInterval(tick); ro.disconnect(); },
     newGame() { if (G.autoRun) return; trail = null; G.cascade = null; newGame(false); },
     undo, hint, auto,
-    setDraw(n) { G.draw = n === 3 ? 3 : 1; LSS("unitka.ptDraw", String(G.draw)); inst.newGame(); },
-    mute(off) { AU.on = !off; LSS("unitka.ptMute", off ? "1" : "0"); },
+    mute(off) { AU.on = !off; LSS("unitka.ptMute", off ? "1" : "0"); if (!off) ac(); },
+    music(on) { AU.mus = on; LSS("unitka.ptMusic", on ? "1" : "0"); ac(); music(on && running); },
+    get musicOn() { return AU.mus; },
     get running() { return running; },
-    dbg: Object.assign(dbg, { G, cards, byId, targets, draw, upd, drawStock, bestMove, tryMove, canAuto, findHint, startCascade, snapshot, restore, moveCards, pileOf, layout: () => G.L }),
+    get started() { return G.started && !G.won; },
+    dbg: Object.assign(dbg, { G, cards, byId, targets, draw, upd, drawStock, bestMove, tryMove, canAuto, findHint, startCascade, snapshot, restore, moveCards, pileOf, layout: () => G.L,
+      audio: () => ({ ctx: AU.a && AU.a.state, sfx: !!AU.sfx, musicBuf: !!AU.mb, musicPlaying: !!AU.src, on: AU.on, mus: AU.mus }) }),
   };
   return inst;
 }
