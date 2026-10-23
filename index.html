@@ -16,10 +16,10 @@
 var TFONT = { comic: "Rubik:wght@400;500;600;700;800&family=Unbounded:wght@600;800", jim: "Rubik:wght@400;500;600;700;800&family=Rubik+Wet+Paint&family=Press+Start+2P", farcry: "Rubik+Dirt&family=Roboto+Condensed:wght@400;500;600;700",
   paper: "PT+Sans:wght@400;700&family=PT+Serif:wght@400;700", dusk: "Nunito:wght@400;500;600;700;800",
   sonic: "Exo+2:ital,wght@0,400;0,500;0,600;0,700;0,800;1,800;1,900&family=Russo+One",
-  solitaire: "Forum&family=Montserrat:wght@400;500;600;700;800" };
+  solitaire: "Forum&family=Montserrat:wght@400;500;600;700;800", birds: "Rubik:wght@400;500;600;700;800;900" };
 function themeFont(t) { if (!TFONT[t] || document.getElementById("tf-" + t)) return; var l = document.createElement("link"); l.id = "tf-" + t; l.rel = "stylesheet";
   l.href = "https://fonts.googleapis.com/css2?family=" + TFONT[t] + "&display=swap"; document.head.appendChild(l); }
-try { var t = JSON.parse(localStorage.getItem("unitka.theme")); if (/^(light|dark|beige|comic|farcry|jim|sonic|solitaire|paper|dusk)$/.test(t)) { document.documentElement.setAttribute("data-theme", t); themeFont(t); } } catch (e) {}</script>
+try { var t = JSON.parse(localStorage.getItem("unitka.theme")); if (/^(light|dark|beige|comic|farcry|jim|sonic|solitaire|birds|paper|dusk)$/.test(t)) { document.documentElement.setAttribute("data-theme", t); themeFont(t); } } catch (e) {}</script>
 <style>
 :root{
   color-scheme: light;
@@ -519,6 +519,156 @@ html.sx-play #sxDeco,html.sx-play #sxDeco *,html.sx-play #sxDeco *::after{animat
 html.pt-big{overflow:hidden}
 html.pt-play #ptDeco i,html.pt-play #ptCard :is(.ptgo,.ptbub,.b2){animation-play-state:paused}
 @media (prefers-reduced-motion: reduce){ :is(#ptDeco,#ptCard) *{animation:none!important} #ptCard{transition:none} }
+/* «Angry Birds» (23.10.2026, Андрей: «тему энгри бердс максимально похоже + 3д ощущения, полная смена темы, погружение…
+   логику открытия как в Сонике, визуал мощнее»). Картинки — NeuralBox NB Pro (Код\unitka\birds): остров свиней во весь экран
+   (ab-scene*.webp) — едет от мыши и при прокрутке (параллакс), по небу пролетают птицы, падают перья (#abDeco); шапка и нижнее
+   меню — деревянная доска (ab-wood.webp) с травой; панели — кремовые плашки с толстой коричневой обводкой и объёмным краем;
+   главные кнопки — красные глянцевые, как Ред; выбор в переключателях — голубой глянец; ползунок — резинка рогатки с Редом;
+   заголовки — с головой свиньи, разделы — с птицами. Шрифт Rubik 400–900 (ближе всего к игровому и с кириллицей).
+   Баннер — карточка #abCard (открытие как в «Сонике»): объёмная диорама — небо с холмами дальним слоем, земля с живой сценой
+   ближним (на ней по-настоящему стреляют из рогатки, ab-game.js → BirdsGame.face), «ЮНИТКА» и Чак впереди; наклон — от мыши
+   или телефона, без них — лёгкое покачивание. «ЮНИТКА» — кнопка: карточка переворачивается, на обороте игра на Box2D
+   (BirdsGame.mount), во весь экран — кнопкой. Движение — только transform/opacity на своих слоях (не предки меню и итога). */
+:root[data-theme="birds"]{
+  color-scheme: light;
+  --bg:#52c1ec; --surface:#fffaf0; --surface-2:#f6ecd6; --ink:#2b1a0c; --ink-2:#5c4329; --muted:#8c7556;
+  --line:#ecdcbc; --ring:#3b220e; --accent:#e0241c; --accent-wash:#ffe4d8;
+  --good:#2f8a10; --good-bg:#e2f5d3; --bad:#d2261c; --bad-bg:#ffe0d9; --warn-bg:#fff1c2; --mid:#a26200;
+  --s1:#e0241c; --s2:#f5b400; --s3:#2f8fd6; --s4:#5cb51c; --s5:#8a5a2b; --s6:#2f8a10;
+  --shadow:0 5px 0 #3b220e,0 12px 26px rgba(16,45,80,.28); --r:18px;
+  --font:"Rubik",system-ui,sans-serif; --font-h:"Rubik",system-ui,sans-serif;
+  --ol:-2px -2px 0 #2b1405,2px -2px 0 #2b1405,-2px 2px 0 #2b1405,2px 2px 0 #2b1405,0 -2px 0 #2b1405,0 2px 0 #2b1405,-2px 0 0 #2b1405,2px 0 0 #2b1405;
+  --ol3:-3px -3px 0 #2b1405,3px -3px 0 #2b1405,-3px 3px 0 #2b1405,3px 3px 0 #2b1405,0 -3px 0 #2b1405,0 3px 0 #2b1405,-3px 0 0 #2b1405,3px 0 0 #2b1405;
+  --wood:url("ab-wood.webp") 50% 50%/100% 100% no-repeat;
+  --grass:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='16' viewBox='0 0 64 16'%3E%3Cpath fill='%233f8a0c' d='M0 0h64v8l-3 5-3-5-4 7-3-6-3 4-4-6-3 7-3-5-3 5-4-7-3 6-3-4-4 6-3-7-3 5-3-5-4 7-2-5L0 8Z'/%3E%3Cpath fill='%2389d12a' transform='translate(0 -2.6)' d='M0 0h64v8l-3 5-3-5-4 7-3-6-3 4-4-6-3 7-3-5-3 5-4-7-3 6-3-4-4 6-3-7-3 5-3-5-4 7-2-5L0 8Z'/%3E%3Crect width='64' height='3.2' fill='%23b6ee48'/%3E%3C/svg%3E");
+  --abh:clamp(220px,32vw,400px); --abt:clamp(46px,7.6vw,108px); --abp:min(2.4vw,28px); --abl:min(3.2vw,38px);
+}
+[data-theme="birds"] body{background:#52c1ec}
+/* живой фон: остров свиней едет от мыши (--bx/--by) и при прокрутке; птицы пролетают дугой (abFly), перья падают и качаются */
+#abDeco{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+#abDeco .abscw{position:absolute;inset:-50px}
+#abDeco .absc{position:absolute;inset:0;background:url("ab-scene.webp") 50% 62%/cover no-repeat;transform:translate3d(calc(var(--bx,0) * -18px),calc(var(--by,0) * -12px),0) scale(1.03);will-change:transform}
+#abDeco .abfly{position:absolute;left:0;top:0;width:var(--z);height:var(--z);background:url("ab-chars.webp") var(--c)/400% 300% no-repeat;filter:drop-shadow(0 10px 8px rgba(10,40,70,.28));will-change:transform}
+#abDeco .abft{position:absolute;top:-30px;width:var(--z);height:calc(var(--z) * .36);border-radius:50%;background:var(--c);box-shadow:inset 0 -2px 0 rgba(0,0,0,.12);opacity:.9;
+  animation:ab-fall var(--d) linear var(--dl) infinite}
+#abDeco .abft::after{content:"";position:absolute;left:8%;right:8%;top:47%;height:1px;background:rgba(0,0,0,.22)}
+@keyframes ab-fall{0%{transform:translate(0,0) rotate(0)}25%{transform:translate(28px,26vh) rotate(70deg)}50%{transform:translate(-14px,52vh) rotate(-30deg)}75%{transform:translate(24px,78vh) rotate(60deg)}100%{transform:translate(-6px,108vh) rotate(-20deg)}}
+@supports (animation-timeline: scroll()){
+  #abDeco .abscw{animation:ab-up linear both;animation-timeline:scroll(root)}
+  @keyframes ab-up{to{transform:translateY(-80px)}}
+}
+html.ab-play #abDeco *{animation-play-state:paused!important}
+/* шапка — деревянная доска, под ней трава */
+[data-theme="birds"] header{background:linear-gradient(180deg,rgba(255,240,200,.18),rgba(60,25,0,.18)),var(--wood);border-bottom:0;box-shadow:0 3px 0 #3b220e}
+[data-theme="birds"] header::after{content:"";position:absolute;left:0;right:0;top:calc(100% + 3px);height:16px;pointer-events:none;background:var(--grass) 0 0/64px 16px repeat-x;filter:drop-shadow(0 3px 2px rgba(0,0,0,.2))}
+[data-theme="birds"] .brand{font-size:23px}
+[data-theme="birds"] .brand span{color:#fff;font-weight:900;text-shadow:var(--ol),0 4px 0 #2b1405}
+[data-theme="birds"] .brand i{width:36px;height:36px;margin:-6px -2px -6px 0;border-radius:0;background:url("ab-i-red.webp") center/contain no-repeat;color:transparent;filter:drop-shadow(0 2px 0 rgba(43,20,5,.55))}
+[data-theme="birds"] .themeb{background:linear-gradient(#fffdf6,#f1e2c2);border:2.5px solid #3b220e;box-shadow:0 3px 0 #3b220e,inset 0 2px 0 #fff;color:#2b1a0c;font-weight:700}
+[data-theme="birds"] .themeb:active{transform:translateY(3px);box-shadow:none}
+@media (min-width: 861px){
+  [data-theme="birds"] nav.tabs button{color:#fff;font-weight:800;text-shadow:var(--ol);border:2.5px solid transparent}
+  [data-theme="birds"] nav.tabs svg{filter:drop-shadow(1px 0 0 #2b1405) drop-shadow(-1px 0 0 #2b1405) drop-shadow(0 1px 0 #2b1405) drop-shadow(0 -1px 0 #2b1405)}
+  [data-theme="birds"] nav.tabs button[aria-current="page"]{color:#fff;background:linear-gradient(#ff7a5c,#e0241c 55%,#a8140d);border-color:#3b0d06;box-shadow:0 3px 0 #3b0d06,inset 0 2px 0 rgba(255,255,255,.45)}
+}
+[data-theme="birds"] main{position:relative;padding-top:38px}
+/* панели — кремовые плашки с толстой обводкой и объёмным краем */
+[data-theme="birds"] :is(.card,details.sec,.search,.sumtot){background:linear-gradient(180deg,#fffdf7,#fff4dc);border:3px solid #3b220e;box-shadow:var(--shadow),inset 0 2px 0 #fff}
+[data-theme="birds"] :is(.btn,.chip,.seg,.inp,select.sel,.namebar input,.lock input,.shurl,.tmenu,.ac){border:2px solid #3b220e}
+[data-theme="birds"] :is(.tmenu,.ac,.tour-tip){background:#fffaf0;box-shadow:0 5px 0 #3b220e,0 14px 30px rgba(0,0,0,.25)}
+[data-theme="birds"] .btn{background:linear-gradient(#ffffff,#f3e6c8)}
+[data-theme="birds"] :is(.btn,.chip){box-shadow:0 3px 0 #3b220e,inset 0 2px 0 rgba(255,255,255,.7);font-weight:700;transition:transform .08s,box-shadow .08s}
+[data-theme="birds"] :is(.btn,.chip):active{transform:translateY(3px);box-shadow:0 0 0 #3b220e}
+[data-theme="birds"] :is(.btn.pri,.chip.on){background:linear-gradient(#ff7a5c,#e0241c 55%,#ad150e);color:#fff;border-color:#3b0d06;box-shadow:0 3px 0 #3b0d06,inset 0 2px 0 rgba(255,255,255,.45);text-shadow:0 1px 0 #6e0d06}
+[data-theme="birds"] .seg{background:#f3e6c8}
+[data-theme="birds"] .seg button[aria-pressed="true"]{background:linear-gradient(#8fdcff,#2f8fd6 60%,#1d63a8);color:#fff;text-shadow:0 1px 0 #0c3a66;box-shadow:inset 0 -3px 0 rgba(0,0,0,.2),inset 0 2px 0 rgba(255,255,255,.45)}
+[data-theme="birds"] :is(.inp,select.sel,.namebar input,.lock input,.shurl){background:#fff}
+[data-theme="birds"] .lhead{background:linear-gradient(rgba(40,15,0,.22),rgba(40,15,0,.32)),var(--wood);color:#fff;border-bottom:3px solid #3b220e;text-shadow:0 1px 0 #2b1405,0 0 4px rgba(43,20,5,.6);top:calc(var(--hdr,57px) + 18px)}
+[data-theme="birds"] .lhead span small{color:#ffe7a8}
+[data-theme="birds"] :is(.detail,.res){top:calc(var(--hdr,57px) + 28px)}
+[data-theme="birds"] .item:hover{background:#fff3cf} [data-theme="birds"] .item.sel{background:#e8f6d8;box-shadow:inset 6px 0 0 #5cb51c}
+[data-theme="birds"] .kpi{background:linear-gradient(#f2fbff,#dcf1fc);border:2px solid #3b220e;box-shadow:0 3px 0 #3b220e}
+[data-theme="birds"] :is(.kpi b,.sumtot b){font-weight:800}
+[data-theme="birds"] .hero .big{font-weight:900;letter-spacing:-.01em}
+[data-theme="birds"] .detail .title{font-size:21px;font-weight:800}
+[data-theme="birds"] .h{font:800 13.5px/1.5 var(--font-h);text-transform:uppercase;letter-spacing:.02em;padding-left:27px;background:url("ab-i-pig.webp") 0 50%/21px 21px no-repeat;align-items:center}
+[data-theme="birds"] .h span{font:500 13px/1.3 var(--font);text-transform:none;letter-spacing:0}
+[data-theme="birds"] .tmenu .tgrp{font-weight:800;color:#8a5a2b}
+[data-theme="birds"] details.sec>summary{padding-left:50px;font-weight:800;background:url("ab-i-red.webp") 14px 50%/26px 26px no-repeat}
+[data-theme="birds"] details.sec:nth-of-type(4n+2)>summary{background-image:url("ab-i-chuck.webp")}
+[data-theme="birds"] details.sec:nth-of-type(4n+3)>summary{background-image:url("ab-i-blues.webp")}
+[data-theme="birds"] details.sec:nth-of-type(4n)>summary{background-image:url("ab-i-bomb.webp")}
+[data-theme="birds"] :is(.mprow,.perline){color:#fff;text-shadow:var(--ol),0 3px 0 #2b1405}
+[data-theme="birds"] .mprow .seg{text-shadow:none}
+/* ползунок — резинка рогатки, на ней Ред */
+[data-theme="birds"] input[type=range]::-webkit-slider-runnable-track{height:9px;border-radius:5px;border:2px solid #2b1405;background:linear-gradient(#9a3a1c,#5a1a0c)}
+[data-theme="birds"] input[type=range]::-webkit-slider-thumb{width:36px;height:36px;margin-top:-16px;border:0;border-radius:0;background:url("ab-i-red.webp") center/contain no-repeat;box-shadow:none;filter:drop-shadow(0 3px 0 rgba(43,20,5,.45))}
+[data-theme="birds"] input[type=range]::-moz-range-track{height:7px;border-radius:5px;border:2px solid #2b1405;background:#7a2412}
+[data-theme="birds"] input[type=range]::-moz-range-thumb{width:32px;height:32px;border:0;border-radius:0;background:url("ab-i-red.webp") center/contain no-repeat}
+[data-theme="birds"] .toast{background:linear-gradient(rgba(40,15,0,.12),rgba(40,15,0,.22)),var(--wood);color:#fff;font-weight:800;text-shadow:var(--ol);border:3px solid #3b220e;box-shadow:0 4px 0 #3b220e,0 10px 24px rgba(0,0,0,.3)}
+[data-theme="birds"] .mini{background:linear-gradient(#fffdf7,#fff1d4);color:var(--ink);border:3px solid #3b220e;box-shadow:0 -4px 0 #e0241c,0 6px 20px rgba(0,0,0,.3)}
+/* карточка-баннер: лицо — объёмная диорама (небо дальше, земля и живая сцена ближе), «ЮНИТКА» и Чак впереди; оборот — игра */
+#abCard{position:relative;height:var(--abh);margin:0 0 32px;--tx:0;--ty:0}
+#abCard .abin{position:absolute;inset:0}
+#abCard .abf{position:absolute;inset:0;border:3px solid #3b220e;border-radius:var(--r);box-shadow:0 7px 0 #3b220e,0 18px 34px rgba(16,45,80,.35);overflow:hidden;background:#52c1ec}
+#abCard .abfr{perspective:900px}
+#abCard .abfr::after{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;border-radius:inherit;box-shadow:inset 0 0 0 2px rgba(255,255,255,.35),inset 0 -40px 50px -30px rgba(40,20,0,.35)}
+#abCard .ab3d{position:absolute;inset:0;transform-style:preserve-3d;transform:rotateY(calc(var(--tx) * 5deg)) rotateX(calc(var(--ty) * -3.5deg))}
+#abCard :is(.absky,.abrun){position:absolute;left:-4%;top:-4%;width:108%;height:108%;display:block}
+#abCard .absky{background:url("ab-land.webp") 50% 78%/cover no-repeat;transform:translateZ(-90px) scale(1.1)}
+#abCard .abrun{pointer-events:none}
+#abCard:not(.anim).flip .abfr,#abCard:not(.anim):not(.flip) .abbk{visibility:hidden}
+#abCard.flip .abfr,#abCard:not(.flip) .abbk{pointer-events:none}
+#abCard.anim{perspective:1800px}
+#abCard.anim .abin{transform-style:preserve-3d}
+#abCard.anim.tr .abin{transition:transform .9s cubic-bezier(.3,.1,.2,1)}
+#abCard.anim.flip .abin{transform:rotateY(180deg)}
+#abCard.anim .abf{-webkit-backface-visibility:hidden;backface-visibility:hidden}
+#abCard.anim .abbk{transform:rotateY(180deg)}
+#abCard .abbk{background:#52c1ec}
+#abCard .abgame{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;outline:0}
+/* «ЮНИТКА» — как логотип игры: буквы вразнобой, красные глянцевые, толстая обводка, объём; рядом «▶ ИГРАТЬ» */
+#abCard .abtitle{position:absolute;z-index:3;left:var(--abl);top:var(--abp);margin:0;padding:0;border:0;background:none;cursor:pointer;-webkit-tap-highlight-color:transparent;
+  transform:translate(calc(var(--tx) * -8px),calc(var(--ty) * -6px))}
+#abCard .abt{display:flex;font:900 var(--abt)/1.05 "Rubik",var(--font);letter-spacing:.01em;padding:0 .05em .12em 0}
+#abCard .abt b{position:relative;display:inline-block;font-weight:900;color:#c4170f;text-shadow:var(--ol3),0 5px 0 #6b1006,0 8px 0 #2b1405,0 14px 16px rgba(0,0,0,.35);
+  transform:rotate(var(--r)) translateY(var(--y));transition:transform .3s cubic-bezier(.3,1.7,.5,1)}
+#abCard .abt b::after{content:attr(data-l);position:absolute;left:0;top:0;text-shadow:none;background:linear-gradient(180deg,#ffb79c 0%,#ff5a3a 30%,#e3211a 58%,#a8100a 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+#abCard .abtitle:hover .abt b,#abCard .abtitle:focus-visible .abt b{transform:rotate(calc(var(--r) * -1)) translateY(calc(var(--y) - 5px))}
+#abCard .abtitle:active .abt b{transform:rotate(var(--r)) translateY(calc(var(--y) + 2px)) scale(.97)}
+#abCard .abtitle:focus-visible{outline:3px solid #fff;outline-offset:8px;border-radius:.3em}
+#abCard .abgo{position:absolute;right:-.5em;bottom:-.7em;font:900 clamp(12px,1.35vw,17px)/1 "Rubik",var(--font);letter-spacing:.03em;color:#fff;text-shadow:0 2px 0 #173d04;white-space:nowrap;
+  background:linear-gradient(#c4f56a,#5cb51c 55%,#2f7a0a);border:3px solid #173d04;border-radius:999px;padding:.45em .95em;box-shadow:0 4px 0 #173d04,inset 0 2px 0 rgba(255,255,255,.55);transform:rotate(-4deg);animation:ab-go 1.4s ease-in-out infinite}
+@keyframes ab-go{0%,100%{transform:rotate(-4deg) scale(1)}50%{transform:rotate(-4deg) scale(1.08)}}
+#abCard .abprize{position:absolute;z-index:3;left:calc(var(--abl) + 6px);bottom:2.4%;cursor:pointer;font:800 clamp(12px,1.35vw,17px)/1.15 "Rubik",var(--font);color:#3b220e;
+  white-space:nowrap;background:linear-gradient(#fff07a,#ffc21a);border:2.5px solid #3b220e;border-radius:999px;padding:.42em .9em;box-shadow:0 3px 0 #3b220e,inset 0 2px 0 rgba(255,255,255,.6);transform:rotate(-2deg);-webkit-tap-highlight-color:transparent}
+#abCard .abprize:focus-visible{outline:3px solid #fff;outline-offset:3px}
+#abCard .abprize .sm{display:none}
+/* Чак вылетает из рамки к зрителю — едет сильнее всех слоёв */
+#abCard .abpop{position:absolute;z-index:4;right:2%;top:-15%;width:clamp(76px,10.5vw,140px);aspect-ratio:1;pointer-events:none;background:url("ab-chars.webp") 100% 0/400% 300% no-repeat;
+  filter:drop-shadow(0 16px 12px rgba(10,30,60,.35));transform:translate(calc(var(--tx) * 20px),calc(var(--ty) * 14px)) rotate(-14deg);transition:opacity .3s}
+#abCard .abpop::after{content:"";position:absolute;right:88%;top:46%;width:120%;height:6%;border-radius:4px;background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.85));box-shadow:0 -14px 0 -1px rgba(255,255,255,.6),0 14px 0 -1px rgba(255,255,255,.5)}
+#abCard.flip .abpop,#abCard.anim .abpop{opacity:0}
+/* кнопки игры на обороте: пауза, звук, во весь экран, назад */
+#abCard .abbtns{position:absolute;z-index:3;top:8px;right:8px;display:flex;gap:6px}
+#abCard .abbtns button{width:36px;height:36px;border-radius:50%;border:2.5px solid #3b220e;background:linear-gradient(#fffdf6,#f1e2c2);color:#3b220e;display:grid;place-items:center;padding:0;box-shadow:0 3px 0 #3b220e,inset 0 2px 0 #fff;cursor:pointer}
+#abCard .abbtns button:active{transform:translateY(3px);box-shadow:none}
+#abCard .abbtns svg{width:18px;height:18px;display:block}
+#abCard .abbtns [data-ab="mute"] .off,#abCard .abbtns [data-ab="mute"][aria-pressed="true"] .on{display:none}
+#abCard .abbtns [data-ab="mute"][aria-pressed="true"] .off{display:block}
+#abCard.big{position:fixed;inset:0;z-index:300;height:auto;margin:0}
+#abCard.big .abf{border-radius:0;border:0;box-shadow:none}
+#abCard.big .abfr{visibility:hidden}
+html.ab-big{overflow:hidden}
+@media (orientation: portrait){                                       /* во весь экран стоя — игра широкой полосой по центру */
+  #abCard.big .abbk{background:#1d4f7a}
+  #abCard.big .abgame{inset:auto 0;top:50%;height:min(100%,calc(100vw / 1.6));transform:translateY(-50%)}
+  #abCard.big .abbk::after{content:"Поверните телефон — будет крупнее";position:absolute;left:0;right:0;top:calc(50% + 100vw / 3.2 + 18px);text-align:center;color:#fff;font:800 14px/1.2 "Rubik",sans-serif;text-shadow:0 2px 0 #0c2f5c}
+}
+@media (prefers-reduced-motion: reduce){
+  :is(#abDeco,#abCard) *,:is(#abDeco,#abCard) *::after{animation:none!important}
+  #abDeco .abft{display:none}
+}
 /* «Тетрадь» — спокойная: лист в клетку, синие «чернила», заголовки и цифры с засечками, вместо теней — тонкие линии, шрифты PT Sans + PT Serif */
 :root[data-theme="paper"]{
   color-scheme: light;
@@ -906,6 +1056,24 @@ a.btn{text-decoration:none;color:inherit}
   #sxCard .sxt{border-width:2.5px;box-shadow:0 0 0 2.5px #0a1a4a,0 5px 0 2.5px #0a1a4a,0 0 18px rgba(255,210,31,.5)}
   #sxDeco .sl{display:none}
   #sxDeco .near{top:10vh}
+  [data-theme="birds"] nav.tabs{background:linear-gradient(180deg,rgba(255,240,200,.12),rgba(40,15,0,.3)),var(--wood);border-top:0;box-shadow:0 -3px 0 #3b220e}
+  [data-theme="birds"] nav.tabs::before{content:"";position:absolute;left:0;right:0;bottom:calc(100% + 2px);height:16px;pointer-events:none;background:var(--grass) 0 0/64px 16px repeat-x;transform:scaleY(-1)}
+  [data-theme="birds"] nav.tabs button{color:#fff;font-weight:800;text-shadow:var(--ol)}
+  [data-theme="birds"] nav.tabs svg{filter:drop-shadow(1px 0 0 #2b1405) drop-shadow(-1px 0 0 #2b1405) drop-shadow(0 1px 0 #2b1405) drop-shadow(0 -1px 0 #2b1405)}
+  [data-theme="birds"] nav.tabs button[aria-current="page"]{color:#ffd21f}
+  [data-theme="birds"] main{padding-top:30px}
+  [data-theme="birds"] .detail-wrap.open .backbar{background:#fffaf0;border-bottom:3px solid #3b220e}
+  #abDeco .absc{background-image:url("ab-scene-m.webp");background-position:50% 50%}
+  :root[data-theme="birds"]{--abh:50vw;--abt:9.8vw;--abp:3vw;--abl:3.6vw}
+  #abCard{margin:0 0 24px}
+  #abCard .abprize{bottom:1.6%;font-size:10.5px;padding:.36em .8em;max-width:64%}
+  #abCard .abgo{font-size:10.5px;right:-1em;bottom:-.95em;border-width:2.5px}
+  #abCard .abt b{text-shadow:var(--ol),0 3px 0 #6b1006,0 5px 0 #2b1405,0 8px 10px rgba(0,0,0,.3)}
+  #abCard .abpop{width:19vw;top:-11%;right:1%}
+  #abCard .abbtns{top:6px;right:6px;gap:5px}
+  #abCard .abbtns button{width:31px;height:31px;border-width:2px}
+  #abCard .abbtns svg{width:16px;height:16px}
+  #abCard .abprize .lg{display:none} #abCard .abprize .sm{display:inline}
 }
 @media (max-width: 380px){ .inp{width:116px} .hero .big{font-size:30px} .lhead,.item{grid-template-columns:minmax(0,1fr) 54px 54px 54px} }
 </style>
@@ -1253,6 +1421,7 @@ const TH = {
   jim: ["Червяк Джим", "jim", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 21.5c-2.6 0-3.8-1.9-2.8-3.8 1.1-2 4-2.1 5.2-4 1.2-1.8-.6-3.8 1-5.6 1.4-1.6 3.6-1.5 5.1-.6"/><circle cx="15.6" cy="5.2" r="2.3"/><circle cx="19.6" cy="5.9" r="2.3"/></svg>'],
   sonic: ["Соник", "sonic", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><ellipse cx="15" cy="12" rx="5.6" ry="7"/><ellipse cx="15" cy="12" rx="2.4" ry="3.6"/><path d="M2.5 8.5h5M1.5 12h5M2.5 15.5h5"/></svg>'],
   solitaire: ["Пасьянс", "solitaire", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2.5"/><path d="M12 7.2c1.2 1.4 3.7 2.9 3.7 4.8 0 1.6-1.9 2.4-3.1 1.2l.6 2.4h-2.4l.6-2.4c-1.2 1.2-3.1.4-3.1-1.2 0-1.9 2.5-3.4 3.7-4.8Z" fill="currentColor" stroke="none"/></svg>'],
+  birds: ["Angry Birds", "birds", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 13.5a7.5 7.5 0 0 1 15 0c0 3.6-3.4 6-7.5 6s-7.5-2.4-7.5-6Z"/><path d="M8 10.2l3 1.3M16 10.2l-3 1.3M11 14l2.6 1.1-2.6 1M9.5 6.5c.4-1.6 1.6-2.6 3-3"/></svg>'],
   /* спокойные */
   paper: ["Тетрадь", "paper", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"><path d="M4 20h4.5L19.5 9 15 4.5 4 15.5Z"/><path d="M13 6.5 17.5 11"/></svg>'],
   dusk: ["Сумерки", "dusk", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6.5 13.5a5.5 5.5 0 0 1 11 0"/><path d="M3 13.5h18M6 17h12M9 20.5h6M12 3.5v2.5M4.6 6.6l1.7 1.7M19.4 6.6l-1.7 1.7"/></svg>']
@@ -1267,6 +1436,7 @@ const SWATCH = {          /* кружки тем — векторные, без 
   jim: '<svg class="sw" viewBox="0 0 20 20"><defs><linearGradient id="swJim" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a1263"/><stop offset=".62" stop-color="#d9532c"/><stop offset=".62" stop-color="#7ad321"/></linearGradient></defs><circle cx="10" cy="10" r="8.4" fill="url(#swJim)" stroke="#1a1022" stroke-width="1.6"/><circle cx="8.3" cy="7.6" r="2" fill="#fff" stroke="#1a1022" stroke-width=".8"/><circle cx="11.9" cy="7.6" r="2" fill="#fff" stroke="#1a1022" stroke-width=".8"/><circle cx="8.7" cy="7.8" r=".7" fill="#1a1022"/><circle cx="12.3" cy="7.8" r=".7" fill="#1a1022"/></svg>',
   sonic: '<svg class="sw" viewBox="0 0 20 20"><defs><linearGradient id="swSon" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0f6efa"/><stop offset=".66" stop-color="#5fb0ff"/><stop offset=".66" stop-color="#3fbf1c"/><stop offset=".76" stop-color="#3fbf1c"/><stop offset=".76" stop-color="#cf6b16"/></linearGradient></defs><circle cx="10" cy="10" r="8.4" fill="url(#swSon)" stroke="#0a1a4a" stroke-width="1.6"/><circle cx="10" cy="8" r="3.4" fill="none" stroke="#ffc81e" stroke-width="1.9"/></svg>',
   solitaire: '<svg class="sw" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8.6" fill="#0b2e1e" stroke="#e8c260" stroke-width="1.4"/><rect x="6.2" y="4.6" width="7.6" height="10.8" rx="1.4" fill="#fffdf6" transform="rotate(-8 10 10)"/><path d="M10 13.2c-.6-.6-2.3-1.6-2.3-2.8 0-.9 1.1-1.4 2.3-.4 1.2-1 2.3-.5 2.3.4 0 1.2-1.7 2.2-2.3 2.8Z" fill="#c41230"/></svg>',
+  birds: '<svg class="sw" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8.6" fill="#e0241c" stroke="#3b220e" stroke-width="1.6"/><path d="M3.2 12.6c2 2.6 4.3 3.7 6.8 3.7s4.8-1.1 6.8-3.7c-2.2.9-4.4 1.3-6.8 1.3s-4.6-.4-6.8-1.3Z" fill="#f3dcb4"/><circle cx="7.6" cy="9.4" r="1.7" fill="#fff"/><circle cx="12.4" cy="9.4" r="1.7" fill="#fff"/><circle cx="8" cy="9.6" r=".7"/><circle cx="12" cy="9.6" r=".7"/><path d="M5.4 7.2l4 1.6M14.6 7.2l-4 1.6" stroke="#1d1007" stroke-width="1.5" stroke-linecap="round"/><path d="M8.6 11l2.8-.2 2 1.3-2.4.9Z" fill="#ffb31f" stroke="#7a3d06" stroke-width=".5"/></svg>',
   paper: '<svg class="sw" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8.6" fill="#fbfaf5" stroke="#8a8a85" stroke-width="1.2"/><path d="M4.5 7.5h11M3.6 11h12.8M4.5 14.5h11M7.5 2.5v15M12.5 2.5v15" stroke="#2c4fb3" stroke-width=".8" opacity=".45"/></svg>',
   dusk: '<svg class="sw" viewBox="0 0 20 20"><defs><linearGradient id="swDusk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2d4c50"/><stop offset="1" stop-color="#3b3653"/></linearGradient></defs><circle cx="10" cy="10" r="8.6" fill="url(#swDusk)" stroke="#8a8a85" stroke-width="1.2"/><circle cx="10" cy="10" r="3.4" fill="#7fc8b4"/></svg>'
 };
@@ -1530,12 +1700,147 @@ function soliDeco(on) {
     if (!red) ptVid(el, true);
   }
 }
+/* «Angry Birds»: живой фон #abDeco (остров свиней с параллаксом, пролетающие птицы, перья) и карточка-баннер #abCard — объёмная
+   диорама с живой сценой (BirdsGame.face), «ЮНИТКА» — кнопка; нажал — карточка переворачивается, на обороте игра (BirdsGame.mount).
+   Физика planck.js и ab-game.js грузятся только в этой теме (loadBirds) */
+let abP = null;
+function loadBirds(cb) {
+  if (window.BirdsGame) return cb();
+  if (!abP) abP = new Promise((ok, no) => {
+    const add = (id, src, next) => { const s = document.createElement("script"); s.id = id; s.src = src; s.onload = next; s.onerror = no; document.head.appendChild(s); };
+    add("abpl", "planck.min.js?v=1", () => add("abjs", "ab-game.js?v=1", ok));
+  }).catch(() => { abP = null; throw 0; });
+  abP.then(cb).catch(() => {});
+}
+// приманка на лице: сколько звёзд собрано (unitka.abStars пишет игра)
+function abLure(el) {
+  let got = 0; try { got = (JSON.parse(localStorage.getItem("unitka.abStars") || "[]") || []).reduce((a, b) => a + (+b || 0), 0); } catch (e) {}
+  // длинная часть (.lg) на телефоне скрыта — плашка в одну строку на земле баннера
+  const t = got === 0 ? '⭐ <span class="lg">Сбей всех свиней — собери</span><span class="sm">Собери</span> 15 звёзд!' : got < 15 ? `⭐ ${got} из 15 звёзд<span class="lg"> — добей до трёх!</span>` : '🏆 Все 15 звёзд<span class="lg"> — Король свиней повержен!</span>';
+  const b = el.querySelector(".abprize"); if (b) b.innerHTML = t;
+}
+function abBig(el, on) {
+  el.classList.toggle("big", on); document.documentElement.classList.toggle("ab-big", on);
+  if (on && el.requestFullscreen && !document.fullscreenElement)       // Android: во весь экран и сразу лёжа
+    el.requestFullscreen({ navigationUI: "hide" }).then(() => { try { screen.orientation.lock("landscape").catch(() => {}); } catch (e) {} }).catch(() => {});
+  if (!on) { try { screen.orientation.unlock(); } catch (e) {} if (document.fullscreenElement) document.exitFullscreen().catch(() => {}); }
+}
+function abFlip(el, on) {
+  if (on === el.classList.contains("flip")) return;
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) el.classList.toggle("flip", on);
+  else {                                   // 3D только на время переворота, потом карточка снова плоская (легче телефону)
+    el.classList.add("anim"); void el.offsetWidth; el.classList.add("tr"); void el.offsetWidth;
+    el.classList.toggle("flip", on);
+    const inner = el.querySelector(".abin"), done = e => { if (e && e.target !== inner) return; clearTimeout(el._ft); inner.removeEventListener("transitionend", done); el.classList.remove("anim", "tr"); };
+    inner.addEventListener("transitionend", done); el._ft = setTimeout(done, 1200);
+  }
+  if (on) {
+    ptAudio();                                // звук на iPhone — только из нажатия
+    loadBirds(() => {
+      if (!el.isConnected || !el.classList.contains("flip")) return;
+      if (!el._game) el._game = BirdsGame.mount(el.querySelector(".abgame"), { onStars: () => abLure(el) });
+      el._game.resume(); if (el._face) el._face.pause(true); document.documentElement.classList.add("ab-play");
+      if (el._game.playing) el._game.menu(true);          // вернулся к начатому уровню — сначала пауза
+      setTimeout(() => { if (el.classList.contains("flip")) el.querySelector(".abgame").focus({ preventScroll: true }); }, 900);
+    });
+  } else {
+    if (el._game) el._game.pause(); if (el._face) el._face.pause(false); abBig(el, false); document.documentElement.classList.remove("ab-play"); abLure(el);
+    if (el._tilt) el._tilt();
+  }
+}
+/* наклон диорамы: мышь над баннером или наклон телефона (Android — без спроса); иначе — лёгкое покачивание. Только --tx/--ty → transform */
+function abTilt(el) {
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  let tx = 0, ty = 0, x = 0, y = 0, raf = 0, src = "", t0 = performance.now();
+  const frame = now => {
+    raf = 0; if (!el.isConnected) return;
+    if (!src) { const t = (now - t0) / 1000; tx = Math.sin(t * 0.55) * 0.45; ty = Math.sin(t * 0.39 + 1) * 0.3; }
+    x += (tx - x) * 0.07; y += (ty - y) * 0.07;
+    el.style.setProperty("--tx", x.toFixed(3)); el.style.setProperty("--ty", y.toFixed(3));
+    if (!el.classList.contains("flip") && el._vis !== false && !document.hidden) raf = requestAnimationFrame(frame);
+  };
+  const kick = () => { if (!raf) raf = requestAnimationFrame(frame); };
+  el.addEventListener("pointermove", e => { if (e.pointerType !== "mouse" || el.classList.contains("flip")) return; const r = el.getBoundingClientRect(); tx = ((e.clientX - r.left) / r.width - 0.5) * 2; ty = ((e.clientY - r.top) / r.height - 0.5) * 2; src = "m"; kick(); });
+  el.addEventListener("pointerleave", () => { if (src === "m") src = ""; kick(); });
+  const ori = e => { if (e.gamma == null || src === "m" || !el.isConnected) return; tx = Math.max(-1, Math.min(1, e.gamma / 22)); ty = Math.max(-1, Math.min(1, (e.beta - 40) / 22)); src = "o"; kick(); };
+  window.addEventListener("deviceorientation", ori); el._unTilt = () => window.removeEventListener("deviceorientation", ori);
+  new IntersectionObserver(es => { el._vis = es[0].isIntersecting; kick(); }).observe(el);
+  document.addEventListener("visibilitychange", kick);
+  el._tilt = kick; kick();
+}
+// птица пролетает по небу дугой (на фоне); ближние — крупнее и быстрее
+function abFly(d) {
+  if (!d.isConnected || document.hidden || document.documentElement.classList.contains("ab-play") || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const k = [["33.333% 0", 1], ["100% 0", 1], ["33.333% 50%", 0.8], ["66.667% 50%", 0.6]][(Math.random() * 4) | 0];
+  const near = Math.random() < 0.35, z = Math.round((near ? 84 : 46) * k[1] + Math.random() * 18), W = innerWidth, H = innerHeight;
+  const el = document.createElement("i"); el.className = "abfly"; el.style.cssText = `--z:${z}px;--c:${k[0]}`; d.appendChild(el);
+  const y0 = H * (0.16 + Math.random() * 0.3), up = H * (0.1 + Math.random() * 0.16), fr = [];
+  for (let i = 0; i <= 12; i++) { const t = i / 12; fr.push({ transform: `translate(${(-z + (W + 2 * z) * t).toFixed(1)}px,${(y0 - up * 4 * t * (1 - t) + (t > 0.5 ? (t - 0.5) * H * 0.25 : 0)).toFixed(1)}px) rotate(${(-22 + 50 * t).toFixed(1)}deg)` }); }
+  const a = el.animate(fr, { duration: (near ? 4200 : 7200) + Math.random() * 1800, easing: "linear" });
+  a.onfinish = () => el.remove();
+}
+function birdsDeco(on) {
+  const d = $("#abDeco"), c = $("#abCard");
+  if (!on) {
+    if (d) { clearInterval(d._iv); window.removeEventListener("pointermove", d._pm); d.remove(); }
+    if (c) { if (c._face) c._face.destroy(); if (c._game) c._game.destroy(); if (c._unTilt) c._unTilt(); abBig(c, false); c.remove(); }
+    document.documentElement.classList.remove("ab-play", "ab-big");
+    return;
+  }
+  const red = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (!d) {
+    const el = document.createElement("div"); el.id = "abDeco"; el.setAttribute("aria-hidden", "true");
+    // перья: [слева, размер, цвет, длительность, задержка]
+    el.innerHTML = '<div class="abscw"><i class="absc"></i></div>' + [["8%", 26, "#ffffff", 19, -3], ["23%", 18, "#e0241c", 23, -14], ["47%", 22, "#ffffff", 26, -8],
+      ["71%", 16, "#ffd21f", 21, -17], ["88%", 24, "#ffffff", 24, -1], ["60%", 14, "#62b9ec", 28, -22]]
+      .map(([x, z, col, t, dl]) => `<i class="abft" style="left:${x};--z:${z}px;--c:${col};--d:${t}s;--dl:${dl}s"></i>`).join("");
+    document.body.appendChild(el);
+    // фон едет от мыши (на телефоне — только прокрутка)
+    let raf = 0, mx = 0, my = 0;
+    el._pm = e => { if (e.pointerType !== "mouse") return; mx = e.clientX / innerWidth - 0.5; my = e.clientY / innerHeight - 0.5;
+      if (!raf) raf = requestAnimationFrame(() => { raf = 0; el.style.setProperty("--bx", (mx * 2).toFixed(3)); el.style.setProperty("--by", (my * 2).toFixed(3)); }); };
+    if (!red) { window.addEventListener("pointermove", el._pm, { passive: true }); setTimeout(() => abFly(el), 1500); el._iv = setInterval(() => abFly(el), 6500); }
+  }
+  if (!c) {
+    const el = document.createElement("div"); el.id = "abCard";
+    const L = [["Ю", -7, 3], ["Н", 4, -4], ["И", -3, 1], ["Т", 6, -3], ["К", -4, 2], ["А", 7, -2]];
+    el.innerHTML = '<div class="abin"><div class="abf abfr"><div class="ab3d"><i class="absky" aria-hidden="true"></i><canvas class="abrun" aria-hidden="true"></canvas></div>' +
+      '<button class="abtitle" type="button" aria-label="Играть в Angry Birds"><span class="abt">' + L.map(([l, r, y]) => `<b data-l="${l}" style="--r:${r}deg;--y:${y}px">${l}</b>`).join("") +
+      '</span><span class="abgo">▶ ИГРАТЬ</span></button><button class="abprize" type="button"></button></div>' +
+      '<div class="abf abbk"><canvas class="abgame" tabindex="0" aria-label="Игра Angry Birds: тяни птицу назад и отпусти; в полёте нажми — умение птицы"></canvas>' +
+      `<div class="abbtns"><button type="button" data-ab="pause" aria-label="Пауза: продолжить, заново, уровни">${SX_ICO.pause}</button>` +
+      `<button type="button" data-ab="mute" aria-label="Звук" aria-pressed="${LS.get("abMute", 0) == 1}">${SX_ICO.mute}</button>` +
+      `<button type="button" data-ab="big" aria-label="Во весь экран">${SX_ICO.big}</button><button type="button" data-ab="back" aria-label="Перевернуть обратно">${SX_ICO.back}</button></div></div></div>` +
+      '<i class="abpop" aria-hidden="true"></i>';
+    $("main").prepend(el);
+    abLure(el);
+    el.querySelector(".abtitle").onclick = () => abFlip(el, true);
+    el.querySelector(".abprize").onclick = () => abFlip(el, true);
+    el.querySelector(".abbtns").addEventListener("click", e => {
+      const b = e.target.closest("[data-ab]"); if (!b) return;
+      if (b.dataset.ab === "pause") { if (el._game) el._game.menu(); }
+      else if (b.dataset.ab === "back") abFlip(el, false);
+      else if (b.dataset.ab === "big") abBig(el, !el.classList.contains("big"));
+      else if (b.dataset.ab === "mute" && window.BirdsGame) { const off = b.getAttribute("aria-pressed") !== "true"; b.setAttribute("aria-pressed", off); BirdsGame.mute(off); }
+    });
+    document.addEventListener("keydown", e => { if (e.key === "Escape" && el.classList.contains("big") && el.isConnected) abBig(el, false); });
+    document.addEventListener("fullscreenchange", () => { if (!document.fullscreenElement && el.classList.contains("big") && el.isConnected) { el.classList.remove("big"); document.documentElement.classList.remove("ab-big"); } });
+    // ушла карточка с экрана во время игры — пауза, вернулась — дальше
+    new IntersectionObserver(es => { if (el.classList.contains("flip") && el._game && !el.classList.contains("big")) es[0].isIntersecting ? el._game.resume() : el._game.pause(); }).observe(el);
+    abTilt(el);
+    // небо диорамы — тот же кадр поля, что рисует сцена (земля совпадает); сцена — живая: рогатка стреляет сама
+    const sky = el.querySelector(".absky");
+    loadBirds(() => { if (el.isConnected && !el._face) el._face = BirdsGame.face(el.querySelector(".abrun"), {
+      onMap: m => { sky.style.backgroundImage = `url("${m.src}")`; sky.style.backgroundSize = `${m.w.toFixed(1)}px ${m.h.toFixed(1)}px`; sky.style.backgroundPosition = `${m.x.toFixed(1)}px ${m.y.toFixed(1)}px`; } }); });
+  }
+}
 function applyTheme() {
   if (!TH[THEME]) THEME = "auto";
   if (THEME === "auto") document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme", THEME);
   themeFont(THEME);
   sonicDeco(THEME === "sonic");
   soliDeco(THEME === "solitaire");
+  birdsDeco(THEME === "birds");
   $("#bTheme").innerHTML = TH[THEME][2] + "<span>" + TH[THEME][0] + "</span>";
   $("#bTheme").title = "Тема: " + TH[THEME][0].toLowerCase();
   const grp = { comic: "Весёлые", paper: "Спокойные" };
