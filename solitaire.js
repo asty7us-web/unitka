@@ -17,8 +17,8 @@ const LSS = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
 const SUITS = ["s", "h", "d", "c"];                      // пики, червы, бубны, трефы
 const RED = { h: 1, d: 1 };
 const RANK = ["", "A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"];
-const FONT_H = '"Playfair Display",Georgia,"Times New Roman",serif';
-const FONT = '"Manrope",system-ui,sans-serif';
+const FONT_H = '"Forum",Georgia,"Times New Roman",serif';
+const FONT = '"Montserrat",system-ui,sans-serif';
 const INK = "#1b1d22", RED_C = "#c41230", GOLD = "#d7b45a";
 
 /* ═════════ звук: мягкий шорох и щелчок карты (WebAudio, без файлов) ═════════ */
@@ -59,68 +59,83 @@ const PIPS = {
   9: [[.31, .2], [.69, .2], [.31, .4], [.69, .4], [.5, .5], [.31, .6], [.69, .6], [.31, .8], [.69, .8]],
   10: [[.31, .2], [.69, .2], [.5, .3], [.31, .4], [.69, .4], [.31, .6], [.69, .6], [.5, .7], [.31, .8], [.69, .8]],
 };
-/* лицо карты w×h (css px) на g в (0,0). big — крупный индекс (маленькие карты на телефоне: в столбце видна только верхняя полоска) */
+/* картинки королей, дам и вальтов — NeuralBox в классическом стиле (Код\unitka\pasyans\make_assets.py → site\pasyans-court.webp,
+   три кадра K, Q, J); пока не загрузились — корона и буква кодом */
+const COURT = { im: null, cb: [] };
+function court() {
+  if (!COURT.im) { COURT.im = new Image(); COURT.im.onload = () => COURT.cb.forEach(f => f()); COURT.im.src = "pasyans-court.webp"; }
+  return COURT.im.complete && COURT.im.naturalWidth ? COURT.im : null;
+}
+const IDX = 'Arial,"Helvetica Neue",Helvetica,sans-serif';
+/* лицо карты w×h (css px) на g в (0,0) — как в старом Windows: белая, тонкая чёрная рамка, жирный индекс, классический расклад очков.
+   big — крупный индекс (маленькие карты на телефоне: в столбце видна только верхняя полоска) */
 function drawFace(g, c, w, h) {
-  const col = RED[c.s] ? RED_C : INK, r = w * 0.09, big = w < 62;
-  const gr = g.createLinearGradient(0, 0, w * 0.4, h); gr.addColorStop(0, "#ffffff"); gr.addColorStop(1, "#f4efe3");
-  g.beginPath(); g.roundRect(0.5, 0.5, w - 1, h - 1, r); g.fillStyle = gr; g.fill();
-  g.lineWidth = 1; g.strokeStyle = "rgba(60,50,30,.35)"; g.stroke();
+  const col = RED[c.s] ? RED_C : "#000", r = Math.max(3, w * 0.07), big = w < 62;
+  g.beginPath(); g.roundRect(0.5, 0.5, w - 1, h - 1, r); g.fillStyle = "#fff"; g.fill();
+  g.lineWidth = 1; g.strokeStyle = "#1a1a1a"; g.stroke();
   g.fillStyle = col; g.textBaseline = "alphabetic";
-  if (big) {                                             // телефон: крупно ранг слева, масть справа, большая масть внизу
-    g.font = "800 " + Math.round(h * 0.27) + "px " + FONT; g.textAlign = "left";
-    g.fillText(RANK[c.r], w * 0.08, h * 0.27, w * 0.62);
-    suitPath(g, c.s, w * 0.8, h * 0.16, h * 0.17);
-    if (c.r > 10) { crown(g, w * 0.5, h * 0.5, w * 0.36, col); g.font = "700 italic " + Math.round(h * 0.3) + "px " + FONT_H; g.textAlign = "center"; g.fillText(RANK[c.r], w * 0.5, h * 0.86); }
+  const art = c.r > 10 ? court() : null;
+  if (big) {                                             // телефон: крупно ранг слева, масть справа; ниже — масть или картинка
+    g.font = "700 " + Math.round(h * 0.27) + "px " + IDX; g.textAlign = "left";
+    g.fillText(RANK[c.r], w * 0.07, h * 0.27, w * 0.64);
+    suitPath(g, c.s, w * 0.81, h * 0.15, h * 0.16);
+    if (art) { const k = 13 - c.r, sw = art.naturalWidth / 3; g.save(); g.beginPath(); g.rect(w * 0.12, h * 0.33, w * 0.76, h * 0.6); g.clip(); g.drawImage(art, k * sw, 0, sw, art.naturalHeight, w * 0.12, h * 0.33, w * 0.76, w * 0.76 * art.naturalHeight / sw); g.restore(); g.lineWidth = 1; g.strokeStyle = col; g.strokeRect(w * 0.12 + 0.5, h * 0.33 + 0.5, w * 0.76 - 1, h * 0.6 - 1); }
+    else if (c.r > 10) { crown(g, w * 0.5, h * 0.5, w * 0.36, col); g.font = "700 " + Math.round(h * 0.3) + "px " + IDX; g.textAlign = "center"; g.fillText(RANK[c.r], w * 0.5, h * 0.86); }
     else suitPath(g, c.s, w * 0.5, h * 0.66, h * 0.4);
     return;
   }
-  // классика: индекс в углах, очки по раскладу, картинки — рамка, корона, буква
   const idx = (rot) => {
     g.save(); if (rot) { g.translate(w, h); g.rotate(PI); }
-    g.font = "800 " + Math.round(h * 0.15) + "px " + FONT; g.textAlign = "center";
-    g.fillText(RANK[c.r], w * 0.13, h * 0.15, w * 0.24); suitPath(g, c.s, w * 0.13, h * 0.24, h * 0.09); g.restore();
+    g.font = "700 " + Math.round(h * 0.14) + "px " + IDX; g.textAlign = "center";
+    g.fillText(RANK[c.r], w * 0.12, h * 0.145, w * 0.22); suitPath(g, c.s, w * 0.12, h * 0.23, h * 0.085); g.restore();
   };
   idx(false); idx(true);
-  if (c.r === 1) { suitPath(g, c.s, w * 0.5, h * 0.5, h * (c.s === "s" ? 0.4 : 0.32)); return; }
+  if (c.r === 1) { suitPath(g, c.s, w * 0.5, h * 0.5, h * (c.s === "s" ? 0.42 : 0.3)); return; }
   if (c.r <= 10) {
-    const ph = h * 0.13;
+    const ph = h * 0.135;
     for (const [px, py] of PIPS[c.r]) { if (py > 0.5) { g.save(); g.translate(w * px, h * py); g.rotate(PI); suitPath(g, c.s, 0, 0, ph); g.restore(); } else suitPath(g, c.s, w * px, h * py, ph); }
     return;
   }
-  const fx = w * 0.22, fy = h * 0.14, fw = w * 0.56, fh = h * 0.72;
-  g.beginPath(); g.roundRect(fx, fy, fw, fh, w * 0.04); g.fillStyle = RED[c.s] ? "rgba(196,18,48,.07)" : "rgba(27,29,34,.06)"; g.fill();
-  g.lineWidth = Math.max(1, w * 0.012); g.strokeStyle = GOLD; g.stroke();
-  if (c.r >= 12) crown(g, w * 0.5, fy + fh * 0.24, fw * (c.r === 13 ? 0.62 : 0.5), col);
-  else { g.beginPath(); g.moveTo(w * 0.5 - fw * 0.22, fy + fh * 0.32); g.lineTo(w * 0.5, fy + fh * 0.12); g.lineTo(w * 0.5 + fw * 0.22, fy + fh * 0.32); g.closePath(); g.fillStyle = GOLD; g.fill(); }
-  g.fillStyle = col; g.font = "700 italic " + Math.round(fh * 0.42) + "px " + FONT_H; g.textAlign = "center"; g.fillText(RANK[c.r], w * 0.5, fy + fh * 0.72);
-  suitPath(g, c.s, w * 0.5, fy + fh * 0.86, fh * 0.13);
+  const fx = Math.round(w * 0.22) + 0.5, fy = Math.round(h * 0.12) + 0.5, fw = Math.round(w * 0.56), fh = Math.round(h * 0.76);
+  if (art) {                                             // классическая двухголовая картинка в рамке, масти в углах рамки
+    const k = 13 - c.r, sw = art.naturalWidth / 3, sh = art.naturalHeight, sc = Math.max(fw / sw, fh / sh);
+    g.save(); g.beginPath(); g.rect(fx, fy, fw, fh); g.clip();
+    g.drawImage(art, k * sw, 0, sw, sh, fx + (fw - sw * sc) / 2, fy + (fh - sh * sc) / 2, sw * sc, sh * sc); g.restore();
+    g.lineWidth = 1; g.strokeStyle = col; g.strokeRect(fx, fy, fw, fh);
+    suitPath(g, c.s, fx + fw * 0.13, fy + fh * 0.08, fh * 0.09);
+    g.save(); g.translate(fx + fw * 0.87, fy + fh * 0.92); g.rotate(PI); suitPath(g, c.s, 0, 0, fh * 0.09); g.restore();
+    return;
+  }
+  g.lineWidth = 1; g.strokeStyle = col; g.strokeRect(fx, fy, fw, fh);
+  if (c.r >= 12) crown(g, w * 0.5, fy + fh * 0.26, fw * (c.r === 13 ? 0.62 : 0.5), col);
+  g.fillStyle = col; g.font = "700 " + Math.round(fh * 0.38) + "px " + IDX; g.textAlign = "center"; g.fillText(RANK[c.r], w * 0.5, fy + fh * 0.72);
+  suitPath(g, c.s, w * 0.5, fy + fh * 0.86, fh * 0.12);
 }
-function drawBack(g, w, h) {
-  const r = w * 0.09;
-  g.beginPath(); g.roundRect(0.5, 0.5, w - 1, h - 1, r); g.fillStyle = "#fbf7ee"; g.fill(); g.lineWidth = 1; g.strokeStyle = "rgba(60,50,30,.35)"; g.stroke();
-  const m = w * 0.07, iw = w - m * 2, ih = h - m * 2;
-  g.save(); g.beginPath(); g.roundRect(m, m, iw, ih, r * 0.6); g.clip();
-  const gr = g.createRadialGradient(w / 2, h / 2, 2, w / 2, h / 2, h * 0.7); gr.addColorStop(0, "#c2253f"); gr.addColorStop(1, "#6d0f20"); g.fillStyle = gr; g.fillRect(m, m, iw, ih);
-  g.strokeStyle = "rgba(255,220,150,.22)"; g.lineWidth = Math.max(0.8, w * 0.012); const st = w * 0.12;
-  for (let x = -h; x < w + h; x += st) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x + h, h); g.moveTo(x + h, 0); g.lineTo(x, h); g.stroke(); }
+function drawBack(g, w, h) {                             // рубашка как в старом Windows: синяя сетка в белой кайме
+  const r = Math.max(3, w * 0.07);
+  g.beginPath(); g.roundRect(0.5, 0.5, w - 1, h - 1, r); g.fillStyle = "#fff"; g.fill(); g.lineWidth = 1; g.strokeStyle = "#1a1a1a"; g.stroke();
+  const m = Math.max(3, Math.round(w * 0.07)), iw = w - m * 2, ih = h - m * 2;
+  g.save(); g.beginPath(); g.rect(m, m, iw, ih); g.clip();
+  g.fillStyle = "#1747a6"; g.fillRect(m, m, iw, ih);
+  g.strokeStyle = "rgba(160,200,255,.55)"; g.lineWidth = Math.max(1, w * 0.014); const st = Math.max(4, w * 0.09);
+  for (let x = -h; x < w + h; x += st) { g.beginPath(); g.moveTo(x, m); g.lineTo(x + h, m + h); g.moveTo(x + h, m); g.lineTo(x, m + h); g.stroke(); }
+  g.fillStyle = "rgba(255,255,255,.85)";
+  for (let y = m + st / 2; y < h; y += st) for (let x = m + st / 2 + ((Math.round((y - m) / st) % 2) ? st / 2 : 0); x < w; x += st) { g.beginPath(); g.arc(x, y, Math.max(0.6, w * 0.008), 0, TAU); g.fill(); }
   g.restore();
-  g.beginPath(); g.roundRect(m, m, iw, ih, r * 0.6); g.lineWidth = Math.max(1, w * 0.025); g.strokeStyle = GOLD; g.stroke();
-  const rr = Math.min(iw, ih) * 0.26;
-  g.beginPath(); g.arc(w / 2, h / 2, rr, 0, TAU); g.fillStyle = "#7d1124"; g.fill(); g.lineWidth = Math.max(1, w * 0.02); g.strokeStyle = GOLD; g.stroke();
-  g.fillStyle = GOLD; g.font = "700 italic " + Math.round(rr * 1.25) + "px " + FONT_H; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText("Ю", w / 2, h / 2 + rr * 0.06);
-  g.textBaseline = "alphabetic";
+  g.lineWidth = 1; g.strokeStyle = "#0c2a66"; g.strokeRect(m + 0.5, m + 0.5, iw - 1, ih - 1);
 }
-/* кадры карт с запечённой мягкой тенью (поля pad вокруг) — рисовать каждый кадр только drawImage */
+/* кадры карт ровно в пикселях экрана (иначе мутно): Wd×Hd устройства, тень запечена в поля pd; на месте — копия 1:1 без масштаба */
 function makeSprites() {
   const cache = new Map();
   return {
     get(key, w, h, dpr, fn) {
-      const k = key + "|" + w.toFixed(1) + "|" + dpr; let c = cache.get(k); if (c) return c;
-      const pad = Math.ceil(w * 0.12); c = document.createElement("canvas"); c.width = Math.ceil((w + pad * 2) * dpr); c.height = Math.ceil((h + pad * 2) * dpr);
-      const g = c.getContext("2d"); g.scale(dpr, dpr); g.translate(pad, pad);
-      g.save(); g.shadowColor = "rgba(0,0,0,.35)"; g.shadowBlur = w * 0.08; g.shadowOffsetY = w * 0.03;
-      g.beginPath(); g.roundRect(1, 1, w - 2, h - 2, w * 0.09); g.fillStyle = "#fff"; g.fill(); g.restore();
-      fn(g); c.pad = pad; cache.set(k, c); if (cache.size > 140) cache.delete(cache.keys().next().value);
+      const k = key + "|" + w + "|" + h + "|" + dpr; let c = cache.get(k); if (c) return c;
+      const Wd = Math.round(w * dpr), Hd = Math.round(h * dpr), pd = Math.ceil(w * 0.12 * dpr);
+      c = document.createElement("canvas"); c.width = Wd + pd * 2; c.height = Hd + pd * 2;
+      const g = c.getContext("2d"); g.translate(pd, pd); g.scale(Wd / w, Hd / h);
+      g.save(); g.shadowColor = "rgba(0,0,0,.4)"; g.shadowBlur = w * 0.07 * dpr; g.shadowOffsetY = Math.max(1, w * 0.025) * dpr;
+      g.beginPath(); g.roundRect(1, 1, w - 2, h - 2, Math.max(3, w * 0.07)); g.fillStyle = "#fff"; g.fill(); g.restore();
+      fn(g); c.pd = pd; c.pad = pd / dpr; cache.set(k, c); if (cache.size > 140) cache.delete(cache.keys().next().value);
       return c;
     },
     clear() { cache.clear(); },
@@ -131,11 +146,16 @@ function cardImg(spr, c, faceUp, w, h, dpr) {
 }
 /* карта на холсте: x, y — левый верх; fl — переворот 0 (рубашка) … 1 (лицо); lift — приподнята (крупнее, тень дальше) */
 function blitCard(ctx, spr, c, x, y, w, h, dpr, fl, lift, rot) {
-  const s = Math.abs(Math.cos(fl * PI)), face = fl >= 0.5, img = cardImg(spr, c, face, w, h, dpr), pad = img.pad;
+  const face = fl >= 0.5, img = cardImg(spr, c, face, w, h, dpr);
+  if ((fl === 0 || fl === 1) && !lift && !rot) {          // в покое и в полёте без поворота — пиксель в пиксель
+    ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.drawImage(img, Math.round(x * dpr) - img.pd, Math.round(y * dpr) - img.pd); ctx.restore();
+    return;
+  }
+  const s = Math.abs(Math.cos(fl * PI)), pad = img.pad;
   const up = Math.sin(fl * PI) * h * 0.06 + (lift || 0) * h * 0.04, sc = 1 + Math.sin(fl * PI) * 0.06 + (lift || 0) * 0.05;
   ctx.save(); ctx.translate(x + w / 2, y + h / 2 - up); if (rot) ctx.rotate(rot); ctx.scale(Math.max(0.02, s) * sc, sc);
   if (lift) { ctx.shadowColor = "rgba(0,0,0,.35)"; ctx.shadowBlur = h * 0.14 * lift; ctx.shadowOffsetY = h * 0.07 * lift; }
-  ctx.drawImage(img, -w / 2 - pad, -h / 2 - pad, w + pad * 2, h + pad * 2);
+  ctx.imageSmoothingQuality = "high"; ctx.drawImage(img, -w / 2 - pad, -h / 2 - pad, w + pad * 2, h + pad * 2);
   ctx.restore();
 }
 
@@ -152,11 +172,12 @@ function mount(cv, opts) {
   const dbg = {};
 
   /* ── раскладка: размер карт по экрану, столбцы по центру; веер в столбце сжимается, если не влезает ── */
-  function layout() {
+  function layout() {                                       // все размеры и места — целые css-пиксели (чётко)
     const narrow = W < 560, gap = Math.max(4, Math.round(Math.min(W, H) * (narrow ? 0.014 : 0.018)));
-    let cw = (W - gap * 8) / 7, ch = cw * 1.4;
-    const maxCh = (H - gap * 3) / (narrow ? 3.3 : 3.6); if (ch > maxCh) { ch = maxCh; cw = ch / 1.4; }
-    const bw = cw * 7 + gap * 6, x0 = (W - bw) / 2, top = gap + (narrow ? 2 : 6);
+    let cw = Math.floor((W - gap * 8) / 7), ch = Math.round(cw * 1.4);
+    const maxCh = Math.floor((H - gap * 3) / (narrow ? 3.3 : 3.6)); if (ch > maxCh) { ch = maxCh; cw = Math.round(ch / 1.4); }
+    ch = Math.max(28, ch); cw = Math.max(20, cw);           // пока карточка вытягивается, холст бывает совсем низким
+    const bw = cw * 7 + gap * 6, x0 = Math.round((W - bw) / 2), top = gap + (narrow ? 2 : 6);
     G.L = { cw, ch, gap, x0, top, tabY: top + ch + gap * (narrow ? 2 : 3), colX: i => x0 + i * (cw + gap) };
     spr.clear();
   }
@@ -171,9 +192,9 @@ function mount(cv, opts) {
     const L = G.L; let z = 0;
     for (const c of G.stock) { c.tx = L.colX(0); c.ty = L.top; c.z = z++; c.pile = "stock"; }
     const wn = G.waste.length;
-    G.waste.forEach((c, i) => { const k = G.draw === 3 ? Math.max(0, i - (wn - 3)) : 0; c.tx = L.colX(1) + k * L.cw * 0.28; c.ty = L.top; c.z = z++; c.pile = "waste"; });
+    G.waste.forEach((c, i) => { const k = G.draw === 3 ? Math.max(0, i - (wn - 3)) : 0; c.tx = L.colX(1) + Math.round(k * L.cw * 0.28); c.ty = L.top; c.z = z++; c.pile = "waste"; });
     G.found.forEach((f, j) => f.forEach(c => { c.tx = L.colX(3 + j); c.ty = L.top; c.z = z++; c.pile = "f" + j; }));
-    G.tab.forEach((col, j) => { const [dn, up] = fanStep(col); let y = L.tabY; col.forEach(c => { c.tx = L.colX(j); c.ty = y; y += c.up ? up : dn; c.z = z++; c.pile = "t" + j; }); });
+    G.tab.forEach((col, j) => { const [dn, up] = fanStep(col); let y = L.tabY; col.forEach(c => { c.tx = L.colX(j); c.ty = Math.round(y); y += c.up ? up : dn; c.z = z++; c.pile = "t" + j; }); });
   }
   function pileOf(c) { const p = c.pile; return p === "stock" ? G.stock : p === "waste" ? G.waste : p[0] === "f" ? G.found[+p[1]] : G.tab[+p[1]]; }
 
@@ -409,12 +430,12 @@ function mount(cv, opts) {
       ctx.fillStyle = "rgba(0,0,0,.35)"; ctx.fillRect(0, 0, W, H);
       const st = JSON.parse(LSG("unitka.ptStats") || '{"w":0}'), f = clamp(W * 0.07, 28, 64), pw = Math.min(W - 24, f * 11), ph = f * 2.6;
       ctx.save(); ctx.shadowColor = "rgba(0,0,0,.5)"; ctx.shadowBlur = 24; ctx.beginPath(); ctx.roundRect(W / 2 - pw / 2, H * 0.42 - f * 1.35, pw, ph, 16);
-      const pg = ctx.createLinearGradient(0, H * 0.3, 0, H * 0.6); pg.addColorStop(0, "#137a44"); pg.addColorStop(1, "#0b5530"); ctx.fillStyle = pg; ctx.fill(); ctx.restore();
+      const pg = ctx.createLinearGradient(0, H * 0.3, 0, H * 0.6); pg.addColorStop(0, "#14382a"); pg.addColorStop(1, "#08180f"); ctx.fillStyle = pg; ctx.fill(); ctx.restore();
       ctx.lineWidth = 2; ctx.strokeStyle = GOLD; ctx.stroke();
-      ctx.textAlign = "center"; ctx.fillStyle = "#ffe9a6"; ctx.font = "700 italic " + Math.round(f) + "px " + FONT_H; ctx.fillText("Пасьянс сошёлся!", W / 2, H * 0.42, pw - 20);
+      ctx.textAlign = "center"; ctx.fillStyle = "#f0c96a"; ctx.font = "400 " + Math.round(f) + "px " + FONT_H; ctx.fillText("Пасьянс сошёлся!", W / 2, H * 0.42, pw - 20);
       ctx.fillStyle = "#fff"; ctx.font = "600 " + Math.round(f * 0.36) + "px " + FONT;
       ctx.fillText("Время " + fmt(G.time) + " · ходов " + G.moves + " · побед " + (st.w || 1), W / 2, H * 0.42 + f * 0.8);
-      ctx.fillStyle = "#cfe9d6"; ctx.fillText("Нажми — новая раскладка", W / 2, H * 0.42 + f * 1.4);
+      ctx.fillStyle = "#e8c260"; ctx.fillText("Нажми — новая раскладка", W / 2, H * 0.42 + f * 1.4);
     }
   }
   const fmt = s => Math.floor(s / 60) + ":" + String(Math.floor(s % 60)).padStart(2, "0");
@@ -430,7 +451,8 @@ function mount(cv, opts) {
   const ro = new ResizeObserver(resize); ro.observe(cv);
   resize();
   if (!load()) newGame(true); else { stat(); }
-  try { document.fonts && document.fonts.load('700 italic 20px "Playfair Display"').then(() => { spr.clear(); draw(); }); document.fonts && document.fonts.load('800 20px "Manrope"').then(() => { spr.clear(); draw(); }); } catch (e) {}
+  court(); COURT.cb.push(() => { spr.clear(); draw(); });           // картинки королей, дам и вальтов догрузились — перерисовать
+  try { document.fonts && document.fonts.load('400 20px "Forum"').then(() => draw()); } catch (e) {}
   const inst = {
     resume() { if (running) return; running = true; need(); draw(); },
     pause() { running = false; if (raf) cancelAnimationFrame(raf); raf = 0; G.drag = null; save(); },
@@ -454,8 +476,9 @@ function fan(cv, opts) {
   const mk = id => ({ id, s: id[0], r: +id.slice(1) });
   let F = { st: "deal", t: 0, cards: HANDS[0].map(mk) };
   function geo() {
-    const narrow = W < 560, ch = clamp(H * (narrow ? 0.58 : 0.64), 60, 280), cw = ch / 1.4, R = ch * 1.9;
-    return { ch, cw, cx: W * (narrow ? 0.74 : 0.7), cy: H * 0.53 + R, R, spread: narrow ? 0.13 : 0.16, deck: [W * (narrow ? 0.46 : 0.47), H * 0.74] };
+    // веер между надписью (слева) и ведущей (справа)
+    const ch = Math.round(clamp(H * 0.56, 60, 240)), cw = Math.round(ch / 1.4), R = ch * 1.9;
+    return { ch, cw, cx: W * 0.54, cy: H * 0.55 + R, R, spread: 0.14, deck: [W * 0.42, H * 0.8] };
   }
   function resize() { const r = cv.getBoundingClientRect(); W = r.width; H = r.height; dpr = DPR(); cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); spr.clear(); draw(); }
   function pose(i, n, g, t) {                              // место i-й карты в веере и угол
@@ -501,7 +524,7 @@ function fan(cv, opts) {
   const io = new IntersectionObserver(es => { vis = es[0].isIntersecting; go(); }); io.observe(cv);
   const ro = new ResizeObserver(resize); ro.observe(cv);
   const onVis = () => go(); document.addEventListener("visibilitychange", onVis);
-  try { document.fonts && document.fonts.load('700 italic 20px "Playfair Display"').then(() => { spr.clear(); draw(); }); } catch (e) {}
+  court(); COURT.cb.push(() => { spr.clear(); draw(); });
   resize(); if (red) { F.st = "hold"; draw(); } go();
   return { pause(p) { paused = !!p; go(); }, destroy() { on = false; cancelAnimationFrame(raf); io.disconnect(); ro.disconnect(); document.removeEventListener("visibilitychange", onVis); } };
 }
