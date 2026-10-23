@@ -10,6 +10,9 @@
    Есть: кольца (удар — кольца разлетаются, часть можно поймать; 100 колец — жизнь), мониторы (10 колец, щит, кроссовки, неуязвимость,
    жизнь), пружины, ускорители, петли, шипы, ямы, уступы, бадники (жук, оса и краб стреляют), чекпоинт, табличка конца акта с бонусами
    за время и кольца, 2 акта и босс (8 попаданий), жизни, «игра окончена».
+   С 23.10 (вечер): Соник — кадры NeuralBox (sonic-run/poses.webp); режимы «бежит сам» / «управляю сам» (одним пальцем в любом месте:
+   вбок — скорость, тап/вверх — прыжок, вниз — присесть/клубок/спин-дэш; клавиши); после босса — секретный этап с Изумрудом Хаоса,
+   награда — Супер Соник в игре и на обложке.
    API: SonicGame.mount(canvas) → {resume, pause, destroy, dbg}; SonicGame.runner(canvas, {map}) → {pause, destroy}. */
 (function () {
 "use strict";
@@ -22,6 +25,8 @@ const P = { acc: 0.046875, dec: 0.5, frc: 0.046875, top: 6, slp: 0.125, grv: 0.2
   rollFrc: 0.0234375, rollDec: 0.125, rollUp: 0.078125, rollDown: 0.3125, rollTop: 16, autoTop: 5 };
 const LSG = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
 const LSS = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
+// Супер Соник — секретный бонус: открывается Изумрудом Хаоса на секретном этапе; золотой и в игре, и на обложке (ok — открыт, on — включён)
+const SUP = { ok: LSG("unitka.sxSuper") === "1", on: LSG("unitka.sxSuper") === "1" && LSG("unitka.sxSuperOn") !== "0" };
 const OL = "#0a1a4a";
 const C = { blue: "#1f5fe6", blue2: "#1240b8", peach: "#f7c48a", peach2: "#d99a5e", red: "#e8262b", red2: "#b5161d",
   gold: "#ffcf26", gold2: "#9a5800", gold3: "#fff3a6", glove2: "#cdd8ee" };
@@ -509,7 +514,7 @@ function mount(cv) {
   }
   const frameC = q => sprite("S" + q.k, 320 * SU, 320 * SU, 0, 0, g => { g.imageSmoothingQuality = "high"; g.drawImage(q.im, q.f * 320, 0, 320, 320, 0, 0, 320 * SU, 320 * SU); });
   function sonicAt(o) {                    // в уже повёрнутой/отражённой системе координат ног
-    if (sonicSpr(ctx, o, !!G.superOn, frameC)) return;
+    if (sonicSpr(ctx, o, !!SUP.on, frameC)) return;
     const ball = o.pose === "ball" || o.pose === "charge", n = 24;
     const i = ((Math.round((ball ? o.rot : o.ph) / TAU * n) % n) + n) % n;
     const key = "s" + o.pose + i + (o.blink ? "b" : "") + (o.eyesX ? "x" : "");
@@ -517,9 +522,10 @@ function mount(cv) {
     ctx.drawImage(c, -30, -50, 70, 56);
   }
   const G = { state: "title", act: 0, score: 0, lives: 3, L: null, ents: [], rings: [], sr: [], fx: [], cam: { x: 0, y: 0 }, t: 0, time: 0, st: 0, held: false, tap: false, boss: null, hint: 0, lifeAt: 100,
-    // режим: auto — бежит сам, тап — прыжок (как Sonic Runners); manual — сам: ◀ ▶ ▼ и прыжок, классическая физика (запоминается)
-    mode: LSG("unitka.sxMode") === "manual" ? "manual" : "auto", ptr: new Map(), keys: { L: false, R: false, D: false, J: false }, kbd: false, ui: [],
-    superOk: LSG("unitka.sxSuper") === "1", superOn: LSG("unitka.sxSuper") === "1" && LSG("unitka.sxSuperOn") !== "0" };
+    // режим: auto — бежит сам, тап — прыжок (как Sonic Runners); manual — сам одним пальцем в любом месте: тянешь вбок — скорость
+    // (держится и после отпускания), тап или взмах вверх — прыжок, вниз — присесть / клубок, вниз и держать — спин-дэш; клавиши ← → ↓ пробел
+    mode: LSG("unitka.sxMode") === "manual" ? "manual" : "auto", gest: null, cruise: 0, gDown: false, gHeld: false, fullJump: false,
+    keys: { L: false, R: false, D: false, J: false }, kbd: false, ui: [] };
   const S = {};
   const dbg = { bot: false, god: false };
 
@@ -634,7 +640,7 @@ function mount(cv) {
     G.ents = L.ents.map(e => Object.assign({ alive: true, t: 0, dir: -1, x0: e.x - 64, x1: e.x + 64, vx: 0, fire: 0, cool: 0 }, e, e.type === "buzz" ? { vx: -1, y0: e.y } : {},
       e.type === "mon" && e.kind === "life" && G.lifeUsed && G.lifeUsed[i + ":" + e.x] ? { broken: true } : {}));
     G.rings = L.rg.map(r => ({ x: r.x, y: r.y, got: false }));
-    G.sr = []; G.fx = []; G.boss = null; G.hint = i === 0 && !fromCp ? 400 : 0;
+    G.sr = []; G.fx = []; G.boss = null; G.hint = i === 0 && !fromCp ? 400 : 0; G.cruise = 0;
     const cp = fromCp && G.cp && G.cp.act === i ? G.cp : null;
     if (!cp) G.cp = null;
     Object.assign(S, { x: cp ? cp.x : 64, y: 0, xsp: 0, ysp: 0, gsp: 0, ang: 0, on: "floor", plat: null, lp: null, th: 0, dir: 1, ball: false, jumping: false,
@@ -676,7 +682,7 @@ function mount(cv) {
   }
   function hurt(force) {
     if (S.dead || dbg.god) return;
-    if (!force && (S.inv > 0 || S.star > 0 || G.superOn)) return;
+    if (!force && (S.inv > 0 || S.star > 0 || SUP.on)) return;
     if (S.shield) { S.shield = false; }
     else if (S.rings > 0) {
       const n = Math.min(S.rings, 32); S.rings = 0; SFX.lose();
@@ -695,7 +701,7 @@ function mount(cv) {
   }
   function jump() {
     const a = S.ang; S.xsp = S.gsp * Math.cos(a) - P.jmp * Math.sin(a); S.ysp = -S.gsp * Math.sin(a) - P.jmp * Math.cos(a);
-    Object.assign(S, { on: null, plat: null, lp: null, ball: true, jumping: true, canHome: true }); SFX.jump(); G.hint = Math.min(G.hint, 30);
+    Object.assign(S, { on: null, plat: null, lp: null, ball: true, jumping: true, canHome: true, noCut: G.fullJump }); SFX.jump(); G.hint = Math.min(G.hint, 30);
   }
   function homeTarget() {
     let best = null, bd = 1e9; const [cx, cy] = sCenter();
@@ -740,11 +746,13 @@ function mount(cv) {
     G.t++; T++;
     if (G.state === "card") { if (++G.st > 140) { G.state = "play"; G.tap = false; } camera(true); return; }
     if (G.state === "clear") { tally(); return; }
-    if (G.state === "over" || G.state === "win") { G.st++; return; }
+    if (G.state === "special") { ssStep(); return; }
+    if (G.state === "teaser") { if (++G.st > 260) ssStart(); return; }
+    if (G.state === "over" || G.state === "spres") { G.st++; return; }
     if (G.state !== "play") return;
     const L = G.L, tap = G.tap; G.tap = false;
     const man = G.mode === "manual";
-    const held = (man ? G.keys.J || [...G.ptr.values()].includes("J") : G.held) || (dbg.bot && G.botHold > 0);
+    const held = (man ? G.keys.J || G.gHeld : G.held) || (dbg.bot && G.botHold > 0);
     if (dbg.bot) bot();
     const botTap = G.botTap; G.botTap = false;
     const pressed = tap || botTap, inp = man ? input() : null;
@@ -752,8 +760,8 @@ function mount(cv) {
     if (G.time >= 36000 && !S.dead) die();
     if (S.inv > 0) S.inv--; if (S.shoes > 0) S.shoes--; if (S.star > 0) S.star--; if (S.spr > 0) S.spr--;
     if (--S.blink < -200) S.blink = 8;
-    const mult = (S.shoes > 0 ? 2 : 1) * (G.superOn ? 1.2 : 1);           // Супер Соник (приз за прохождение) — на 20% быстрее
-    if (G.superOn && G.t % 5 === 0 && !S.dead) fx({ k: "spark", x: S.x + (Math.random() - 0.5) * 26, y: S.y - 20 + (Math.random() - 0.5) * 34, max: 14 });
+    const mult = (S.shoes > 0 ? 2 : 1) * (SUP.on ? 1.2 : 1);           // Супер Соник (приз за прохождение) — на 20% быстрее
+    if (SUP.on && G.t % 5 === 0 && !S.dead) fx({ k: "spark", x: S.x + (Math.random() - 0.5) * 26, y: S.y - 20 + (Math.random() - 0.5) * 34, max: 14 });
     S.py = S.y;
     if (S.dead) {
       S.ysp += P.grv; S.y += S.ysp; S.dead++;
@@ -770,50 +778,63 @@ function mount(cv) {
     interact();
     updEnts();
     camera(false);
+    G.fullJump = false;
   }
-  /* «управляю сам»: кнопки (касания по зонам, клавиши) → {x: −1/0/1, down} */
+  /* «управляю сам»: клавиши → {x: −1/0/1}; палец → {target: заданная скорость (−1…1 от предельной)}; вниз — down */
   function input() {
-    let l = G.keys.L, r = G.keys.R, d = G.keys.D;
-    for (const b of G.ptr.values()) { if (b === "L") l = true; else if (b === "R") r = true; else if (b === "D") d = true; }
+    const l = G.keys.L, r = G.keys.R, d = G.keys.D || G.gDown;
     if (dbg.bot) {                                   // автопилот: вперёд; на арене — от стены к стене, как в «бежит сам»
       const a = G.L.arena; G.botDir = G.botDir || 1;
       if (a && G.boss && S.x > a.x1 - 40) G.botDir = -1; else if (a && G.boss && S.x < a.x0 + 40) G.botDir = 1; else if (!G.boss) G.botDir = 1;
       const v = S.on ? S.gsp : S.xsp;                // как осторожный игрок: не гонит выше ~5
       return { x: !G.boss && v * G.botDir > 4.8 ? 0 : G.botDir, down: false };
     }
-    return { x: (r ? 1 : 0) - (l ? 1 : 0), down: d };
+    const x = (r ? 1 : 0) - (l ? 1 : 0);
+    if (x) { G.cruise = 0; return { x, down: d }; }   // клавиши — по-классике: отпустил — трение
+    return { x: 0, down: d, target: G.cruise };
   }
+  const toward = (v, t, a) => (v < t ? Math.min(t, v + a) : Math.max(t, v - a));
   /* классика по Sonic Physics Guide: разгон/торможение/трение, занос, клубок вниз на ходу, присед + прыжок — спин-дэш */
   function manualGround(mult, pressed, inp) {
     const x = S.ctrl ? inp.x : 0, top = P.top * mult, acc = P.acc * mult, floor = S.on === "floor";
+    const tg = S.ctrl && inp.target !== undefined ? inp.target * top : null;
     if (S.crouch) {
       if (!inp.down || !S.ctrl) {
         S.crouch = false;
         if (S.spin !== null) { S.gsp = (8 + Math.floor(S.spin) / 2) * S.dir; S.ball = true; S.spin = null; SFX.boost(); fx({ k: "puff", x: S.x - S.dir * 12, y: S.y - 6, max: 20 }); }
       } else {
-        if (pressed) { S.spin = Math.min(8, (S.spin === null ? -2 : S.spin) + 2); SFX.rev(); fx({ k: "puff", x: S.x - S.dir * 14, y: S.y - 4, max: 16 }); }
+        // подкрутка: клавишей — прыжком; пальцем — сама, пока держишь вниз (отпустил — сорвался)
+        const rev = pressed || (G.gDown && ++S.crouchT > 14 && S.crouchT % 10 === 5);
+        if (rev) { S.spin = Math.min(8, (S.spin === null ? -2 : S.spin) + 2); SFX.rev(); fx({ k: "puff", x: S.x - S.dir * 14, y: S.y - 4, max: 16 }); }
         if (S.spin !== null) S.spin -= Math.floor(S.spin / 0.125) / 256;
-        if (x) S.dir = x;
+        if (x) S.dir = x; else if (tg) S.dir = sgn(tg);
         S.gsp = 0; S.skid = false; return false;
       }
     }
     if (S.ball) {                                     // катится клубком: без разгона, своё трение, вниз по склону быстрее
-      if (x && sgn(S.gsp) !== x) S.gsp -= Math.min(Math.abs(S.gsp), P.rollDec) * sgn(S.gsp);
+      const back = x ? sgn(S.gsp) !== x : tg !== null && tg !== 0 && sgn(S.gsp) !== sgn(tg);
+      if (back) S.gsp -= Math.min(Math.abs(S.gsp), P.rollDec) * sgn(S.gsp);
       S.gsp -= Math.min(Math.abs(S.gsp), P.rollFrc) * sgn(S.gsp);
       if (floor) { const s = Math.sin(S.ang); S.gsp -= (sgn(S.gsp) === sgn(s) ? P.rollUp : P.rollDown) * s; }
       S.gsp = clamp(S.gsp, -P.rollTop, P.rollTop);
       if (Math.abs(S.gsp) < 0.5) S.ball = false;
     } else {
+      let w = x;                                      // куда «жмём» в этот кадр (для заноса и поворота)
       if (x < 0) { if (S.gsp > 0) { S.gsp -= P.dec; if (S.gsp <= 0) S.gsp = -0.5; } else if (S.gsp > -top) S.gsp = Math.max(-top, S.gsp - acc); }
       else if (x > 0) { if (S.gsp < 0) { S.gsp += P.dec; if (S.gsp >= 0) S.gsp = 0.5; } else if (S.gsp < top) S.gsp = Math.min(top, S.gsp + acc); }
+      else if (tg !== null && tg !== 0) {             // палец: тянемся к заданной скорости; в обратную сторону — тормоз с заносом
+        w = sgn(tg);
+        if (S.gsp !== 0 && sgn(S.gsp) !== w) { S.gsp -= P.dec * sgn(S.gsp); if (sgn(S.gsp) === w) S.gsp = 0; }
+        else S.gsp = toward(S.gsp, tg, Math.abs(tg) > Math.abs(S.gsp) ? acc : Math.max(P.frc, 0.07));
+      }
       else S.gsp -= Math.min(Math.abs(S.gsp), P.frc) * sgn(S.gsp);
       if (Math.abs(S.gsp) > top) S.gsp -= sgn(S.gsp) * 0.035;          // после ускорителя скорость сходит плавно (в оригинале держится — играть тяжелее)
       if (floor && (Math.abs(S.gsp) > 0.01 || Math.abs(S.ang) > 0.4)) S.gsp -= P.slp * Math.sin(S.ang);
-      S.skid = !!x && S.gsp !== 0 && sgn(S.gsp) !== x && Math.abs(S.gsp) > 2;
-      if (x && !S.skid && (S.gsp === 0 || sgn(S.gsp) === x)) S.dir = x;
+      S.skid = !!w && S.gsp !== 0 && sgn(S.gsp) !== w && Math.abs(S.gsp) > 2;
+      if (w && !S.skid && (S.gsp === 0 || sgn(S.gsp) === w)) S.dir = w;
       if (inp.down && S.ctrl) {
         if (Math.abs(S.gsp) >= 1.03125) { S.ball = true; S.skid = false; SFX.roll(); }
-        else if (floor || S.on === "plat") { S.crouch = true; S.gsp = 0; S.skid = false; return false; }
+        else if (floor || S.on === "plat") { S.crouch = true; S.crouchT = 0; S.gsp = 0; S.skid = false; return false; }
       }
     }
     if (pressed && S.ctrl) { S.skid = false; jump(); return true; }
@@ -875,8 +896,12 @@ function mount(cv) {
       S.homing--; const [cx, cy] = sCenter(), dx = S.ht.x - cx, dy = S.ht.y - cy, d = Math.hypot(dx, dy) || 1;
       S.xsp = dx / d * 9; S.ysp = dy / d * 9; if (d < 6) S.homing = 0;
     } else {
-      if (S.jumping && !held && S.ysp < -P.cut) S.ysp = -P.cut;
-      if (inp) { const t = P.top * mult, x = S.ctrl ? inp.x : 0; if (x) { S.dir = x; if (x > 0 ? S.xsp < t : S.xsp > -t) S.xsp += P.air * mult * x; } }
+      if (S.jumping && !held && !S.noCut && S.ysp < -P.cut) S.ysp = -P.cut;      // короткий тап пальцем — прыжок в полную силу
+      if (inp) {
+        const t = P.top * mult, x = S.ctrl ? inp.x : 0;
+        if (x) { S.dir = x; if (x > 0 ? S.xsp < t : S.xsp > -t) S.xsp += P.air * mult * x; }
+        else if (S.ctrl && inp.target) { const tg = inp.target * t; S.dir = sgn(tg); if (Math.abs(tg) > Math.abs(S.xsp) || sgn(S.xsp) !== sgn(tg)) S.xsp = toward(S.xsp, tg, P.air * mult); }
+      }
       else if (S.ctrl) { const t = P.autoTop * mult; if (S.dir > 0 ? S.xsp < t : S.xsp > -t) S.xsp += P.air * mult * S.dir; }
       if (S.ysp < 0 && S.ysp > -4) S.xsp -= S.xsp / 256 * 8 / 32;
       S.ysp = Math.min(P.fall, S.ysp + P.grv);
@@ -891,7 +916,7 @@ function mount(cv) {
     }
   }
   function interact() {
-    const [cx, cy] = sCenter(), R = S.ball ? 13 : 14, atk = S.ball || S.star > 0 || S.homing > 0 || G.superOn;
+    const [cx, cy] = sCenter(), R = S.ball ? 13 : 14, atk = S.ball || S.star > 0 || S.homing > 0 || SUP.on;
     // кольца
     const x0 = cx - 24, x1 = cx + 24;
     for (const r of G.rings) if (!r.got && r.x > x0 && r.x < x1 && Math.abs(r.y - cy) < 26 && (r.x - cx) ** 2 + (r.y - cy) ** 2 < 22 * 22) { r.got = true; gotRing(); fx({ k: "spark", x: r.x, y: r.y, max: 16 }); }
@@ -959,7 +984,7 @@ function mount(cv) {
   function tally() {
     G.st++;
     if (G.st > 80) { for (const kk of ["tb", "rb"]) { const d = Math.min(G[kk], 100); G[kk] -= d; G.score += d; } }
-    if ((G.st > 80 && !G.tb && !G.rb && G.st > 260) || G.skip) { G.score += G.tb + G.rb; G.tb = G.rb = 0; G.skip = false; if (G.act + 1 < ACTS.length) { G.tt = (G.tt || 0) + G.time; startAct(G.act + 1); } else { won(); G.state = "win"; G.st = 0; } }
+    if ((G.st > 80 && !G.tb && !G.rb && G.st > 260) || G.skip) { G.score += G.tb + G.rb; G.tb = G.rb = 0; G.skip = false; if (G.act + 1 < ACTS.length) { G.tt = (G.tt || 0) + G.time; startAct(G.act + 1); } else zoneDone(); }
   }
 
   /* ───── арена и босс: яйцелёт доктора с шаром на цепи; 8 попаданий ───── */
@@ -980,7 +1005,7 @@ function mount(cv) {
     } else if (b.st === "boom") {
       if (b.t % 6 === 0) { fx({ k: "boom", x: b.x + (Math.random() - 0.5) * 50, y: b.y + (Math.random() - 0.5) * 34, max: 24 }); if (b.t % 18 === 0) SFX.boom(); }
       b.ang *= 0.95; if (b.t > 130) { b.st = "flee"; b.t = 0; }
-    } else if (b.st === "flee") { b.x += 2.6; b.y -= 1.4; if (b.t % 8 === 0) fx({ k: "puff", x: b.x - 20, y: b.y + 8, max: 30 }); if (b.t > 140) { b.st = "gone"; G.score += 1000; won(); G.state = "win"; G.st = 0; SFX.clear(); } }
+    } else if (b.st === "flee") { b.x += 2.6; b.y -= 1.4; if (b.t % 8 === 0) fx({ k: "puff", x: b.x - 20, y: b.y + 8, max: 30 }); if (b.t > 140) { b.st = "gone"; G.score += 1000; zoneDone(); SFX.clear(); } }
     const chain = 94; b.bx = b.x + Math.sin(b.ang) * chain; b.by = b.y + 16 + Math.cos(b.ang) * chain;
   }
   function bossHit(cx, cy, R, atk) {
@@ -1034,6 +1059,7 @@ function mount(cv) {
   function draw() {
     const sc = SC;
     ctx.setTransform(1, 0, 0, 1, 0, 0);
+    if ((G.state === "special" || G.state === "spres") && G.sp) { G.ui = []; drawSpecial(); return; }
     if (!cloudsR) cloudsR = raster(pic("clouds", "sonic-clouds.svg"), 96);
     if (!hillsR) hillsR = raster(pic("hills", "sonic-hills.svg"), H * 0.62);
     if (!G.L) toTitle();
@@ -1102,7 +1128,7 @@ function mount(cv) {
   function drawSonic() {
     if (S.inv > 0 && !S.dead && Math.floor(S.inv / 3) % 2) return;
     const pose = S.dead ? "dead" : S.hurt ? "hurt" : S.spr > 0 && S.ysp < 0 ? "spring" : S.ball || S.homing ? "ball" : S.crouch ? (S.spin !== null ? "charge" : "crouch") :
-      S.push ? "push" : S.skid ? "skid" : (G.state === "win") ? "win" : poseFor(S.on ? S.gsp : S.xsp, false);
+      S.push ? "push" : S.skid ? "skid" : (G.state === "teaser") ? "win" : poseFor(S.on ? S.gsp : S.xsp, false);
     const rot = S.on === "loop" ? -S.th : S.on ? S.ang * -1 : 0;
     for (let i = S.last.length - 1; i >= 0; i--) { const l = S.last[i]; ctx.save(); ctx.globalAlpha = 0.18 * (1 - i / 4); ctx.translate(l[0] - S.dir * (i + 1) * 4, l[1]); ctx.rotate(-l[2]); if (S.dir < 0) ctx.scale(-1, 1); sonicAt({ pose: S.ball ? "ball" : pose, ph: S.ph, rot: S.rot }); ctx.restore(); }
     ctx.save(); ctx.translate(S.x, S.y); ctx.rotate(rot); if (S.dir < 0) ctx.scale(-1, 1);
@@ -1147,7 +1173,7 @@ function mount(cv) {
   function fmtTime(fr) { const s = Math.floor(fr / 60); return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); }
   /* табло (очки, время, кольца, жизни) — в свою картинку, перерисовка только когда меняются цифры */
   function hud(fs, pad) {
-    const blink = S.rings === 0 && T % 40 < 20, key = [G.score, Math.floor(G.time / 60), S.rings, blink, G.lives, fs, dpr, G.superOn, strips(G.superOn)[1].complete].join("|");
+    const blink = S.rings === 0 && T % 40 < 20, key = [G.score, Math.floor(G.time / 60), S.rings, blink, G.lives, fs, dpr, SUP.on, strips(SUP.on)[1].complete].join("|");
     const w = Math.ceil(pad + fs * 10), h = Math.ceil(pad + fs * 3.6 + 10), lh = Math.ceil(fs * 1.9), lw = Math.ceil(lh * 0.95 * 4 / 3 + fs * 2.6);
     if (hudC.key !== key) {
       hudC.key = key;
@@ -1158,38 +1184,28 @@ function mount(cv) {
       lab("ОЧКИ", 0); val(String(G.score), 0); lab("ВРЕМЯ", 1); val(fmtTime(G.time), 1); lab("КОЛЬЦА", 2); val(String(S.rings), 2, blink);
       const l = hudC.l || (hudC.l = document.createElement("canvas")); l.width = Math.ceil(lw * dpr); l.height = Math.ceil(lh * dpr);
       const q = l.getContext("2d"); q.setTransform(dpr, 0, 0, dpr, 0, 0); q.imageSmoothingQuality = "high";
-      const [, pos] = strips(G.superOn), ih = lh * 0.95, iw = ih * 4 / 3;      // значок жизней — голова Соника из кадра «стоит»
+      const [, pos] = strips(SUP.on), ih = lh * 0.95, iw = ih * 4 / 3;      // значок жизней — голова Соника из кадра «стоит»
       if (pos.complete && pos.naturalWidth) q.drawImage(pos, 60, 28, 200, 150, 0, lh - ih, iw, ih);
       else { q.save(); q.translate(fs * 0.6, lh - fs * 0.25); q.scale(fs / 30, fs / 30); q.translate(0, 26); head(q, {}); q.restore(); }
       txt("× " + G.lives, iw + fs * 0.15, lh - fs * 0.2, fs, "#fff", 0, 0, q);
     }
     ctx.drawImage(hudC.c, 0, 0, hudC.c.width / dpr, hudC.c.height / dpr);
-    // жизни: внизу слева; в «управляю сам» там кнопки — справа вверху, под кнопками карточки (звук, экран, назад)
-    if (G.mode === "manual") ctx.drawImage(hudC.l, cssW - lw - pad * 0.5, 48, lw, lh);
-    else ctx.drawImage(hudC.l, pad, cssH - pad - lh + fs * 0.05, lw, lh);
+    ctx.drawImage(hudC.l, pad, cssH - pad - lh + fs * 0.05, lw, lh);
   }
-  /* кнопки на экране для «управляю сам»: слева ◀ ▼ ▶, справа A (прыжок); касание — по ближайшей, левая половина — стрелки, правая — прыжок */
-  function pads() {
-    const pad = Math.round(clamp(cssH * 0.05, 8, 18)), b = clamp(Math.min(cssH * 0.2, cssW * 0.12), 40, 70), gap = b * 0.16, cy = cssH - pad - b / 2;
-    return { b, L: [pad + b / 2, cy], D: [pad + b * 1.5 + gap, cy], R: [pad + b * 2.5 + gap * 2, cy], J: [cssW - pad - b * 0.7, cssH - pad - b * 0.7], jr: b * 0.7 };
-  }
-  function zone(x, y) {
-    if (x > cssW * 0.5) return "J";
-    const p = pads(); let best = "L", bd = 1e9;
-    for (const k of ["L", "D", "R"]) { const d = Math.hypot(x - p[k][0], y - p[k][1]); if (d < bd) { bd = d; best = k; } }
-    return best;
-  }
-  function drawPads() {
-    if (G.kbd) return;
-    const p = pads(), on = new Set(G.ptr.values());
-    const btn = (k, r, glyph) => {
-      const [x, y] = p[k]; ctx.globalAlpha = on.has(k) ? 0.75 : 0.42;
-      ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fillStyle = on.has(k) ? "#ffd21f" : "#0a1a4a"; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = "#fff"; ctx.stroke();
-      ctx.globalAlpha = 0.95; ctx.fillStyle = "#fff"; ctx.beginPath(); glyph(x, y, r * 0.42); ctx.fill(); ctx.globalAlpha = 1;
-    };
-    const tri = a => (x, y, s) => { for (let i = 0; i < 3; i++) { const t = a + i * TAU / 3; ctx[i ? "lineTo" : "moveTo"](x + Math.cos(t) * s, y + Math.sin(t) * s); } ctx.closePath(); };
-    btn("L", p.b / 2, tri(PI)); btn("D", p.b / 2, tri(PI / 2)); btn("R", p.b / 2, tri(0));
-    btn("J", p.jr, (x, y, s) => { ctx.font = "italic 900 " + Math.round(s * 2.1) + "px " + FONT; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText("A", x, y + 1); });
+  /* «управляю сам» одним пальцем (23.10, Андрей: «в любом месте нажал — и прыгнуть, и пригнуться, и ускориться, и медленно регулировать
+     скорость оттяжкой в сторону»): под пальцем — от точки касания до пальца; внизу по центру — заданная скорость (держится без пальца) */
+  const dragR = () => clamp(cssW * 0.3, 90, 240);        // столько пикселей вбок — от стоянки до полной скорости
+  function drawGesture() {
+    const c = G.cruise, w = Math.min(180, cssW * 0.42), cx = cssW / 2, y = cssH - Math.max(10, cssH * 0.05);
+    ctx.fillStyle = "rgba(10,26,74,.55)"; ctx.beginPath(); ctx.roundRect(cx - w / 2 - 4, y - 6, w + 8, 12, 6); ctx.fill();
+    const len = c * w / 2; ctx.fillStyle = Math.abs(c) > 0.85 ? "#ff7a1a" : "#ffd21f"; ctx.fillRect(Math.min(cx, cx + len), y - 3, Math.abs(len), 6);
+    ctx.fillStyle = "#fff"; ctx.fillRect(cx - 1, y - 7, 2, 14);
+    if (Math.abs(c) > 0.03) { const ex = cx + len, d = sgn(c); ctx.beginPath(); ctx.moveTo(ex + d * 7, y); ctx.lineTo(ex - d * 1, y - 6); ctx.lineTo(ex - d * 1, y + 6); ctx.closePath(); ctx.fill(); }
+    const g = G.gest; if (!g || G.kbd) return;
+    ctx.globalAlpha = 0.5; ctx.lineWidth = 2; ctx.strokeStyle = "#fff";
+    ctx.beginPath(); ctx.arc(g.x0, g.y0, 16, 0, TAU); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(g.x0, g.y0); ctx.lineTo(g.x0 + g.dx, g.y0 + g.dy); ctx.stroke();
+    ctx.fillStyle = G.gDown ? "#5aaaff" : "#ffd21f"; ctx.beginPath(); ctx.arc(g.x0 + g.dx, g.y0 + g.dy, 10, 0, TAU); ctx.fill(); ctx.globalAlpha = 1;
   }
   function overlay() {
     const fs = clamp(Math.round(cssH * 0.07), 11, 18), pad = Math.round(fs * 0.7);
@@ -1201,14 +1217,16 @@ function mount(cv) {
       for (let i = 0; i < n; i++) { ctx.fillStyle = i < G.boss.hp ? "#ff3d3d" : "rgba(10,26,74,.5)"; ctx.strokeStyle = OL; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.roundRect(x + i * w, pad, w - 3, fs * 0.6, 3); ctx.fill(); ctx.stroke(); }
     }
     const man = G.mode === "manual";
-    if (man && (G.state === "play" || G.state === "card")) drawPads();
+    if (man && (G.state === "play" || G.state === "card")) drawGesture();
     if (G.hint > 0 && G.state === "play") {
       ctx.globalAlpha = Math.min(1, G.hint / 30);
-      const s = man ? "◀ ▶ — бег · A — прыжок · ▼ на ходу — клубок · ▼ + A — спин-дэш" : "Тап — прыжок · держи — выше · тап в прыжке — атака";
-      txt(s, cssW / 2, cssH * 0.56, fit(s, Math.max(10, fs * 0.8), cssW - 16), "#fff", "center"); ctx.globalAlpha = 1;     // между табло и кнопками
+      const ls = man ? (G.kbd ? ["← → — бег · пробел — прыжок · ↓ на ходу — клубок · ↓ + пробел — спин-дэш"]
+        : ["Палец в любом месте: тяни вбок — скорость", "тап или вверх — прыжок · вниз — присесть, держи — спин-дэш"]) : ["Тап — прыжок · держи — выше · тап в прыжке — атака"];
+      const s0 = Math.min(...ls.map(s => fit(s, Math.max(10, fs * 0.8), cssW - 16)));
+      ls.forEach((s, i) => txt(s, cssW / 2, cssH * 0.5 + i * s0 * 1.35, s0, "#fff", "center")); ctx.globalAlpha = 1;
     }
     if (G.state === "card") titleCard(); else if (G.state === "clear") clearScreen(); else if (G.state === "over") bigMsg("ИГРА ОКОНЧЕНА", "Нажми, чтобы начать заново");
-    else if (G.state === "win") winScreen();
+    else if (G.state === "teaser") teaserScreen();
   }
   function fit(s, size, maxW, wgt) { ctx.font = (wgt || "italic 900 ") + size + "px " + FONT; const w = ctx.measureText(s).width; return w > maxW ? Math.max(7, size * maxW / w) : size; }
   function wrap(s, size, maxW, wgt) {                  // строки по ширине
@@ -1225,52 +1243,212 @@ function mount(cv) {
     txt(label, x + w / 2, y + (sub ? h * 0.47 : h * 0.5 + s * 0.36), s, "#fff", "center");
     if (sub) { const s2 = fit(sub, h * 0.22, w - h * 0.3, "700 "); ctx.font = "700 " + s2 + "px " + FONT; ctx.textAlign = "center"; ctx.fillStyle = on ? "#0a1a4a" : "#bfe3ff"; ctx.fillText(sub, x + w / 2, y + h * 0.82); }
   }
-  /* финал: бонус Бондареву (23.10, Андрей: «придумать, какой бонус будет ждать в конце Бондарева, если пройдёт») —
-     1) открывается Супер Соник (золотой, быстрее, враги не страшны; включается на заставке), 2) приз от Андрея по коду —
-     код из очков, времени и даты; «Отправить Андрею» — системное «Поделиться» на телефоне, на ПК текст с кодом копируется
-     (новых окон и вкладок не открываем) */
-  const PRIZE = "чили-дог за счёт Андрея — любимая еда Соника";
-  function won() {
+  /* ═══ секретный бонус (23.10, Андрей: «не писать Бондареву, а просто пройди и получи секретный бонус… надо что-то интереснее»):
+     после босса — секретный этап, как в Sonic 1: лабиринт вращается, Соник клубком катится под действием силы тяжести «вниз экрана»,
+     кольца, отбойники, блоки R (разворачивают вращение), по краям GOAL (выкидывает с этапа). В центре — Изумруд Хаоса: достал →
+     Супер Соник (золотой, на 20% быстрее, враги не страшны) — и в игре, и на обложке «Юнитки». Управление то же одним пальцем:
+     тянешь вбок — катится, тап или взмах вверх — прыжок; клавиши ← → и пробел. 60 секунд, попыток сколько угодно. ═══ */
+  function zoneDone() {
     G.tt = (G.tt || 0) + G.time;
-    const s = G.score + "|" + G.tt + "|" + new Date().toISOString().slice(0, 10); let h = 2166136261;
-    for (const ch of s) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619) >>> 0; }
-    G.code = "SONIC-" + h.toString(36).toUpperCase().padStart(5, "0").slice(0, 5);
-    G.newSuper = !G.superOk; if (G.newSuper) { G.superOk = true; G.superOn = true; LSS("unitka.sxSuper", "1"); LSS("unitka.sxSuperOn", "1"); }
-    strips(true);                                    // золотые кадры — заранее, к финалу и следующей игре
     let best = null; try { best = JSON.parse(LSG("unitka.sxBest") || "null"); } catch (e) {}
     G.best = best; if (!best || G.score > best.score) LSS("unitka.sxBest", JSON.stringify({ score: G.score, tt: G.tt }));
-    G.sent = "";
+    strips(true);                                    // золотые кадры — заранее, к награде
+    G.state = "teaser"; G.st = 0;
   }
-  function share() {
-    const msg = "Андрей, я прошёл Соника в Юнитке! Очки " + G.score + ", время " + fmtTime(G.tt) + ". Код приза: " + G.code + " (" + PRIZE + ")";
-    const copy = () => { try { navigator.clipboard.writeText(msg).then(() => { G.sent = "Скопировано — вставь Андрею в Telegram"; }, () => { G.sent = "Напиши Андрею код: " + G.code; }); } catch (e) { G.sent = "Напиши Андрею код: " + G.code; } };
-    if (navigator.share && matchMedia("(pointer: coarse)").matches) navigator.share({ text: msg }).then(() => { G.sent = "Отправлено"; }, copy);
-    else copy();
+  function teaserScreen() {
+    const fs = clamp(cssH * 0.11, 16, 42), x = cssW / 2;
+    ctx.fillStyle = "rgba(10,26,74,.62)"; ctx.fillRect(0, 0, cssW, cssH);
+    txt("ЗОНА ПРОЙДЕНА!", x, cssH * 0.3, fit("ЗОНА ПРОЙДЕНА!", fs, cssW - 24), "#ffd21f", "center");
+    const st = "Очки " + G.score + " · время " + fmtTime(G.tt || 0) + (G.best && G.best.score > G.score ? " · рекорд " + G.best.score : "");
+    txt(st, x, cssH * 0.3 + fs * 0.95, fit(st, fs * 0.42, cssW - 24), "#fff", "center");
+    const k = 1 + 0.06 * Math.sin(T * 0.12), s2 = fit("★ А ТЕПЕРЬ — СЕКРЕТНЫЙ БОНУС ★", fs * 0.62 * k, cssW - 24);
+    if (G.st > 50) txt("★ А ТЕПЕРЬ — СЕКРЕТНЫЙ БОНУС ★", x, cssH * 0.62, s2, T % 30 < 20 ? "#ffe24a" : "#fff", "center");
+    if (G.st > 90 && T % 60 < 42) txt("нажми, чтобы войти", x, cssH * 0.62 + fs * 0.75, Math.max(10, fs * 0.36), "#bfe3ff", "center");
   }
-  function winScreen() {
-    ctx.fillStyle = "rgba(10,26,74,.78)"; ctx.fillRect(0, 0, cssW, cssH);
-    const [, pos] = strips(true), sh = cssH * (cssW < 560 ? 0.5 : 0.72), k = sh / 280, sx = cssW - sh * 0.42, sy = cssH * 0.92 + Math.sin(T * 0.06) * 3;
-    for (let i = 0; i < 7; i++) { const a = T * 0.03 + i * TAU / 7, r = sh * (0.42 + 0.08 * Math.sin(T * 0.07 + i)); star(ctx, sx + Math.cos(a) * r, sy - sh * 0.5 + Math.sin(a) * r, sh * 0.05, i % 2 ? "#fff" : "#ffd21f", a); }
-    if (pos.complete && pos.naturalWidth) { ctx.save(); ctx.imageSmoothingQuality = "high"; ctx.drawImage(pos, 7 * 320, 0, 320, 320, sx - 160 * k, sy - 310 * k, 320 * k, 320 * k); ctx.restore(); }
-    const x = Math.max(12, cssW * 0.04), colW = cssW - x - sh * 0.78, f1 = clamp(cssH * 0.1, 15, 40), f2 = clamp(cssH * 0.052, 10, 19);
-    let y = cssH * 0.05 + f1;
-    txt("БОНДАРЕВ, ТЫ ПРОШЁЛ!", x, y, fit("БОНДАРЕВ, ТЫ ПРОШЁЛ!", f1, colW), "#ffd21f");
-    y += f2 * 1.55;
-    const st = "Очки " + G.score + " · время " + fmtTime(G.tt || 0) + (G.best ? " · рекорд " + Math.max(G.best.score, G.score) : "");
-    txt(st, x, y, fit(st, f2, colW), "#fff");
-    const para = (s, col) => { for (const l of wrap(s, f2, colW)) { y += f2 * 1.3; txt(l, x, y, f2, col); } };
-    y += f2 * 0.3;
-    para("★ Бонус 1: " + (G.newSuper ? "открыт" : "твой") + " Супер Соник — золотой, быстрее, враги не страшны (вкл. на заставке)", "#bfe3ff");
-    para("★ Бонус 2: приз от Андрея — " + PRIZE, "#bfe3ff");
-    y += f2 * 1.45; txt("КОД: " + G.code, x, y, fit("КОД: " + G.code, f2 * 1.25, colW), "#ffd21f");
-    const bh = clamp(cssH * 0.13, 28, 50), bw = Math.min(colW * 0.56, 260), by = Math.min(cssH - bh - 8, y + f2 * 0.8);
-    if (G.st > 40) {
-      uiBtn("share", x, by, bw, bh, "ОТПРАВИТЬ АНДРЕЮ", "", true); uiBtn("again", x + bw + 8, by, Math.min(colW - bw - 8, bw * 0.7), bh, "ЕЩЁ РАЗ", "", false);
-      if (G.sent) {
-        const below = by + bh + f2 * 1.2 <= cssH - 3, s = fit(G.sent, f2 * 0.9, below ? colW : cssW - 16);
-        if (!below) { ctx.fillStyle = "rgba(10,26,74,.9)"; ctx.fillRect(0, cssH - s * 1.7, cssW, s * 1.7); }
-        txt(G.sent, below ? x : cssW / 2, below ? by + bh + f2 * 1.2 : cssH - s * 0.45, s, "#9cff7a", below ? "left" : "center");
+  // лабиринт 15×25 клеток по 32: четыре полки с проходами то слева, то справа; на стенах у полок — GOAL (качнуло к стене — вылетел),
+  // внизу — Изумруд Хаоса и GOAL в углу. Лабиринт качается ±29° (период ~6 с); блок R разворачивает качание.
+  const SS = { W: 15, H: 25, C: 32, R: 11 };
+  const SS_GAPS = [[5, 6, 7], [10, 9, 10], [15, 4, 5], [19, 9, 10]];         // полка: ряд, проход — столбцы (от GOAL до места падения — 3–5 клеток)
+  function ssMaze() {
+    const { W, H } = SS, m = Array.from({ length: H }, () => Array(W).fill("."));
+    for (let c = 0; c < W; c++) m[0][c] = m[H - 1][c] = "#";
+    for (let r = 0; r < H; r++) m[r][0] = m[r][W - 1] = "#";
+    for (const [r, a, b] of SS_GAPS) for (let c = 1; c < W - 1; c++) if (c < a || c > b) m[r][c] = "#";
+    // на каждой полке GOAL — у стены с той стороны, где нет прохода: качнуло не туда и не удержал — вылетел
+    m[3][W - 1] = m[4][W - 1] = "G"; m[8][0] = m[9][0] = "G"; m[13][W - 1] = m[14][W - 1] = "G"; m[17][0] = m[18][0] = "G";
+    m[H - 2][1] = m[H - 2][W - 2] = "G";
+    m[H - 2][7] = "E";
+    for (const [r, c] of [[2, 2], [2, 12], [7, 9], [12, 3], [17, 8], [21, 3]]) m[r][c] = "B";
+    m[4][0] = m[9][W - 1] = m[14][0] = m[18][W - 1] = "R";           // R — у стены напротив GOAL: докатился — качание развернётся
+    for (let r = 1; r < H - 1; r++) for (let c = 1; c < W - 1; c++) if (m[r][c] === "." && (r + c) % 2 === 0 && r > 3) m[r][c] = "o";
+    return m;
+  }
+  function ssStart() {
+    G.sp = { m: ssMaze(), th: 0, ph: 0, w: -0.018, x: 10.5 * SS.C, y: 2.5 * SS.C, vx: 0, vy: 0, rot: 0, rings: 0, time: 3600, intro: 200, end: null, endT: 0, ground: false, rcool: 0, mz: null };
+    G.state = "special"; G.st = 0; G.gest = null; G.gDown = false; G.tap = false;
+  }
+  function ssAxis() {                                              // −1…1: клавиши или палец (от точки касания вбок)
+    const k = (G.keys.R ? 1 : 0) - (G.keys.L ? 1 : 0); if (k) return k;
+    const g = G.gest; if (g) return clamp(g.dx / (dragR() * 0.5), -1, 1);
+    if (dbg.ssBot) {                                               // проверка: катим к проходу своей полки, внизу — к изумруду
+      const sp = G.sp, row = sp.y / SS.C, lvl = SS_GAPS.findIndex(q => row < q[0]), tx = lvl < 0 ? 7.5 * SS.C : (SS_GAPS[lvl][1] + SS_GAPS[lvl][2] + 1) / 2 * SS.C;
+      sp.stuck = sp.ground && Math.abs(sp.vx) < 0.3 && Math.abs(tx - sp.x) > 20 ? (sp.stuck || 0) + 1 : 0;
+      if (sp.stuck > 25) { G.tap = true; sp.stuck = 0; }
+      return clamp((tx - sp.x) / 30, -1, 1);
+    }
+    return 0;
+  }
+  function ssEnd(ok, why) {
+    const sp = G.sp; sp.end = ok ? "win" : why; sp.endT = 0;
+    G.score += sp.rings * 10 + (ok ? 5000 : 0);
+    if (ok) { SFX.item(); if (!SUP.ok) sp.first = true; SUP.ok = true; SUP.on = true; LSS("unitka.sxSuper", "1"); LSS("unitka.sxSuperOn", "1"); strips(true); pic("charG", "sonic-char-gold.webp"); hudC.key = ""; }
+    else SFX.lose();
+  }
+  function ssStep() {
+    const sp = G.sp, tap = G.tap; G.tap = false; G.st++;
+    if (sp.end) { if (++sp.endT > 100) { G.state = "spres"; G.st = 0; } return; }
+    if (sp.intro > 0) { sp.intro--; if (tap && sp.intro < 150) sp.intro = 0; return; }
+    if (--sp.time <= 0) return ssEnd(false, "time");
+    sp.ph += sp.w; sp.th = 0.56 * Math.sin(sp.ph); if (sp.rcool > 0) sp.rcool--;
+    const c = Math.cos(sp.th), s = Math.sin(sp.th), gx = s, gy = c, rx = c, ry = -s;     // «вниз» и «вправо» экрана в координатах лабиринта
+    const ax = ssAxis();
+    sp.vx += gx * 0.16 + rx * ax * 0.11; sp.vy += gy * 0.16 + ry * ax * 0.11;
+    if ((tap || dbg.ssJump) && sp.ground) { sp.vx -= gx * 5.2; sp.vy -= gy * 5.2; SFX.jump(); }
+    const v = Math.hypot(sp.vx, sp.vy); if (v > 8) { sp.vx *= 8 / v; sp.vy *= 8 / v; }
+    sp.ground = false;
+    for (let k = 0; k < 4 && !sp.end; k++) { sp.x += sp.vx / 4; sp.y += sp.vy / 4; ssCollide(sp, gx, gy); }   // по четверти шага — сквозь стену не проскочит
+    sp.rot += (sp.vx * rx + sp.vy * ry) * 0.09;
+  }
+  function ssCollide(sp, gx, gy) {
+    const C = SS.C, r = SS.R, m = sp.m;
+    const i0 = Math.floor((sp.x - r) / C), i1 = Math.floor((sp.x + r) / C), j0 = Math.floor((sp.y - r) / C), j1 = Math.floor((sp.y + r) / C);
+    for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) {
+      const ch = m[j] && m[j][i]; if (!ch || ch === ".") continue;
+      if (ch === "o") { const dx = (i + 0.5) * C - sp.x, dy = (j + 0.5) * C - sp.y; if (dx * dx + dy * dy < (r + 9) ** 2) { m[j][i] = "."; sp.rings++; SFX.ring(); } continue; }
+      const qx = clamp(sp.x, i * C, i * C + C), qy = clamp(sp.y, j * C, j * C + C);
+      let nx = sp.x - qx, ny = sp.y - qy, d = Math.hypot(nx, ny);
+      if (d >= r) continue;
+      if (ch === "E") return ssEnd(true);
+      if (ch === "G") return ssEnd(false, "goal");
+      if (d < 1e-6) { nx = -gx; ny = -gy; d = 1e-6; } else { nx /= d; ny /= d; }
+      sp.x += nx * (r - d); sp.y += ny * (r - d);
+      const vn = sp.vx * nx + sp.vy * ny;
+      if (ch === "B") { sp.vx += (6.5 - vn) * nx; sp.vy += (6.5 - vn) * ny; SFX.spring(); continue; }
+      if (ch === "R" && !sp.rcool) { sp.w = -sp.w; sp.rcool = 40; SFX.check(); }
+      if (vn < 0) { sp.vx -= vn * nx; sp.vy -= vn * ny; }
+      if (-(nx * gx + ny * gy) > 0.55) sp.ground = true;
+    }
+  }
+  const ssZoom = () => cssH / 240;                                 // css-пикселей на единицу этапа: по высоте видно ~7–8 клеток
+  function ssBlock(g, x, y, a, b) {
+    g.fillStyle = a; g.fillRect(x, y, 32, 32); g.fillStyle = b;
+    g.beginPath(); g.moveTo(x + 16, y + 5); g.lineTo(x + 27, y + 16); g.lineTo(x + 16, y + 27); g.lineTo(x + 5, y + 16); g.closePath(); g.fill();
+    g.fillStyle = "rgba(255,255,255,.35)"; g.fillRect(x, y, 32, 3); g.fillStyle = "rgba(0,0,0,.25)"; g.fillRect(x, y + 29, 32, 3);
+    g.strokeStyle = OL; g.lineWidth = 1.2; g.strokeRect(x + 0.6, y + 0.6, 30.8, 30.8);
+  }
+  function ssStatic() {                                            // лабиринт без колец и изумруда — одной картинкой, пока не сменился размер
+    const sp = G.sp, C = SS.C, z = Math.min(2.6, ssZoom() * dpr);
+    if (sp.mz && sp.mz.z === z) return sp.mz;
+    const c = document.createElement("canvas"); c.width = Math.ceil(SS.W * C * z); c.height = Math.ceil(SS.H * C * z); const g = c.getContext("2d"); g.scale(z, z);
+    const col = [["#2f6df5", "#9cc2ff"], ["#e8457c", "#ffb3cf"], ["#f2b51b", "#fff0a8"], ["#26b35a", "#b6f5c8"], ["#8a4cf0", "#d6c2ff"]];
+    for (let j = 0; j < SS.H; j++) for (let i = 0; i < SS.W; i++) {
+      const ch = sp.m[j][i], x = i * C, y = j * C;
+      if (ch === "#") { const [a, b] = col[Math.min(4, Math.floor(j / 5))]; ssBlock(g, x, y, a, b); }
+      else if (ch === "R") { ssBlock(g, x, y, "#ff9a1a", "#ffd9a0"); g.font = "italic 900 18px " + FONT; g.textAlign = "center"; g.fillStyle = "#fff"; g.strokeStyle = OL; g.lineWidth = 2.5; g.strokeText("R", x + 16, y + 23); g.fillText("R", x + 16, y + 23); }
+      else if (ch === "G") {
+        g.fillStyle = "#fff"; g.fillRect(x, y, 32, 32); g.strokeStyle = "#e3262b"; g.lineWidth = 3; g.strokeRect(x + 2, y + 2, 28, 28);
+        g.font = "900 9px " + FONT; g.textAlign = "center"; g.fillStyle = "#e3262b"; g.fillText("GOAL", x + 16, y + 19);
+      } else if (ch === "B") {
+        ell(g, x + 16, y + 16, 14, 14, 0, "#f2f4fa", 1.4); ell(g, x + 16, y + 16, 9, 9, 0, "#e3262b", 0); star(g, x + 16, y + 16, 6, "#fff", 0);
       }
+    }
+    c.z = z; sp.mz = c; return c;
+  }
+  function ssGem(g, x, y, t) {                                     // Изумруд Хаоса
+    g.save(); g.translate(x, y); g.scale(1 + 0.06 * Math.sin(t * 0.1), 1 + 0.06 * Math.sin(t * 0.1));
+    g.globalAlpha = 0.35 + 0.15 * Math.sin(t * 0.08); ell(g, 0, 0, 22, 22, 0, "#9dffb8", 0); g.globalAlpha = 1;
+    g.beginPath(); g.moveTo(0, -14); g.lineTo(12, -4); g.lineTo(7, 12); g.lineTo(-7, 12); g.lineTo(-12, -4); g.closePath();
+    g.fillStyle = "#1fd26a"; g.fill(); g.lineWidth = 1.6; g.strokeStyle = OL; g.stroke();
+    g.beginPath(); g.moveTo(0, -14); g.lineTo(5, -3); g.lineTo(-5, -3); g.closePath(); g.fillStyle = "#c8ffd9"; g.fill();
+    g.beginPath(); g.moveTo(-5, -3); g.lineTo(5, -3); g.lineTo(3, 12); g.lineTo(-3, 12); g.closePath(); g.fillStyle = "#3ff08c"; g.fill();
+    star(g, 8 * Math.cos(t * 0.07), -12 + 4 * Math.sin(t * 0.09), 4 + 2 * Math.sin(t * 0.2), "#fff", t * 0.05);
+    g.restore();
+  }
+  function drawSpecial() {
+    const sp = G.sp, z = ssZoom(), C = SS.C;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    // фон: лиловая глубина и плывущие ромбы (как стаи на фоне Sonic 1)
+    const bg = ctx.createRadialGradient(cssW / 2, cssH / 2, 10, cssW / 2, cssH / 2, Math.max(cssW, cssH) * 0.8);
+    bg.addColorStop(0, "#5a2bc4"); bg.addColorStop(1, "#0b1660"); ctx.fillStyle = bg; ctx.fillRect(0, 0, cssW, cssH);
+    ctx.fillStyle = "rgba(255,255,255,.08)";
+    for (let i = 0; i < 28; i++) { const x = ((i * 137 + T * (0.4 + (i % 3) * 0.2)) % (cssW + 60)) - 30, y = ((i * 89) % (cssH + 40)) - 20, r = 6 + (i % 4) * 3;
+      ctx.beginPath(); ctx.moveTo(x, y - r); ctx.lineTo(x + r, y); ctx.lineTo(x, y + r); ctx.lineTo(x - r, y); ctx.closePath(); ctx.fill(); }
+    ctx.save(); ctx.translate(cssW / 2, cssH / 2); ctx.scale(z, z); ctx.rotate(sp.th); ctx.translate(-sp.x, -sp.y);
+    ctx.imageSmoothingQuality = "high"; ctx.drawImage(ssStatic(), 0, 0, SS.W * C, SS.H * C);
+    const vr = Math.hypot(cssW, cssH) / z / 2 + C, ph = T * 0.13;
+    for (let j = 0; j < SS.H; j++) for (let i = 0; i < SS.W; i++) {
+      const ch = sp.m[j][i]; if (ch !== "o" && ch !== "E") continue;
+      const x = (i + 0.5) * C, y = (j + 0.5) * C; if (Math.abs(x - sp.x) > vr || Math.abs(y - sp.y) > vr) continue;
+      if (ch === "o") ring(ctx, x, y, ph); else if (sp.end !== "win") ssGem(ctx, x, y, T);
+    }
+    ctx.restore();
+    // Соник клубком — в центре экрана
+    if (sp.end !== "goal" || sp.endT < 20) {
+      ctx.save(); ctx.translate(cssW / 2, cssH / 2); ctx.scale(z * SS.R / 14, z * SS.R / 14); ctx.translate(0, 14);
+      if (!sonicSpr(ctx, { pose: "ball", rot: sp.rot }, SUP.on)) sonic(ctx, { pose: "ball", rot: sp.rot });
+      ctx.restore();
+    }
+    // табло
+    const fs = clamp(Math.round(cssH * 0.07), 11, 18), pad = Math.round(fs * 0.7);
+    txt("КОЛЬЦА", pad, pad + fs, fs, "#ffd21f"); txt(String(sp.rings), pad + fs * 4.6, pad + fs, fs, "#fff");
+    txt("ВРЕМЯ", pad, pad + fs * 2 + 4, fs, "#ffd21f"); txt(fmtTime(Math.max(0, sp.time)), pad + fs * 4.6, pad + fs * 2 + 4, fs, sp.time < 600 && T % 30 < 15 ? "#ff5a5a" : "#fff");
+    const f1 = clamp(cssH * 0.1, 16, 40), cx = cssW / 2;
+    if (sp.intro > 0) {
+      const a = Math.min(1, sp.intro / 30); ctx.globalAlpha = a; ctx.fillStyle = "rgba(10,26,74,.6)"; ctx.fillRect(0, 0, cssW, cssH);
+      txt("СЕКРЕТНЫЙ ЭТАП", cx, cssH * 0.28, fit("СЕКРЕТНЫЙ ЭТАП", f1, cssW - 24), "#ffe24a", "center");
+      const ls = ["Лабиринт качается — спустись к Изумруду Хаоса на дне", "Не касайся блоков GOAL · 60 секунд",
+        G.kbd ? "← → — катиться · пробел — прыжок" : "Тяни вбок — катиться · тап — прыжок"];
+      const s2 = Math.min(...ls.map(s => fit(s, f1 * 0.42, cssW - 24)));
+      ls.forEach((s, i) => txt(s, cx, cssH * 0.28 + f1 * 0.9 + i * s2 * 1.5, s2, i === 2 ? "#bfe3ff" : "#fff", "center"));
+      ssGem(ctx, cx, cssH * 0.8, T);
+      ctx.globalAlpha = 1;
+    }
+    if (sp.end && G.state !== "spres") {
+      if (sp.end === "win") { ctx.globalAlpha = Math.max(0, 1 - sp.endT / 60); ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, cssW, cssH); ctx.globalAlpha = 1; }
+      const msg = sp.end === "win" ? "ИЗУМРУД ХАОСА!" : sp.end === "goal" ? "GOAL — ВЫКИНУЛО!" : "ВРЕМЯ ВЫШЛО";
+      txt(msg, cx, cssH * 0.45, fit(msg, f1, cssW - 24), sp.end === "win" ? "#1fd26a" : "#ffd21f", "center");
+    }
+    if (G.state === "spres") ssResult();
+  }
+  function ssResult() {
+    const sp = G.sp, ok = sp.end === "win";
+    ctx.fillStyle = "rgba(10,26,74,.82)"; ctx.fillRect(0, 0, cssW, cssH);
+    const narrow = cssW < 560, sh = cssH * (narrow ? 0.52 : 0.74), x = Math.max(12, cssW * 0.04), colW = cssW - x - (ok ? sh * 0.75 : 12);
+    const f1 = clamp(cssH * 0.1, 15, 40), f2 = clamp(cssH * 0.055, 10, 19);
+    if (ok) {
+      const [, pos] = strips(true), k = sh / 280, sx = cssW - sh * 0.42, sy = cssH * 0.94 + Math.sin(T * 0.06) * 3;
+      for (let i = 0; i < 8; i++) { const a = T * 0.03 + i * TAU / 8, r = sh * (0.42 + 0.08 * Math.sin(T * 0.07 + i)); star(ctx, sx + Math.cos(a) * r, sy - sh * 0.5 + Math.sin(a) * r, sh * 0.05, i % 2 ? "#fff" : "#ffd21f", a); }
+      if (pos.complete && pos.naturalWidth) { ctx.save(); ctx.imageSmoothingQuality = "high"; ctx.drawImage(pos, 7 * 320, 0, 320, 320, sx - 160 * k, sy - 310 * k, 320 * k, 320 * k); ctx.restore(); }
+      ssGem(ctx, sx - sh * 0.38, sy - sh * 0.82, T);
+    }
+    let y = cssH * 0.06 + f1;
+    const h1 = ok ? "СЕКРЕТНЫЙ БОНУС ТВОЙ!" : "ИЗУМРУД УСКОЛЬЗНУЛ…";
+    txt(h1, x, y, fit(h1, f1, colW), ok ? "#ffe24a" : "#ffd21f");
+    const para = (s, col) => { for (const l of wrap(s, f2, colW)) { y += f2 * 1.35; txt(l, x, y, f2, col); } };
+    y += f2 * 0.4;
+    if (ok) {
+      para("Изумруд Хаоса превратил Соника в Супер Соника: золотой, на 20% быстрее, враги ему не страшны.", "#fff");
+      para("И теперь он бегает золотым прямо на обложке «Юнитки».", "#bfe3ff");
+      para("Включить и выключить — на заставке игры.", "#bfe3ff");
+    } else {
+      para(sp.end === "goal" ? "Блок GOAL выкинул тебя с этапа." : "60 секунд вышли.", "#fff");
+      para("Секретный бонус ещё ждёт — попробуй снова, попыток сколько угодно.", "#bfe3ff");
+    }
+    y += f2 * 0.6; txt("Кольца на этапе: " + sp.rings + " · очки: " + G.score, x, y + f2 * 0.6, fit("Кольца на этапе: " + sp.rings + " · очки: " + G.score, f2 * 0.9, colW), "#ffd21f");
+    const bh = clamp(cssH * 0.13, 28, 50), bw = Math.min(colW * 0.56, 280), by = Math.min(cssH - bh - 8, y + f2 * 1.4);
+    if (G.st > 40) {
+      if (ok) { uiBtn("ss_play", x, by, bw, bh, "ИГРАТЬ СУПЕР СОНИКОМ", "", true); uiBtn("ss_title", x + bw + 8, by, Math.min(colW - bw - 8, bw * 0.7), bh, "НА ЗАСТАВКУ", "", false); }
+      else { uiBtn("ss_again", x, by, bw, bh, "ЕЩЁ ПОПЫТКА", "", true); uiBtn("ss_title", x + bw + 8, by, Math.min(colW - bw - 8, bw * 0.7), bh, "НА ЗАСТАВКУ", "", false); }
     }
   }
   function titleCard() {
@@ -1301,26 +1479,33 @@ function mount(cv) {
   function titleScreen() {
     const g = ctx.createLinearGradient(0, 0, cssW, 0); g.addColorStop(0, "rgba(10,26,74,.75)"); g.addColorStop(0.6, "rgba(10,26,74,.15)"); g.addColorStop(1, "rgba(10,26,74,0)");
     ctx.fillStyle = g; ctx.fillRect(0, 0, cssW, cssH);
-    const im = pic("char", "sonic-char.webp"), narrow = cssW < 560;
+    const im = SUP.on && pic("charG", "sonic-char-gold.webp").complete ? pic("charG", "sonic-char-gold.webp") : pic("char", "sonic-char.webp"), narrow = cssW < 560;
     if (im.complete && im.naturalWidth) { const h = cssH * (narrow ? 0.84 : 0.92), w = h * im.naturalWidth / im.naturalHeight, x = Math.max(cssW * 0.5, cssW - w * 0.97) + Math.sin(T * 0.05) * 3, y = cssH - h + Math.sin(T * 0.08) * 3; ctx.drawImage(im, x, y, w, h); }
     // режим выбирает игрок (23.10, Андрей: «если он бегает сам, всегда сложно… надо, чтобы самому выбрать режим»)
     const fs = clamp(cssH * 0.15, 22, 60), x = Math.max(12, cssW * 0.04), colW = Math.min(cssW * (cssW < 560 ? 0.62 : 0.42), 400), sel = G.sel || G.mode;
     let y = Math.max(8, cssH * 0.04) + fs * 0.85;
-    txt("СОНИК", x, y, fs, G.superOn ? "#ffe24a" : "#ffd21f");
+    const name = SUP.on ? "СУПЕР СОНИК" : "СОНИК";
+    txt(name, x, y, fit(name, fs, colW), SUP.on ? "#ffe24a" : "#ffd21f");
     const s2 = fit("Зона зелёных холмов · 2 акта и босс", Math.max(10, fs * 0.27), colW);
     y += s2 * 1.6; txt("Зона зелёных холмов · 2 акта и босс", x, y, s2, "#fff");
     const bh = clamp(cssH * 0.16, 30, 60), gap = bh * 0.2; y += s2 * 0.8;
     uiBtn("auto", x, y, colW, bh, "БЕЖИТ САМ", "тап — прыжок · тап в прыжке — атака", sel === "auto"); y += bh + gap;
-    uiBtn("manual", x, y, colW, bh, "УПРАВЛЯЮ САМ", G.kbd ? "← → бег · ↓ клубок · пробел — прыжок" : "кнопки ◀ ▶ ▼ и A на экране", sel === "manual"); y += bh + gap;
-    if (G.superOk) { const h2 = bh * 0.7; uiBtn("super", x, y, colW, h2, "★ СУПЕР СОНИК: " + (G.superOn ? "ВКЛ" : "ВЫКЛ"), "", sel === "super"); y += h2 + gap; }
-    if (T % 60 < 40 && y + 10 < cssH) txt("Выбери режим — и вперёд!", x, Math.min(cssH - 6, y + fs * 0.25), fit("Выбери режим — и вперёд!", Math.max(10, fs * 0.26), colW), "#ffd21f");
+    uiBtn("manual", x, y, colW, bh, "УПРАВЛЯЮ САМ", G.kbd ? "← → бег · ↓ клубок · пробел — прыжок" : "одним пальцем в любом месте экрана", sel === "manual"); y += bh + gap;
+    if (SUP.ok) {
+      const h2 = bh * 0.7; uiBtn("super", x, y, colW, h2, "★ СУПЕР СОНИК: " + (SUP.on ? "ВКЛ" : "ВЫКЛ"), "", sel === "super"); y += h2 + gap;
+      if (T % 60 < 40 && y + 10 < cssH) txt("Выбери режим — и вперёд!", x, Math.min(cssH - 6, y + fs * 0.25), fit("Выбери режим — и вперёд!", Math.max(10, fs * 0.26), colW), "#ffd21f");
+    } else {                                         // приманка: что за бонус — не говорим
+      const s = "★ Пройди до конца — получи секретный бонус ★", k = 1 + 0.05 * Math.sin(T * 0.1);
+      txt(s, x, Math.min(cssH - 6, y + fs * 0.25), fit(s, Math.max(10, fs * 0.28) * k, colW), T % 40 < 26 ? "#ffe24a" : "#fff");
+    }
   }
-  function startMode(m) { G.mode = m; G.sel = null; LSS("unitka.sxMode", m); G.ptr.clear(); newGame(); }
+  function startMode(m) { G.mode = m; G.sel = null; LSS("unitka.sxMode", m); G.gest = null; G.gDown = false; newGame(); }
   function uiAct(id) {
     if (id === "auto" || id === "manual") startMode(id);
-    else if (id === "super") { G.superOn = !G.superOn; LSS("unitka.sxSuperOn", G.superOn ? "1" : "0"); hudC.key = ""; }
-    else if (id === "share") share();
-    else if (id === "again") toTitle();
+    else if (id === "super") { SUP.on = !SUP.on; LSS("unitka.sxSuperOn", SUP.on ? "1" : "0"); hudC.key = ""; if (SUP.on) strips(true); }
+    else if (id === "ss_again") ssStart();
+    else if (id === "ss_play") startMode(G.mode);
+    else if (id === "ss_title") toTitle();
   }
   const hitUi = (x, y) => { for (const b of G.ui) if (x >= b.x && x <= b.x + b.w && y >= b.y && y <= b.y + b.h) return b.id; return null; };
 
@@ -1336,39 +1521,50 @@ function mount(cv) {
     ac();
     if (G.state === "title") { startMode(G.sel === "auto" || G.sel === "manual" ? G.sel : G.mode); return; }
     if (G.state === "over") { if (G.st > 40) toTitle(); return; }
-    if (G.state === "win") return;                     // на финале — только кнопки
+    if (G.state === "teaser") { if (G.st > 60) ssStart(); return; }
+    if (G.state === "spres") return;                   // на итоге этапа — только кнопки
     if (G.state === "clear") { if (G.st > 90) G.skip = true; return; }
     G.tap = true; G.held = true;
   }
   const local = e => { const r = cv.getBoundingClientRect(); return [(e.clientX - r.left) * cssW / (r.width || 1), (e.clientY - r.top) * cssH / (r.height || 1)]; };
+  // жест одним пальцем: тап (коротко, почти на месте) — прыжок в полную силу; взмах вверх — прыжок (держишь — выше); вбок — скорость
+  // от той, что была при касании (держится и без пальца); вниз — присесть / клубок, держишь присев — копится спин-дэш
+  const gestOn = () => G.state === "special" || (G.mode === "manual" && (G.state === "play" || G.state === "card"));
   const onDown = e => {
     e.preventDefault(); try { cv.setPointerCapture(e.pointerId); } catch (err) {}
     ac(); G.kbd = false;
     const [x, y] = local(e);
-    if (G.state === "title") { const id = hitUi(x, y); if (id) uiAct(id); else press(); return; }
-    if (G.state === "win") return;                     // кнопки финала — по отпусканию (так браузер разрешает «Поделиться»)
-    if (G.mode === "manual" && (G.state === "play" || G.state === "card")) { const z = zone(x, y); G.ptr.set(e.pointerId, z); if (z === "J") { G.tap = true; G.hint = Math.min(G.hint, 30); } return; }
+    if (G.state === "title" || G.state === "spres") { const id = hitUi(x, y); if (id) uiAct(id); else if (G.state === "title") press(); return; }
+    if (gestOn()) { if (!G.gest) G.gest = { id: e.pointerId, x0: x, y0: y, t0: performance.now(), dx: 0, dy: 0, c0: G.cruise, up: false, moved: 0 }; return; }
     press();
   };
-  const onMove = e => {                                // палец скользит по стрелкам — кнопка меняется; прыжок остаётся прыжком
-    const z0 = G.ptr.get(e.pointerId); if (!z0 || z0 === "J") return;
-    const [x, y] = local(e), z = zone(x, y); if (z !== "J") G.ptr.set(e.pointerId, z);
+  const onMove = e => {
+    const g = G.gest; if (!g || e.pointerId !== g.id) return;
+    const [x, y] = local(e); g.dx = x - g.x0; g.dy = y - g.y0; g.moved = Math.max(g.moved, Math.hypot(g.dx, g.dy));
+    const up = !g.up && g.dy < -26 && -g.dy > Math.abs(g.dx) * 1.1;
+    if (G.state === "special") { if (up) { g.up = true; G.tap = true; } return; }
+    const ex = Math.abs(g.dx) > 6 ? g.dx - sgn(g.dx) * 6 : 0;
+    G.cruise = clamp(g.c0 + ex / dragR(), -1, 1);
+    G.gDown = g.dy > (G.gDown ? 14 : 22) && g.dy > Math.abs(g.dx) * 0.7;
+    if (up) { g.up = true; G.tap = true; G.gHeld = true; G.hint = Math.min(G.hint, 30); }
   };
   const onUp = e => {
-    G.held = false; if (e && e.pointerId !== undefined) G.ptr.delete(e.pointerId);
-    if (e && e.type === "pointerup" && G.state === "win" && G.st > 40) { const [x, y] = local(e), id = hitUi(x, y); if (id) uiAct(id); }
+    G.held = false;
+    const g = G.gest; if (!g || !e || e.pointerId !== g.id) return;
+    if (!g.up && g.moved < 14 && performance.now() - g.t0 < 260) { G.tap = true; G.fullJump = true; G.hint = Math.min(G.hint, 30); }
+    G.gest = null; G.gDown = false; G.gHeld = false;
   };
   const keyOk = e => !(e.target && /input|textarea|select/i.test(e.target.tagName)) && running && cv.isConnected && cv.getBoundingClientRect().height > 0;
   const KJ = ["Space", "ArrowUp", "Enter", "KeyW", "KeyZ", "KeyX", "KeyJ", "KeyK"], KL = ["ArrowLeft", "KeyA"], KR = ["ArrowRight", "KeyD"], KD = ["ArrowDown", "KeyS"];
   const onKey = e => {
     if (!keyOk(e)) return; const c = e.code;
     if (G.state === "title") {
-      const opts = G.superOk ? ["auto", "manual", "super"] : ["auto", "manual"], i = opts.indexOf(G.sel || G.mode);
+      const opts = SUP.ok ? ["auto", "manual", "super"] : ["auto", "manual"], i = opts.indexOf(G.sel || G.mode);
       if (KL.includes(c) || KR.includes(c) || KD.includes(c) || c === "ArrowUp") { e.preventDefault(); G.kbd = true; G.sel = opts[(i + (KL.includes(c) || c === "ArrowUp" ? opts.length - 1 : 1)) % opts.length]; return; }
       if (c === "Space" || c === "Enter") { e.preventDefault(); if (!e.repeat) { ac(); if (G.sel === "super") uiAct("super"); else press(); } }
       return;
     }
-    if (G.state === "win") { if ((c === "Enter" || c === "Space") && G.st > 40) { e.preventDefault(); toTitle(); } return; }
+    if (G.state === "spres") { if ((c === "Enter" || c === "Space") && G.st > 40 && G.ui[0]) { e.preventDefault(); uiAct(G.ui[0].id); } return; }
     const k = KL.includes(c) ? "L" : KR.includes(c) ? "R" : KD.includes(c) ? "D" : KJ.includes(c) ? "J" : null;
     if (!k) return;
     e.preventDefault(); G.kbd = true; G.keys[k] = true;
@@ -1387,18 +1583,18 @@ function mount(cv) {
   resize();
   try { document.fonts && document.fonts.load("italic 900 16px \"Exo 2\""); } catch (e) {}
   pic("char", "sonic-char.webp"); pic("clouds", "sonic-clouds.svg").onload = () => { cloudsR = null; }; pic("hills", "sonic-hills.svg").onload = () => { hillsR = null; };
-  strips(false); if (G.superOk) strips(true);
+  strips(false); if (SUP.ok) { strips(true); pic("charG", "sonic-char-gold.webp"); }
   { const b = pic("bg", "sonic-bg.webp"); if (!b.complete) b.addEventListener("load", () => { back = null; }); }
   const inst = {
     resume() { if (running) return; running = true; last = performance.now(); accT = 0; raf = requestAnimationFrame(loop); },
-    pause() { running = false; cancelAnimationFrame(raf); G.held = false; G.ptr.clear(); G.keys = { L: false, R: false, D: false, J: false }; },
+    pause() { running = false; cancelAnimationFrame(raf); G.held = false; G.gest = null; G.gDown = false; G.gHeld = false; G.keys = { L: false, R: false, D: false, J: false }; },
     destroy() { inst.pause(); ro.disconnect(); window.removeEventListener("keydown", onKey); window.removeEventListener("keyup", onKeyUp); document.removeEventListener("visibilitychange", onVis); },
     get running() { return running; },
     dbg: Object.assign(dbg, {
       G, S, newGame, startAct, step, draw,
       run(n) { for (let i = 0; i < n; i++) step(); },
       warp(act, x) { startAct(act); G.state = "play"; S.x = x; S.y = G.L.gy(x); camera(true); },
-      press, won, uiAct,
+      press, uiAct, zoneDone, ssStart, SUP, gest: { down: (x, y) => onDown({ preventDefault() {}, pointerId: 7, clientX: x, clientY: y }), move: (x, y) => onMove({ pointerId: 7, clientX: x, clientY: y }), up: (x, y) => onUp({ type: "pointerup", pointerId: 7, clientX: x, clientY: y }) },
     }),
   };
   draw();
@@ -1481,6 +1677,7 @@ function runner(cv, opt) {
     if (R.s >= total - 1) { R.st = "wait"; R.w = 2.6 + Math.random() * 1.5; }
     const p = pos(), bx = p[0] + Math.sin(p[2]) * HB * 0.45, by = p[1] - Math.cos(p[2]) * HB * 0.45;      // центр тела (в петле — к её середине)
     for (const r of R.rings) if (!r.got && Math.hypot(r.x - bx, r.y - by) < 95) { r.got = true; R.spark.push({ x: r.x, y: r.y, t: 0 }); }
+    if (SUP.on && Math.random() < dt * 14) R.spark.push({ x: bx + (Math.random() - 0.5) * HB * 0.8, y: by + (Math.random() - 0.5) * HB, t: 0.15 });
     if (R.v > vmax * 1.1 || ball) { R.last.unshift(p); if (R.last.length > 4) R.last.pop(); } else R.last.length = 0;
   }
   function pos() {
@@ -1504,7 +1701,8 @@ function runner(cv, opt) {
     }
     const vmax = cw / M.s / 2.1;
     const pose = R.st === "idle" ? "tap" : R.st === "charge" ? "charge" : ball ? "ball" : R.v < 1e-3 ? "stand" : R.v / vmax < 0.45 ? "walk" : R.v > vmax * 1.5 ? "dash" : "run";
-    const fig = (o, ang, px, py) => { ctx.save(); ctx.translate(px, py); ctx.rotate(ang); ctx.scale(sz, sz); if (!sonicSpr(ctx, o, false)) sonic(ctx, o); ctx.restore(); };
+    // открыт секретный бонус — на обложке бегает золотой Супер Соник в искрах
+    const fig = (o, ang, px, py) => { ctx.save(); ctx.translate(px, py); ctx.rotate(ang); ctx.scale(sz, sz); if (!sonicSpr(ctx, o, SUP.on)) sonic(ctx, o); ctx.restore(); };
     for (let i = R.last.length - 1; i >= 0; i--) {                    // след на скорости — по касательной назад
       const q = R.last[i], [lx, ly] = toC(q[0], q[1]), k = (i + 1) * 4 * sz;
       ctx.globalAlpha = 0.16 * (1 - i / 4); fig({ pose: q[3] ? "ball" : "dash", ph: R.ph, rot: R.rot }, q[2], lx - Math.cos(q[2]) * k, ly - Math.sin(q[2]) * k);
@@ -1522,7 +1720,7 @@ function runner(cv, opt) {
   const io = new IntersectionObserver(es => { vis = es[0].isIntersecting; go(); }); io.observe(cv);
   const ro = new ResizeObserver(resize); ro.observe(cv);
   const onVis = () => go(); document.addEventListener("visibilitychange", onVis);
-  for (const im of strips(false)) if (!im.complete) im.addEventListener("load", () => { if (!on) draw(); });
+  for (const im of strips(SUP.on)) if (!im.complete) im.addEventListener("load", () => { if (!on) draw(); });
   resize();
   if (red) { R.st = "idle"; R.s = sOfX(2150); R.rings = []; draw(); }       // без движения: Соник стоит перед петлёй
   else reset();
