@@ -15,10 +15,11 @@
 <script>/* шрифты тем — Google Fonts, грузятся только когда тема выбрана */
 var TFONT = { comic: "Rubik:wght@400;500;600;700;800&family=Unbounded:wght@600;800", jim: "Rubik:wght@400;500;600;700;800&family=Rubik+Wet+Paint&family=Press+Start+2P", farcry: "Rubik+Dirt&family=Roboto+Condensed:wght@400;500;600;700",
   paper: "PT+Sans:wght@400;700&family=PT+Serif:wght@400;700", dusk: "Nunito:wght@400;500;600;700;800",
-  sonic: "Exo+2:ital,wght@0,400;0,500;0,600;0,700;0,800;1,800;1,900&family=Russo+One" };
+  sonic: "Exo+2:ital,wght@0,400;0,500;0,600;0,700;0,800;1,800;1,900&family=Russo+One",
+  solitaire: "Playfair+Display:ital,wght@0,600;0,700;1,600;1,700&family=Manrope:wght@400;500;600;700;800" };
 function themeFont(t) { if (!TFONT[t] || document.getElementById("tf-" + t)) return; var l = document.createElement("link"); l.id = "tf-" + t; l.rel = "stylesheet";
   l.href = "https://fonts.googleapis.com/css2?family=" + TFONT[t] + "&display=swap"; document.head.appendChild(l); }
-try { var t = JSON.parse(localStorage.getItem("unitka.theme")); if (/^(light|dark|beige|comic|farcry|jim|sonic|paper|dusk)$/.test(t)) { document.documentElement.setAttribute("data-theme", t); themeFont(t); } } catch (e) {}</script>
+try { var t = JSON.parse(localStorage.getItem("unitka.theme")); if (/^(light|dark|beige|comic|farcry|jim|sonic|solitaire|paper|dusk)$/.test(t)) { document.documentElement.setAttribute("data-theme", t); themeFont(t); } } catch (e) {}</script>
 <style>
 :root{
   color-scheme: light;
@@ -377,6 +378,123 @@ html.sx-play #sxDeco,html.sx-play #sxDeco *,html.sx-play #sxDeco *::after{animat
 [data-theme="sonic"] input[type=range]::-moz-range-thumb{width:28px;height:28px;border:0;border-radius:50%;background:var(--ringi)}
 [data-theme="sonic"] .toast{background:#ffc81e;color:#0a1a4a;border:3px solid #0a1a4a;box-shadow:0 4px 0 #0a1a4a}
 [data-theme="sonic"] .mini{background:#0b2c8f;color:#fff;border:3px solid #0a1a4a;box-shadow:0 -3px 0 #ffc81e,0 6px 20px rgba(0,0,0,.35)}
+/* «Пасьянс» (23.10.2026, Андрей: «тему пасьянса и игру пасьянс — плавно, объёмно, красиво, чтобы менялась вся тема»): зелёное сукно
+   карточного стола с зерном, по краям медленно плывут масти; шапка — бортик стола с золотой кромкой; панели — игральные карты (слоновая
+   кость, масть в углу, мягкая тень — объём); главные кнопки — красные с золотым ободком, ползунок — фишка казино. Шрифты Playfair Display
+   (заголовки) + Manrope. Баннер — карточка #ptCard: на лице колода раздаёт веер раскладов (solitaire.js → Solitaire.fan), «ЮНИТКА» —
+   кнопка; нажал — карточка переворачивается и раскрывается на весь экран: пасьянс «Косынка» (Solitaire.mount). Движение — transform/opacity. */
+:root[data-theme="solitaire"]{
+  color-scheme: light;
+  --bg:#0f5a35; --surface:#fffdf6; --surface-2:#f2ecdd; --ink:#1b1d22; --ink-2:#4d4a43; --muted:#857f71;
+  --line:#e6dfcc; --ring:rgba(30,40,25,.16); --accent:#b3122e; --accent-wash:#fbe4e8;
+  --good:#1d7a3b; --good-bg:#e1f2e5; --bad:#c0392b; --bad-bg:#fbe5e2; --warn-bg:#fbf0d2; --mid:#8a6400;
+  --s1:#b3122e; --s2:#1b1d22; --s3:#1d7a3b; --s4:#c9971c; --s5:#7a4fb8; --s6:#1d7a3b;
+  --shadow:0 1px 1px rgba(0,0,0,.18),0 8px 22px rgba(0,0,0,.28); --r:12px;
+  --font:"Manrope",system-ui,sans-serif; --font-h:"Playfair Display",Georgia,serif;
+  --felt:radial-gradient(ellipse 120% 80% at 50% 16%,#25995a 0%,#137a44 38%,#0b5530 72%,#073a21 100%);
+  --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.1'/%3E%3C/svg%3E");
+  --gold:linear-gradient(180deg,#fff6d2 0%,#f0cf73 42%,#c08f2c 70%,#f3d98a 100%);
+  --sp-d:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath fill='%231b1d22' d='M50 4C62 16 100 38 98 62 96 88 64 92 55 74L63 96H37L45 74C36 92 4 88 2 62 0 38 38 16 50 4Z'/%3E%3C/svg%3E");
+  --he-r:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath fill='%23c41230' d='M50 94C38 82-2 60 0 34 2 4 38 0 50 26 62 0 98 4 100 34 102 60 62 82 50 94Z'/%3E%3C/svg%3E");
+  --di-r:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath fill='%23c41230' d='M50 2Q65 30 86 50 65 70 50 98 35 70 14 50 35 30 50 2Z'/%3E%3C/svg%3E");
+  --cl-d:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='%231b1d22'%3E%3Ccircle cx='50' cy='29' r='20'/%3E%3Ccircle cx='29' cy='59' r='20'/%3E%3Ccircle cx='71' cy='59' r='20'/%3E%3Cpath d='M45 62 37 96H63L55 62Z'/%3E%3C/svg%3E");
+  --sp-w:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath fill='%23fff' d='M50 4C62 16 100 38 98 62 96 88 64 92 55 74L63 96H37L45 74C36 92 4 88 2 62 0 38 38 16 50 4Z'/%3E%3C/svg%3E");
+  --he-w:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath fill='%23fff' d='M50 94C38 82-2 60 0 34 2 4 38 0 50 26 62 0 98 4 100 34 102 60 62 82 50 94Z'/%3E%3C/svg%3E");
+  --di-w:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath fill='%23fff' d='M50 2Q65 30 86 50 65 70 50 98 35 70 14 50 35 30 50 2Z'/%3E%3C/svg%3E");
+  --cl-w:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='%23fff'%3E%3Ccircle cx='50' cy='29' r='20'/%3E%3Ccircle cx='29' cy='59' r='20'/%3E%3Ccircle cx='71' cy='59' r='20'/%3E%3Cpath d='M45 62 37 96H63L55 62Z'/%3E%3C/svg%3E");
+  --pbh:clamp(200px,28vw,360px); --pt:clamp(42px,6.6vw,96px); --pp:min(2.8vw,32px); --pl:min(3.8vw,44px);
+}
+[data-theme="solitaire"] body{background:#0b5530}
+[data-theme="solitaire"] body::before{content:"";position:fixed;inset:0;z-index:-2;pointer-events:none;background:var(--grain),var(--felt)}
+#ptDeco{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+#ptDeco i{position:absolute;width:var(--z);height:var(--z);background:var(--ic) center/contain no-repeat;opacity:.075;animation:pt-drift var(--d) ease-in-out infinite alternate;will-change:transform}
+@keyframes pt-drift{from{transform:translate(0,0) rotate(-10deg)}to{transform:translate(var(--dx),var(--dy)) rotate(12deg)}}
+/* шапка — бортик стола: тёмное сукно, золотая кромка; «Ю» — маленькая карта */
+[data-theme="solitaire"] header{background:linear-gradient(180deg,#083a22,#0d4a2c);border-bottom:0;box-shadow:0 1px 0 #e2bd5c,0 3px 0 #6b4a12,0 10px 20px rgba(0,0,0,.35)}
+[data-theme="solitaire"] .brand span{color:#fff3d0;font:700 italic 21px/1 var(--font-h);letter-spacing:.01em}
+[data-theme="solitaire"] .brand i{width:24px;height:32px;border-radius:5px;background:linear-gradient(170deg,#fff,#f1e9d6);color:#c41230;font:700 italic 16px/1 var(--font-h);box-shadow:0 2px 5px rgba(0,0,0,.45),inset 0 0 0 1px #e2bd5c;transform:rotate(-7deg)}
+[data-theme="solitaire"] .themeb{background:#fffdf6;border:1px solid #e2bd5c;color:#1b1d22;box-shadow:0 2px 6px rgba(0,0,0,.25)}
+@media (min-width: 861px){
+  [data-theme="solitaire"] nav.tabs button{color:#e3f1e7}
+  [data-theme="solitaire"] nav.tabs button:hover{background:rgba(255,255,255,.08)}
+  [data-theme="solitaire"] nav.tabs button[aria-current="page"]{color:#b3122e;background:linear-gradient(170deg,#fff,#f4eddc);box-shadow:0 2px 0 #c7b78e,0 6px 14px rgba(0,0,0,.3)}
+}
+[data-theme="solitaire"] main{position:relative;padding-top:30px}
+/* панели — игральные карты: слоновая кость, масть в углу, тень на сукне */
+[data-theme="solitaire"] :is(.card,details.sec,.search,.sumtot){border:1px solid #d9cfb6;box-shadow:var(--shadow)}
+[data-theme="solitaire"] .card{background:var(--sp-d) right 11px top 10px/11px 11px no-repeat,linear-gradient(172deg,#fffffb,#f8f2e3)}
+[data-theme="solitaire"] details.sec{background:var(--he-r) right 13px top 16px/11px 11px no-repeat,linear-gradient(172deg,#fffffb,#f8f2e3)}
+[data-theme="solitaire"] details.sec>summary .sum{margin-right:16px}
+[data-theme="solitaire"] :is(.search,.sumtot){background:linear-gradient(172deg,#fffffb,#f8f2e3)}
+[data-theme="solitaire"] :is(.tmenu,.ac,.modal .sheet){background:#fffdf6;border:1px solid #e2bd5c}
+[data-theme="solitaire"] .btn{border:1px solid #d3c7a8;background:linear-gradient(#fffef9,#f1e9d6);box-shadow:0 2px 0 #c9b98f,0 3px 8px rgba(0,0,0,.12);transition:transform .08s,box-shadow .08s}
+[data-theme="solitaire"] .btn:active{transform:translateY(2px);box-shadow:0 0 0 #c9b98f}
+[data-theme="solitaire"] :is(.btn.pri,.chip.on){background:linear-gradient(#d3203f,#a10f27);color:#fff;border:1px solid #7a0b1d;box-shadow:inset 0 0 0 2px rgba(255,220,140,.55),0 2px 0 #6e0a1b,0 4px 10px rgba(0,0,0,.22)}
+[data-theme="solitaire"] .chip{background:#fffdf6;border:1px solid #d3c7a8}
+[data-theme="solitaire"] .seg{background:#ece4d1}
+[data-theme="solitaire"] .seg button[aria-pressed="true"]{background:linear-gradient(#1f9254,#0f6436);color:#fff;box-shadow:0 2px 5px rgba(0,0,0,.28)}
+[data-theme="solitaire"] :is(.inp,select.sel){background:#f6f0e1}
+[data-theme="solitaire"] .kpi{background:linear-gradient(172deg,#fffdf6,#f4ecda);border:1px solid #e3d9c2}
+[data-theme="solitaire"] :is(.kpi b,.sumtot b){font-family:var(--font-h);font-weight:700}
+[data-theme="solitaire"] .hero .big{font-family:var(--font-h);font-weight:700}
+[data-theme="solitaire"] .detail .title{font-size:21px}
+[data-theme="solitaire"] .lhead{background:#0d4a2c;color:#fff3d0;border-bottom:1px solid #e2bd5c} [data-theme="solitaire"] .lhead span small{color:#bfe0c9}
+[data-theme="solitaire"] .item:hover{background:#fbf6ea} [data-theme="solitaire"] .item.sel{background:var(--accent-wash);box-shadow:inset 4px 0 0 #b3122e}
+[data-theme="solitaire"] :is(.mprow,.perline){color:#fff3d0;text-shadow:0 1px 3px rgba(0,0,0,.55)}
+[data-theme="solitaire"] .mprow .seg{text-shadow:none}
+[data-theme="solitaire"] .h{font:700 15px/1.4 var(--font-h);padding-left:21px;background:var(--cl-d) 0 50%/14px 14px no-repeat;align-items:center}
+[data-theme="solitaire"] .h span{font:500 13px/1.3 var(--font)}
+[data-theme="solitaire"] details.sec>summary{padding-left:40px;background:var(--di-r) 15px 50%/15px 15px no-repeat;font-family:var(--font-h);font-weight:700}
+[data-theme="solitaire"] .tmenu .tgrp{font-family:var(--font-h);text-transform:none;letter-spacing:0;font-size:13px}
+[data-theme="solitaire"] input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:3px;background:linear-gradient(90deg,#b8892b,#f0cf73)}
+[data-theme="solitaire"] input[type=range]::-webkit-slider-thumb{width:30px;height:30px;margin-top:-12px;border:0;border-radius:50%;
+  background:radial-gradient(circle,#c41230 0 40%,#fff 41% 47%,transparent 48%),repeating-conic-gradient(#c41230 0 30deg,#fff 30deg 45deg);box-shadow:0 2px 5px rgba(0,0,0,.45)}
+[data-theme="solitaire"] input[type=range]::-moz-range-thumb{width:26px;height:26px;border:0;border-radius:50%;background:radial-gradient(circle,#c41230 0 40%,#fff 41% 47%,transparent 48%),repeating-conic-gradient(#c41230 0 30deg,#fff 30deg 45deg)}
+[data-theme="solitaire"] .toast{background:#fffdf6;color:#1b1d22;border:1px solid #e2bd5c;box-shadow:0 8px 22px rgba(0,0,0,.35)}
+[data-theme="solitaire"] .mini{background:#0d4a2c;color:#fff3d0;border:1px solid #e2bd5c}
+/* карточка-баннер: стол с бортиком; лицо — веер карт и «ЮНИТКА», оборот — «Косынка» во весь экран */
+#ptCard{position:relative;height:var(--pbh);margin:0 0 28px}
+#ptCard .ptin{position:absolute;inset:0}
+#ptCard .ptf{position:absolute;inset:0;border-radius:16px;overflow:hidden;box-shadow:0 0 0 1px #e2bd5c,0 0 0 5px #6b4a12,0 0 0 6px #e2bd5c,0 16px 34px rgba(0,0,0,.45)}
+#ptCard .ptfr{background:radial-gradient(ellipse 70% 120% at 72% 45%,rgba(255,250,210,.2),transparent 62%),var(--grain),var(--felt)}
+#ptCard .ptbk{display:flex;flex-direction:column;background:var(--grain),var(--felt)}
+#ptCard:not(.anim).flip .ptfr,#ptCard:not(.anim):not(.flip) .ptbk{visibility:hidden}
+#ptCard.flip .ptfr,#ptCard:not(.flip) .ptbk{pointer-events:none}
+#ptCard.anim{perspective:1800px}
+#ptCard.anim .ptin{transform-style:preserve-3d}
+#ptCard.anim.tr .ptin{transition:transform .75s cubic-bezier(.3,.1,.2,1)}
+#ptCard.anim.flip .ptin{transform:rotateY(180deg)}
+#ptCard.anim .ptf{-webkit-backface-visibility:hidden;backface-visibility:hidden}
+#ptCard.anim .ptbk{transform:rotateY(180deg)}
+#ptCard .ptfan{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none}
+#ptCard .pttitle{position:absolute;z-index:3;left:var(--pl);top:var(--pp);margin:0;padding:0;border:0;background:none;cursor:pointer;text-align:left;transition:transform .2s ease;-webkit-tap-highlight-color:transparent}
+#ptCard .ptt{display:block;font:700 italic var(--pt)/1.02 "Playfair Display",Georgia,serif;letter-spacing:.01em;background:var(--gold);-webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 2px 0 #5a3b08) drop-shadow(0 8px 12px rgba(0,0,0,.45));padding-right:.06em}
+#ptCard .ptgo{display:inline-flex;align-items:center;gap:.5em;margin-top:.5em;font:800 clamp(11px,1.35vw,16px)/1 "Manrope",system-ui,sans-serif;letter-spacing:.05em;text-transform:uppercase;color:#fff;
+  background:linear-gradient(#d3203f,#a10f27);border:1px solid #6e0a1b;border-radius:999px;padding:.7em 1.15em;box-shadow:inset 0 0 0 2px rgba(255,220,140,.6),0 3px 0 #5e0816,0 8px 18px rgba(0,0,0,.35);animation:pt-pulse 2.2s ease-in-out infinite}
+@keyframes pt-pulse{50%{transform:scale(1.05)}}
+#ptCard .pttitle:hover,#ptCard .pttitle:focus-visible{transform:translateY(-3px)}
+#ptCard .pttitle:active{transform:translateY(1px)}
+#ptCard .pttitle:focus-visible{outline:3px solid #fff3d0;outline-offset:6px;border-radius:8px}
+#ptCard .ptsub{position:absolute;z-index:2;left:var(--pl);bottom:var(--pp);font:600 italic clamp(12px,1.5vw,18px)/1.2 "Playfair Display",Georgia,serif;color:#f4e6bd;text-shadow:0 1px 3px rgba(0,0,0,.6);pointer-events:none}
+#ptCard .ptbar{display:flex;align-items:center;gap:6px;padding:8px 10px;padding-top:max(8px,env(safe-area-inset-top));background:linear-gradient(180deg,rgba(0,0,0,.38),rgba(0,0,0,.1));flex:none}
+#ptCard .ptbar button{height:36px;min-width:36px;border-radius:10px;border:1px solid rgba(226,189,92,.75);background:rgba(255,253,246,.1);color:#fff3d0;font:700 13px/1 "Manrope",system-ui,sans-serif;
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:0 11px;cursor:pointer;transition:background .15s,transform .08s}
+#ptCard .ptbar button:hover{background:rgba(255,253,246,.2)} #ptCard .ptbar button:active{transform:translateY(1px)}
+#ptCard .ptbar button[disabled]{opacity:.38;cursor:default}
+#ptCard .ptbar svg{width:18px;height:18px;flex:none;display:block}
+#ptCard .ptbar .pri{background:linear-gradient(#d3203f,#a10f27);border-color:#f0cf73}
+#ptCard .ptbar [data-pt="mute"] .off,#ptCard .ptbar [data-pt="mute"][aria-pressed="true"] .on{display:none}
+#ptCard .ptbar [data-pt="mute"][aria-pressed="true"] .off{display:block}
+#ptCard .ptstat{margin-left:auto;font:700 13px/1 "Manrope",system-ui,sans-serif;color:#f4e6bd;white-space:nowrap;font-variant-numeric:tabular-nums}
+#ptCard .ptgame{display:block;flex:1;min-height:0;width:100%;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+@media (max-width: 560px){ #ptCard .ptbar .lbl{display:none} #ptCard .ptbar{gap:5px;padding-left:8px;padding-right:8px} #ptCard .ptbar button{padding:0 8px} #ptCard .ptstat{font-size:12px} }
+#ptCard.big{position:fixed;inset:0;z-index:300;height:auto;margin:0;transform-origin:0 0}
+#ptCard.big .ptf{border-radius:0;box-shadow:none}
+#ptCard.big .ptfr{visibility:hidden}
+html.pt-big{overflow:hidden}
+html.pt-play #ptDeco i,html.pt-play #ptCard .ptgo{animation-play-state:paused}
+@media (prefers-reduced-motion: reduce){ :is(#ptDeco,#ptCard) *{animation:none!important} }
 /* «Тетрадь» — спокойная: лист в клетку, синие «чернила», заголовки и цифры с засечками, вместо теней — тонкие линии, шрифты PT Sans + PT Serif */
 :root[data-theme="paper"]{
   color-scheme: light;
@@ -742,6 +860,13 @@ a.btn{text-decoration:none;color:inherit}
   [data-theme="sonic"] nav.tabs button{color:#e6eeff}
   [data-theme="sonic"] nav.tabs button[aria-current="page"]{color:#ffd21f}
   [data-theme="sonic"] main{padding-top:28px}
+  [data-theme="solitaire"] nav.tabs{background:linear-gradient(180deg,#0d4a2c,#083a22);border-top:1px solid #e2bd5c}
+  [data-theme="solitaire"] nav.tabs button{color:#e3f1e7}
+  [data-theme="solitaire"] nav.tabs button[aria-current="page"]{color:#ffd76a}
+  [data-theme="solitaire"] main{padding-top:24px}
+  :root[data-theme="solitaire"]{--pbh:52vw;--pt:10.5vw;--pp:4vw;--pl:4.4vw}
+  #ptCard{margin:0 0 22px}
+  #ptCard .ptsub{display:none}
   :root[data-theme="sonic"]{--sbh:50vw;--st:9.5vw}
   #sxCard{margin:0 0 22px}
   #sxCard .sxfr{background:linear-gradient(100deg,rgba(0,40,170,.42),rgba(0,40,170,0) 55%),url("sonic-hill-m.webp") 55% 42%/cover}
@@ -1096,6 +1221,7 @@ const TH = {
   farcry: ["Far Cry 3", "farcry", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3a7 7 0 0 0-7 7c0 2.4 1.2 4.3 3 5.4V18a1 1 0 0 0 1 1h1v2h4v-2h1a1 1 0 0 0 1-1v-2.6c1.8-1.1 3-3 3-5.4a7 7 0 0 0-7-7Z"/><circle cx="9.3" cy="10.6" r="1.5" fill="currentColor"/><circle cx="14.7" cy="10.6" r="1.5" fill="currentColor"/></svg>'],
   jim: ["Червяк Джим", "jim", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 21.5c-2.6 0-3.8-1.9-2.8-3.8 1.1-2 4-2.1 5.2-4 1.2-1.8-.6-3.8 1-5.6 1.4-1.6 3.6-1.5 5.1-.6"/><circle cx="15.6" cy="5.2" r="2.3"/><circle cx="19.6" cy="5.9" r="2.3"/></svg>'],
   sonic: ["Соник", "sonic", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><ellipse cx="15" cy="12" rx="5.6" ry="7"/><ellipse cx="15" cy="12" rx="2.4" ry="3.6"/><path d="M2.5 8.5h5M1.5 12h5M2.5 15.5h5"/></svg>'],
+  solitaire: ["Пасьянс", "solitaire", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2.5"/><path d="M12 7.2c1.2 1.4 3.7 2.9 3.7 4.8 0 1.6-1.9 2.4-3.1 1.2l.6 2.4h-2.4l.6-2.4c-1.2 1.2-3.1.4-3.1-1.2 0-1.9 2.5-3.4 3.7-4.8Z" fill="currentColor" stroke="none"/></svg>'],
   /* спокойные */
   paper: ["Тетрадь", "paper", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"><path d="M4 20h4.5L19.5 9 15 4.5 4 15.5Z"/><path d="M13 6.5 17.5 11"/></svg>'],
   dusk: ["Сумерки", "dusk", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6.5 13.5a5.5 5.5 0 0 1 11 0"/><path d="M3 13.5h18M6 17h12M9 20.5h6M12 3.5v2.5M4.6 6.6l1.7 1.7M19.4 6.6l-1.7 1.7"/></svg>']
@@ -1109,6 +1235,7 @@ const SWATCH = {          /* кружки тем — векторные, без 
   farcry: '<svg class="sw" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8.6" fill="#2a1d12" stroke="#c8241d" stroke-width="1.6"/><path d="M10 4.6a4.2 4.2 0 0 0-4.2 4.2c0 1.4.7 2.6 1.8 3.2v1.6h1v1.2h2.8V14h1v-1.6c1.1-.6 1.8-1.8 1.8-3.2A4.2 4.2 0 0 0 10 4.6Z" fill="#efe2c0"/><circle cx="8.4" cy="9.2" r=".9" fill="#2a1d12"/><circle cx="11.6" cy="9.2" r=".9" fill="#2a1d12"/></svg>',
   jim: '<svg class="sw" viewBox="0 0 20 20"><defs><linearGradient id="swJim" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a1263"/><stop offset=".62" stop-color="#d9532c"/><stop offset=".62" stop-color="#7ad321"/></linearGradient></defs><circle cx="10" cy="10" r="8.4" fill="url(#swJim)" stroke="#1a1022" stroke-width="1.6"/><circle cx="8.3" cy="7.6" r="2" fill="#fff" stroke="#1a1022" stroke-width=".8"/><circle cx="11.9" cy="7.6" r="2" fill="#fff" stroke="#1a1022" stroke-width=".8"/><circle cx="8.7" cy="7.8" r=".7" fill="#1a1022"/><circle cx="12.3" cy="7.8" r=".7" fill="#1a1022"/></svg>',
   sonic: '<svg class="sw" viewBox="0 0 20 20"><defs><linearGradient id="swSon" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0f6efa"/><stop offset=".66" stop-color="#5fb0ff"/><stop offset=".66" stop-color="#3fbf1c"/><stop offset=".76" stop-color="#3fbf1c"/><stop offset=".76" stop-color="#cf6b16"/></linearGradient></defs><circle cx="10" cy="10" r="8.4" fill="url(#swSon)" stroke="#0a1a4a" stroke-width="1.6"/><circle cx="10" cy="8" r="3.4" fill="none" stroke="#ffc81e" stroke-width="1.9"/></svg>',
+  solitaire: '<svg class="sw" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8.6" fill="#137a44" stroke="#d7b45a" stroke-width="1.4"/><rect x="6.2" y="4.6" width="7.6" height="10.8" rx="1.4" fill="#fffdf6" transform="rotate(-8 10 10)"/><path d="M10 13.2c-.6-.6-2.3-1.6-2.3-2.8 0-.9 1.1-1.4 2.3-.4 1.2-1 2.3-.5 2.3.4 0 1.2-1.7 2.2-2.3 2.8Z" fill="#c41230"/></svg>',
   paper: '<svg class="sw" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8.6" fill="#fbfaf5" stroke="#8a8a85" stroke-width="1.2"/><path d="M4.5 7.5h11M3.6 11h12.8M4.5 14.5h11M7.5 2.5v15M12.5 2.5v15" stroke="#2c4fb3" stroke-width=".8" opacity=".45"/></svg>',
   dusk: '<svg class="sw" viewBox="0 0 20 20"><defs><linearGradient id="swDusk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2d4c50"/><stop offset="1" stop-color="#3b3653"/></linearGradient></defs><circle cx="10" cy="10" r="8.6" fill="url(#swDusk)" stroke="#8a8a85" stroke-width="1.2"/><circle cx="10" cy="10" r="3.4" fill="#7fc8b4"/></svg>'
 };
@@ -1209,11 +1336,123 @@ function sonicDeco(on) {
     loadSonic(() => { if (el.isConnected && !el._run) el._run = SonicGame.runner(el.querySelector(".sxrun"), { map: sxMap }); });
   }
 }
+/* «Пасьянс»: плывущие масти (#ptDeco) и карточка-баннер #ptCard — на лице колода раздаёт веер (Solitaire.fan), «ЮНИТКА» — кнопка;
+   нажал — карточка переворачивается и раскрывается на весь экран, на обороте «Косынка» (Solitaire.mount). solitaire.js грузится только в этой теме */
+const PT_ICO = {
+  deal: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><rect x="3" y="6" width="10" height="14" rx="2"/><path d="M8 6V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-5"/></svg>',
+  undo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>',
+  hint: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.6 10.8c.8.6 1.1 1.3 1.1 2.2h5c0-.9.3-1.6 1.1-2.2A6 6 0 0 0 12 3Z"/></svg>',
+  auto: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>'
+};
+function loadSoli(cb) {
+  if (window.Solitaire) return cb();
+  let s = document.getElementById("ptjs");
+  if (!s) { s = document.createElement("script"); s.id = "ptjs"; s.src = "solitaire.js?v=1"; document.head.appendChild(s); }
+  s.addEventListener("load", () => cb(), { once: true });
+}
+const ptReduced = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+function ptTurn(el, on, done) {                     // переворот (3D только на время анимации)
+  if (ptReduced()) { el.classList.toggle("flip", on); return done && done(); }
+  el.classList.add("anim"); void el.offsetWidth; el.classList.add("tr"); void el.offsetWidth;
+  el.classList.toggle("flip", on);
+  const inner = el.querySelector(".ptin"), fin = e => { if (e && e.target !== inner) return; clearTimeout(el._pt); inner.removeEventListener("transitionend", fin); el.classList.remove("anim", "tr"); done && done(); };
+  inner.addEventListener("transitionend", fin); el._pt = setTimeout(fin, 1100);
+}
+function ptGrow(el, on, done) {                     // раскрыть стол на весь экран и обратно (FLIP: плавно из места баннера)
+  const box = r => ({ left: r.left, top: r.top, width: r.width, height: r.height });
+  const tf = (a, b) => `translate(${a.left - b.left}px,${a.top - b.top}px) scale(${a.width / b.width},${a.height / b.height})`;
+  if (on) {
+    const r0 = box(el.getBoundingClientRect()); el._r0 = { left: r0.left, top: r0.top + scrollY, width: r0.width, height: r0.height };
+    el.classList.add("big"); document.documentElement.classList.add("pt-big");
+    if (ptReduced() || !el.animate) return done && done();
+    const r1 = box(el.getBoundingClientRect());
+    el.animate([{ transform: tf(r0, r1) }, { transform: "none" }], { duration: 430, easing: "cubic-bezier(.2,.8,.2,1)" }).onfinish = () => done && done();
+  } else {
+    const fin = () => { el.classList.remove("big"); document.documentElement.classList.remove("pt-big"); done && done(); };
+    if (ptReduced() || !el.animate || !el._r0) return fin();
+    const r1 = box(el.getBoundingClientRect()), t = { left: el._r0.left, top: el._r0.top - scrollY, width: el._r0.width, height: el._r0.height };
+    const a = el.animate([{ transform: "none" }, { transform: tf(t, r1) }], { duration: 360, easing: "cubic-bezier(.4,0,.6,1)", fill: "forwards" });
+    a.onfinish = () => { fin(); a.cancel(); };
+  }
+}
+function ptOpen(el, on) {
+  if (el._busy || on === el.classList.contains("flip")) return;
+  el._busy = true;
+  if (on) {
+    if (el._fan) el._fan.pause(true); document.documentElement.classList.add("pt-play");
+    ptTurn(el, true, () => ptGrow(el, true, () => {
+      el._busy = false;
+      loadSoli(() => {
+        if (!el.isConnected) return;
+        if (!el._game) el._game = Solitaire.mount(el.querySelector(".ptgame"), { onStat: s => ptStat(el, s) });
+        el._game.resume(); el.querySelector('[data-pt="back"]').focus({ preventScroll: true });
+      });
+    }));
+  } else {
+    if (el._game) el._game.pause();
+    ptGrow(el, false, () => ptTurn(el, false, () => { el._busy = false; if (el._fan) el._fan.pause(false); document.documentElement.classList.remove("pt-play"); }));
+  }
+}
+function ptStat(el, s) {
+  el.querySelector(".ptstat").textContent = s.time + " · " + s.moves + " " + (s.moves % 10 === 1 && s.moves % 100 !== 11 ? "ход" : s.moves % 10 >= 2 && s.moves % 10 <= 4 && (s.moves % 100 < 12 || s.moves % 100 > 14) ? "хода" : "ходов");
+  el.querySelector('[data-pt="auto"]').classList.toggle("hidden", !s.canAuto);
+  el.querySelector('[data-pt="undo"]').disabled = !s.canUndo;
+  el.querySelector('[data-pt="draw"] b').textContent = s.draw;
+}
+function soliDeco(on) {
+  const d = $("#ptDeco"), c = $("#ptCard");
+  if (!on) {
+    if (d) d.remove();
+    if (c) { if (c._fan) c._fan.destroy(); if (c._game) c._game.destroy(); c.remove(); }
+    document.documentElement.classList.remove("pt-play", "pt-big");
+    return;
+  }
+  if (!d) {
+    const el = document.createElement("div"); el.id = "ptDeco"; el.setAttribute("aria-hidden", "true");
+    // масти медленно плывут по краям стола: [слева, сверху, размер, масть, длительность, сдвиг]
+    el.innerHTML = [["3%", "18%", 120, "sp", 26, "40px,-30px"], ["88%", "12%", 90, "he", 31, "-30px,40px"], ["6%", "62%", 80, "di", 23, "30px,30px"],
+      ["84%", "58%", 140, "cl", 34, "-40px,-20px"], ["46%", "84%", 70, "he", 28, "20px,-40px"], ["62%", "30%", 60, "sp", 25, "-20px,30px"]]
+      .map(([x, y, z, s, t, dd]) => { const [dx, dy] = dd.split(","); return `<i style="left:${x};top:${y};--z:${z}px;--ic:var(--${s}-w);--d:${t}s;--dx:${dx};--dy:${dy}"></i>`; }).join("");
+    document.body.appendChild(el);
+  }
+  if (!c) {
+    const el = document.createElement("div"); el.id = "ptCard";
+    el.innerHTML = '<div class="ptin"><div class="ptf ptfr"><canvas class="ptfan" aria-hidden="true"></canvas>' +
+      '<button class="pttitle" type="button" aria-label="Разложить пасьянс"><span class="ptt">ЮНИТКА</span><span class="ptgo">♠ Разложить пасьянс</span></button>' +
+      '<div class="ptsub" aria-hidden="true">«Косынка» — отдохни минутку от цифр</div></div>' +
+      '<div class="ptf ptbk"><div class="ptbar">' +
+      `<button type="button" data-pt="back" aria-label="Закрыть пасьянс">${SX_ICO.back}<span class="lbl">Назад</span></button>` +
+      `<button type="button" data-pt="new" aria-label="Новая раскладка">${PT_ICO.deal}<span class="lbl">Новая</span></button>` +
+      `<button type="button" data-pt="undo" aria-label="Отменить ход" disabled>${PT_ICO.undo}<span class="lbl">Отменить</span></button>` +
+      `<button type="button" data-pt="hint" aria-label="Подсказка">${PT_ICO.hint}<span class="lbl">Подсказка</span></button>` +
+      `<button type="button" data-pt="auto" class="pri hidden" aria-label="Собрать карты в дома">${PT_ICO.auto}<span class="lbl">Собрать</span></button>` +
+      `<button type="button" data-pt="draw" aria-label="Сдавать по 1 или по 3 карты"><b>1</b><span class="lbl">&nbsp;из колоды</span></button>` +
+      `<button type="button" data-pt="mute" aria-label="Звук" aria-pressed="${LS.get("ptMute", 0) == 1}">${SX_ICO.mute}</button>` +
+      '<span class="ptstat">0:00 · 0 ходов</span></div><canvas class="ptgame" aria-label="Пасьянс «Косынка»: перетаскивай карты или нажимай — карта сама уйдёт, куда можно"></canvas></div></div>';
+    $("main").prepend(el);
+    el.querySelector(".pttitle").onclick = () => ptOpen(el, true);
+    el.querySelector(".ptbar").addEventListener("click", e => {
+      const b = e.target.closest("[data-pt]"); if (!b) return;
+      const k = b.dataset.pt, g = el._game;
+      if (k === "back") ptOpen(el, false);
+      else if (!g) return;
+      else if (k === "new") g.newGame();
+      else if (k === "undo") g.undo();
+      else if (k === "hint") g.hint();
+      else if (k === "auto") g.auto();
+      else if (k === "draw") g.setDraw(+b.querySelector("b").textContent === 1 ? 3 : 1);
+      else if (k === "mute") { const off = b.getAttribute("aria-pressed") !== "true"; b.setAttribute("aria-pressed", off); g.mute(off); }
+    });
+    document.addEventListener("keydown", e => { if (e.key === "Escape" && el.classList.contains("big") && el.isConnected) ptOpen(el, false); });
+    loadSoli(() => { if (el.isConnected && !el._fan) el._fan = Solitaire.fan(el.querySelector(".ptfan")); });
+  }
+}
 function applyTheme() {
   if (!TH[THEME]) THEME = "auto";
   if (THEME === "auto") document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme", THEME);
   themeFont(THEME);
   sonicDeco(THEME === "sonic");
+  soliDeco(THEME === "solitaire");
   $("#bTheme").innerHTML = TH[THEME][2] + "<span>" + TH[THEME][0] + "</span>";
   $("#bTheme").title = "Тема: " + TH[THEME][0].toLowerCase();
   const grp = { comic: "Весёлые", paper: "Спокойные" };
