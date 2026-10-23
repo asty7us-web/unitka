@@ -233,7 +233,9 @@ try { var t = JSON.parse(localStorage.getItem("unitka.theme")); if (/^(light|dar
    Движение — только transform и opacity, на своих слоях #sxDeco и #sxCard (не предки меню и итога, их создаёт sonicDeco() только в этой теме);
    prefers-reduced-motion — без движения.
    С 23.10 баннер — карточка #sxCard: на лице по самой картинке бегает нарисованный кодом Соник (sonic-game.js, runner: холм, прыжок за кольцами,
-   иногда стоит и срывается спин-дэшем), «ЮНИТКА» — светящаяся кнопка; нажал — карточка переворачивается, на обороте игра (SonicGame.mount). */
+   иногда стоит и срывается спин-дэшем), «ЮНИТКА» — светящаяся кнопка; нажал — карточка переворачивается, на обороте игра (SonicGame.mount).
+   С 23.10 (вечер) Соник — кадры NeuralBox (site\sonic-run/poses*.webp), на лице бежит по дорожке прямо в петлю; в игре выбор режима
+   «бежит сам» / «управляю сам», в финале — бонус Бондареву (Супер Соник + приз по коду). */
 :root[data-theme="sonic"]{
   color-scheme: light;
   --bg:#1d5fe6; --surface:#ffffff; --surface-2:#edf3ff; --ink:#0a1a4a; --ink-2:#34508e; --muted:#6a7fae;
@@ -1115,7 +1117,7 @@ const SX_ICO = {
 function loadSonic(cb) {
   if (window.SonicGame) return cb();
   let s = document.getElementById("sxjs");
-  if (!s) { s = document.createElement("script"); s.id = "sxjs"; s.src = "sonic-game.js?v=2"; document.head.appendChild(s); }
+  if (!s) { s = document.createElement("script"); s.id = "sxjs"; s.src = "sonic-game.js?v=3"; document.head.appendChild(s); }
   s.addEventListener("load", () => cb(), { once: true });
 }
 /* где на экране исходная картинка баннера (cover + background-position как в CSS) — чтобы Соник бежал по её земле */
@@ -1171,7 +1173,7 @@ function sonicDeco(on) {
       '<canvas class="sxrun" aria-hidden="true"></canvas>' +
       '<button class="sxtitle" type="button" aria-label="Играть в Соника"><span class="sxt">ЮНИТКА</span><span class="sxgo">▶ ИГРАТЬ</span></button>' +
       '<div class="sxsub" aria-hidden="true">Быстрее ветра — к прибыли!</div></div>' +
-      '<div class="sxf sxbk"><canvas class="sxgame" tabindex="0" aria-label="Игра «Соник»: тап — прыжок, тап в прыжке — атака"></canvas>' +
+      '<div class="sxf sxbk"><canvas class="sxgame" tabindex="0" aria-label="Игра «Соник»: два режима — бежит сам (тап — прыжок) или управляю сам (стрелки и пробел)"></canvas>' +
       `<div class="sxbtns"><button type="button" data-sx="mute" aria-label="Звук" aria-pressed="${LS.get("sxMute", 0) == 1}">${SX_ICO.mute}</button>` +
       `<button type="button" data-sx="big" aria-label="Во весь экран">${SX_ICO.big}</button><button type="button" data-sx="back" aria-label="Перевернуть обратно">${SX_ICO.back}</button></div></div></div>`;
     $("main").prepend(el);
