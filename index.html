@@ -1852,15 +1852,14 @@ const SND = {
   sonic: { off: () => LS.get("sxMute", 0) == 1, set: off => { LS.set("sxMute", off ? 1 : 0); if (window.SonicGame) SonicGame.mute(off); } },
   solitaire: { off: () => LS.get("ptMute", 0) == 1 && LS.get("ptMusic", 1) == 0,
     set: off => { LS.set("ptMute", off ? 1 : 0); LS.set("ptMusic", off ? 0 : 1); const g = $("#ptCard") && $("#ptCard")._game; if (g) { g.mute(off); g.music(!off); } } },
-  birds: { off: () => LS.get("abMute", 0) == 1, set: off => { LS.set("abMute", off ? 1 : 0); if (window.BirdsGame) BirdsGame.mute(off); } },
-  farcry: { off: () => LS.get("fcMute", 0) == 1, set: off => LS.set("fcMute", off ? 1 : 0) },
-  jim: { off: () => LS.get("jimMute", 0) == 1, set: off => LS.set("jimMute", off ? 1 : 0) }
+  birds: { off: () => LS.get("abMute", 0) == 1, set: off => { LS.set("abMute", off ? 1 : 0); if (window.BirdsGame) BirdsGame.mute(off); } }
 };
 /* музыка тем (Андрей 24.10: «соник, фар край, джим — там тоже должна быть соответствующая оттуда музыка»): оригиналы на открытый сайт
    нельзя (авторские права), поэтому свои треки в стиле игр — NeuralBox Suno V4.5 Plus, бесшовные петли site\<тема>-music.mp3
-   (Код\unitka\muzyka: gen.js → wait_dl.py → make_loop.py). Far Cry и Джим — фоном всей темы с первого нажатия на странице (до него браузер
-   звук не даёт), Соник — пока открыта игра, как музыка «Пасьянса». Выключает кнопка звука в шапке, у Соника — и кнопка звука в игре. */
-const TMU = { a: null, b: {}, ld: {}, src: null, g: null, cur: null, want: null }, TMV = { sonic: 0.3, farcry: 0.24, jim: 0.24 };
+   (Код\unitka\muzyka: gen.js → wait_dl.py → make_loop.py). Андрей 25.10 оставил только Соника («соник ок, остальное не надо»): играет,
+   пока открыта игра, как музыка «Пасьянса»; выключают кнопка звука в шапке и кнопка звука в игре. Тема фоном с первого нажатия
+   (так были Far Cry и Джим) — добавить её в TMV и SND, tmWant уже умеет. */
+const TMU = { a: null, b: {}, ld: {}, src: null, g: null, cur: null, want: null }, TMV = { sonic: 0.3 };
 function tmCtx() {
   if (!TMU.a) {
     try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch (e) {}   // iPhone: слышно и в беззвучном режиме
