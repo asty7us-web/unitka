@@ -737,6 +737,9 @@ nav.tabs svg{width:20px;height:20px}
 #bTour{position:relative;margin-left:auto} #bTour .newdot{position:absolute;top:-3px;right:-3px}
 nav.tabs + #bTour{margin-left:0}
 .tw{position:relative}
+#bSound{padding:0}
+#bSound .off,#bSound[aria-pressed="true"] .on{display:none}
+#bSound[aria-pressed="true"] .off{display:block}
 .tmenu{position:absolute;right:0;top:calc(100% + 6px);z-index:60;background:var(--surface);border:1px solid var(--ring);border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.18);padding:6px;min-width:200px;display:flex;flex-direction:column;gap:2px}
 .tmenu button{border:0;background:none;text-align:left;padding:9px 10px;border-radius:8px;font-weight:600;display:flex;align-items:center;gap:10px;color:var(--ink)}
 .tmenu button:hover{background:var(--surface-2)}
@@ -1078,6 +1081,7 @@ a.btn{text-decoration:none;color:inherit}
     </nav>
     <button class="themeb" id="bTour" title="Пошаговые подсказки по открытой вкладке"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M11 5l1.7 5.3L18 12l-5.3 1.7L11 19l-1.7-5.3L4 12l5.3-1.7Z"/><path d="M18.5 3.5l.6 1.5 1.5.6-1.5.6-.6 1.5-.6-1.5-1.5-.6 1.5-.6Z"/></svg><span class="tl-full">Показать фишки</span><span class="tl-short">Фишки</span></button>
     <button class="themeb hidden" id="bInstall" title="Поставить Юнитку на телефон или компьютер как приложение"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M12 7v7M9 11.5l3 3 3-3M10.5 18.5h3"/></svg><span class="tl-full">Установить</span></button>
+    <button class="themeb hidden" id="bSound" aria-label="Звук" aria-pressed="false"><svg class="on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4Z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg><svg class="off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4Z"/><path d="m17 9 5 6M22 9l-5 6"/></svg></button>
     <div class="tw"><button class="themeb" id="bTheme" aria-label="Тема" aria-haspopup="true"></button>
       <div class="tmenu hidden" id="tmenu" role="menu"></div></div>
   </div>
@@ -1521,7 +1525,7 @@ function sonicDeco(on) {
       if (b.dataset.sx === "pause") { if (el._game) el._game.menu(); }
       else if (b.dataset.sx === "back") sxFlip(el, false);
       else if (b.dataset.sx === "big") sxBig(el, !el.classList.contains("big"));
-      else if (b.dataset.sx === "mute" && window.SonicGame) { const off = b.getAttribute("aria-pressed") !== "true"; b.setAttribute("aria-pressed", off); SonicGame.mute(off); }
+      else if (b.dataset.sx === "mute" && window.SonicGame) { const off = b.getAttribute("aria-pressed") !== "true"; b.setAttribute("aria-pressed", off); SonicGame.mute(off); syncSound(); }
     });
     // ушла карточка с экрана во время игры — пауза, вернулась — дальше
     new IntersectionObserver(es => { if (el.classList.contains("flip") && el._game && !el.classList.contains("big")) es[0].isIntersecting ? el._game.resume() : el._game.pause(); }).observe(el);
@@ -1679,8 +1683,8 @@ function soliDeco(on) {
       else if (k === "undo") g.undo();
       else if (k === "hint") g.hint();
       else if (k === "auto") g.auto();
-      else if (k === "mute") { const off = b.getAttribute("aria-pressed") !== "true"; b.setAttribute("aria-pressed", off); g.mute(off); }
-      else if (k === "music") { const off = b.getAttribute("aria-pressed") !== "true"; b.setAttribute("aria-pressed", off); g.music(!off); }
+      else if (k === "mute") { const off = b.getAttribute("aria-pressed") !== "true"; b.setAttribute("aria-pressed", off); g.mute(off); syncSound(); }
+      else if (k === "music") { const off = b.getAttribute("aria-pressed") !== "true"; b.setAttribute("aria-pressed", off); g.music(!off); syncSound(); }
     });
     document.addEventListener("keydown", e => { if (e.key === "Escape" && el.classList.contains("big") && el.isConnected) ptBig(el, false); });
     document.addEventListener("fullscreenchange", () => { if (!document.fullscreenElement && el.classList.contains("big") && isPhone()) ptBig(el, false); });
@@ -1812,7 +1816,7 @@ function birdsDeco(on) {
       if (b.dataset.ab === "pause") { if (el._game) el._game.menu(); }
       else if (b.dataset.ab === "back") abFlip(el, false);
       else if (b.dataset.ab === "big") abBig(el, !el.classList.contains("big"));
-      else if (b.dataset.ab === "mute" && window.BirdsGame) { const off = b.getAttribute("aria-pressed") !== "true"; b.setAttribute("aria-pressed", off); BirdsGame.mute(off); }
+      else if (b.dataset.ab === "mute" && window.BirdsGame) { const off = b.getAttribute("aria-pressed") !== "true"; b.setAttribute("aria-pressed", off); BirdsGame.mute(off); syncSound(); }
     });
     document.addEventListener("keydown", e => { if (e.key === "Escape" && el.classList.contains("big") && el.isConnected) abBig(el, false); });
     document.addEventListener("fullscreenchange", () => { if (!document.fullscreenElement && el.classList.contains("big") && el.isConnected) { el.classList.remove("big"); document.documentElement.classList.remove("ab-big"); } });
@@ -1838,7 +1842,32 @@ function applyTheme() {
   $("#tmenu").innerHTML = Object.entries(TH).map(([k, v]) => (grp[k] ? `<div class="tgrp">${grp[k]}</div>` : "") +
     `<button role="menuitemradio" aria-checked="${k === THEME}" data-theme-set="${k}">${SWATCH[k]}${v[0]}</button>`).join("");
   const m = document.querySelector('meta[name="theme-color"]'); if (m) m.content = getComputedStyle(document.documentElement).getPropertyValue("--bg").trim() || "#2a78d6";
+  syncSound();
 }
+/* звук — кнопка в шапке у тем со звуком (Андрей 24.10, как в «Отклике»: «в шапке для всех последующих тем»). Выключает и включает
+   звук сразу во всех играх (у «Пасьянса» — и звуки, и музыку); кнопки звука в самих играх остаются, шапка показывает состояние игры
+   текущей темы. Новая тема со звуком — добавить в SND: выключен ли звук и как его переключить. */
+const SND = {
+  sonic: { off: () => LS.get("sxMute", 0) == 1, set: off => { LS.set("sxMute", off ? 1 : 0); if (window.SonicGame) SonicGame.mute(off); } },
+  solitaire: { off: () => LS.get("ptMute", 0) == 1 && LS.get("ptMusic", 1) == 0,
+    set: off => { LS.set("ptMute", off ? 1 : 0); LS.set("ptMusic", off ? 0 : 1); const g = $("#ptCard") && $("#ptCard")._game; if (g) { g.mute(off); g.music(!off); } } },
+  birds: { off: () => LS.get("abMute", 0) == 1, set: off => { LS.set("abMute", off ? 1 : 0); if (window.BirdsGame) BirdsGame.mute(off); } }
+};
+let sndMem = null;                       // браузер не даёт хранить (инкогнито) — помним до перезагрузки
+function soundOff() { const s = SND[THEME]; if (!s) return false; let ok = true; try { localStorage.setItem("unitka.t", "1"); localStorage.removeItem("unitka.t"); } catch (e) { ok = false; } return ok || sndMem === null ? s.off() : sndMem; }
+function syncSound() {
+  const b = $("#bSound"), off = soundOff();
+  b.classList.toggle("hidden", !SND[THEME]); b.setAttribute("aria-pressed", off); b.title = off ? "Звук выключен — включить" : "Звук включён — выключить";
+  document.querySelectorAll('[data-sx="mute"]').forEach(x => x.setAttribute("aria-pressed", LS.get("sxMute", 0) == 1));
+  document.querySelectorAll('[data-ab="mute"]').forEach(x => x.setAttribute("aria-pressed", LS.get("abMute", 0) == 1));
+  document.querySelectorAll('[data-pt="mute"]').forEach(x => x.setAttribute("aria-pressed", LS.get("ptMute", 0) == 1));
+  document.querySelectorAll('[data-pt="music"]').forEach(x => x.setAttribute("aria-pressed", LS.get("ptMusic", 1) == 0));
+}
+$("#bSound").onclick = () => {
+  const off = !soundOff(); sndMem = off;
+  if (!off) try { if (!window.__ptAC) window.__ptAC = new (window.AudioContext || window.webkitAudioContext)(); window.__ptAC.resume(); } catch (e) {}   // iPhone: звук разрешается только внутри нажатия
+  Object.values(SND).forEach(s => s.set(off)); syncSound();
+};
 $("#bTheme").onclick = e => { e.stopPropagation(); $("#tmenu").classList.toggle("hidden"); };
 $("#tmenu").addEventListener("click", e => {
   const b = e.target.closest("[data-theme-set]"); if (!b) return;
