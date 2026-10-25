@@ -13,7 +13,7 @@
 const TAU = Math.PI * 2, PI = Math.PI;
 const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
 const DPR = () => Math.min(2, window.devicePixelRatio || 1);
-const reduced = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+const reduced = () => false;   // игра двигается всегда, «меньше анимации» Windows не глушит (Андрей 24.10)
 const LSG = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
 const LSS = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
 const SUITS = ["s", "h", "d", "c"];                      // пики, червы, бубны, трефы
