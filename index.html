@@ -180,7 +180,6 @@ try { var t = JSON.parse(localStorage.getItem("unitka.theme")); if (/^(light|dar
 [data-theme="jim"] body::after{content:"";position:fixed;z-index:45;top:calc(var(--hdr,57px) + 30px);left:-160px;width:130px;height:112px;pointer-events:none;
   background:url("jim-cow.png") center/contain no-repeat;animation:jim-cow 30s linear 4s infinite}
 @keyframes jim-cow{0%{transform:translate(0,40px) rotate(-10deg)}8%{transform:translate(calc(50vw + 80px),-20px) rotate(4deg)}16%{transform:translate(calc(100vw + 320px),10px) rotate(12deg)}100%{transform:translate(calc(100vw + 320px),10px)}}
-@media (prefers-reduced-motion: reduce){ [data-theme="jim"] body::after{display:none} }
 [data-theme="jim"] :is(input,textarea){cursor:text} [data-theme="jim"] :is(select,input[type=range]){cursor:pointer}
 /* шапка — закат, по низу стекает слизь */
 [data-theme="jim"] header{background:linear-gradient(180deg,#3a1263 0%,#7a1f86 55%,#d9532c 100%);border-bottom:3px solid #1a1022}
@@ -232,7 +231,7 @@ try { var t = JSON.parse(localStorage.getItem("unitka.theme")); if (/^(light|dar
    «ЮНИТКА», над ним крутятся и блестят кольца, по нему пробегают линии скорости; под шапкой — земля в клетку с травой. Карточки — игровые панели
    с тёмно-синей обводкой и тенью, главные кнопки золотые, заголовки с кольцом, ползунок — кольцо. Шрифты Russo One + Exo 2.
    Движение — только transform и opacity, на своих слоях #sxDeco и #sxCard (не предки меню и итога, их создаёт sonicDeco() только в этой теме);
-   prefers-reduced-motion — без движения.
+   prefers-reduced-motion не учитываем — игровые темы двигаются всегда (Андрей 24.10).
    С 23.10 баннер — карточка #sxCard: на лице по самой картинке бегает нарисованный кодом Соник (sonic-game.js, runner: холм, прыжок за кольцами,
    иногда стоит и срывается спин-дэшем), «ЮНИТКА» — светящаяся кнопка; нажал — карточка переворачивается, на обороте игра (SonicGame.mount).
    С 23.10 (вечер) Соник — кадры NeuralBox (site\sonic-run/poses*.webp), на лице бежит по дорожке прямо в петлю; в игре выбор режима
@@ -311,7 +310,6 @@ try { var t = JSON.parse(localStorage.getItem("unitka.theme")); if (/^(light|dar
   color:#0a1a4a;text-shadow:none;box-shadow:0 3px 0 #0a1a4a,0 0 16px rgba(255,210,31,.65);animation:sx-prize 1.6s ease-in-out infinite}
 #sxCard .sxprize:focus-visible{outline:3px solid #fff;outline-offset:3px}
 @keyframes sx-prize{0%,100%{transform:rotate(-3deg) scale(1)}50%{transform:rotate(-3deg) scale(1.07)}}
-@media (prefers-reduced-motion:reduce){#sxCard .sxprize{animation:none}}
 /* кнопки игры на обороте: звук, во весь экран, перевернуть обратно */
 #sxCard .sxbtns{position:absolute;z-index:3;top:8px;right:8px;display:flex;gap:6px}
 #sxCard .sxbtns button{width:34px;height:34px;border-radius:50%;border:2px solid #ffd21f;background:rgba(10,26,74,.62);color:#fff;display:grid;place-items:center;padding:0;box-shadow:0 2px 0 #0a1a4a;cursor:pointer}
@@ -333,10 +331,6 @@ html.sx-play #sxDeco,html.sx-play #sxDeco *,html.sx-play #sxDeco *::after{animat
   #sxDeco .sxp.rn{animation:sx-up2 linear both;animation-timeline:scroll(root)}
   @keyframes sx-up{to{transform:translateY(-90px)}}
   @keyframes sx-up2{to{transform:translateY(-240px)}}
-}
-@media (prefers-reduced-motion: reduce){
-  :is(#sxDeco,#sxCard) *,:is(#sxDeco,#sxCard) *::after,:is(#sxDeco,#sxCard) *::before{animation:none!important}
-  #sxCard .sp{display:none}
 }
 /* шапка — синяя, под ней земля в клетку с травой */
 [data-theme="sonic"] header{background:linear-gradient(180deg,#0b2c8f,#1748c9);border-bottom:0}
@@ -518,7 +512,6 @@ html.sx-play #sxDeco,html.sx-play #sxDeco *,html.sx-play #sxDeco *::after{animat
 #ptCard.big .ptfr{visibility:hidden}
 html.pt-big{overflow:hidden}
 html.pt-play #ptDeco i,html.pt-play #ptCard :is(.ptgo,.ptbub,.b2){animation-play-state:paused}
-@media (prefers-reduced-motion: reduce){ :is(#ptDeco,#ptCard) *{animation:none!important} #ptCard{transition:none} }
 /* «Angry Birds» (23.10.2026, Андрей: «тему энгри бердс максимально похоже + 3д ощущения, полная смена темы, погружение…
    логику открытия как в Сонике, визуал мощнее»). Картинки — NeuralBox NB Pro (Код\unitka\birds): остров свиней во весь экран
    (ab-scene*.webp) — едет от мыши и при прокрутке (параллакс), по небу пролетают птицы, падают перья (#abDeco); шапка и нижнее
@@ -664,10 +657,6 @@ html.ab-big{overflow:hidden}
   #abCard.big .abbk{background:#1d4f7a}
   #abCard.big .abgame{inset:auto 0;top:50%;height:min(100%,calc(100vw / 1.6));transform:translateY(-50%)}
   #abCard.big .abbk::after{content:"Поверните телефон — будет крупнее";position:absolute;left:0;right:0;top:calc(50% + 100vw / 3.2 + 18px);text-align:center;color:#fff;font:800 14px/1.2 "Rubik",sans-serif;text-shadow:0 2px 0 #0c2f5c}
-}
-@media (prefers-reduced-motion: reduce){
-  :is(#abDeco,#abCard) *,:is(#abDeco,#abCard) *::after{animation:none!important}
-  #abDeco .abft{display:none}
 }
 /* «Тетрадь» — спокойная: лист в клетку, синие «чернила», заголовки и цифры с засечками, вместо теней — тонкие линии, шрифты PT Sans + PT Serif */
 :root[data-theme="paper"]{
@@ -1474,9 +1463,11 @@ function sxBig(el, on) {
     el.requestFullscreen({ navigationUI: "hide" }).then(() => { try { screen.orientation.lock("landscape").catch(() => {}); } catch (e) {} }).catch(() => {});
   if (!on) { try { screen.orientation.unlock(); } catch (e) {} if (document.fullscreenElement) document.exitFullscreen().catch(() => {}); }
 }
+// игровые темы двигаются всегда: «меньше анимации» Windows (на сервере и по удалённому столу включено) их не глушит (Андрей 24.10)
+function noMotion() { return false; }
 function sxFlip(el, on) {
   if (on === el.classList.contains("flip")) return;
-  if (matchMedia("(prefers-reduced-motion: reduce)").matches) el.classList.toggle("flip", on);
+  if (noMotion()) el.classList.toggle("flip", on);
   else {                                   // включаем 3D в текущем положении, потом анимацию, потом переворот; в конце 3D выключаем
     el.classList.add("anim"); void el.offsetWidth; el.classList.add("tr"); void el.offsetWidth;
     el.classList.toggle("flip", on);
@@ -1553,7 +1544,7 @@ function loadSoli(cb) {
   if (!s) { s = document.createElement("script"); s.id = "ptjs"; s.src = "solitaire.js?v=3"; document.head.appendChild(s); }
   s.addEventListener("load", () => cb(), { once: true });
 }
-const ptReduced = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+const ptReduced = () => noMotion();
 function ptTurn(el, on, done) {                     // переворот (3D только на время анимации)
   if (ptReduced()) { el.classList.toggle("flip", on); return done && done(); }
   el.classList.add("anim"); void el.offsetWidth; el.classList.add("tr"); void el.offsetWidth;
@@ -1727,7 +1718,7 @@ function abBig(el, on) {
 }
 function abFlip(el, on) {
   if (on === el.classList.contains("flip")) return;
-  if (matchMedia("(prefers-reduced-motion: reduce)").matches) el.classList.toggle("flip", on);
+  if (noMotion()) el.classList.toggle("flip", on);
   else {                                   // 3D только на время переворота, потом карточка снова плоская (легче телефону)
     el.classList.add("anim"); void el.offsetWidth; el.classList.add("tr"); void el.offsetWidth;
     el.classList.toggle("flip", on);
@@ -1750,7 +1741,7 @@ function abFlip(el, on) {
 }
 /* наклон диорамы: мышь над баннером или наклон телефона (Android — без спроса); иначе — лёгкое покачивание. Только --tx/--ty → transform */
 function abTilt(el) {
-  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  if (noMotion()) return;
   let tx = 0, ty = 0, x = 0, y = 0, raf = 0, src = "", t0 = performance.now();
   const frame = now => {
     raf = 0; if (!el.isConnected) return;
@@ -1770,7 +1761,7 @@ function abTilt(el) {
 }
 // птица пролетает по небу дугой (на фоне); ближние — крупнее и быстрее
 function abFly(d) {
-  if (!d.isConnected || document.hidden || document.documentElement.classList.contains("ab-play") || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  if (!d.isConnected || document.hidden || document.documentElement.classList.contains("ab-play") || noMotion()) return;
   const k = [["33.333% 0", 1], ["100% 0", 1], ["33.333% 50%", 0.8], ["66.667% 50%", 0.6]][(Math.random() * 4) | 0];
   const near = Math.random() < 0.35, z = Math.round((near ? 84 : 46) * k[1] + Math.random() * 18), W = innerWidth, H = innerHeight;
   const el = document.createElement("i"); el.className = "abfly"; el.style.cssText = `--z:${z}px;--c:${k[0]}`; d.appendChild(el);
@@ -1787,7 +1778,7 @@ function birdsDeco(on) {
     document.documentElement.classList.remove("ab-play", "ab-big");
     return;
   }
-  const red = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const red = noMotion();
   if (!d) {
     const el = document.createElement("div"); el.id = "abDeco"; el.setAttribute("aria-hidden", "true");
     // перья: [слева, размер, цвет, длительность, задержка]
