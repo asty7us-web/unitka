@@ -1489,6 +1489,7 @@ function sxFlip(el, on) {
     if (el._game) el._game.pause(); if (el._run) el._run.pause(false); sxBig(el, false); document.documentElement.classList.remove("sx-play");
     const pz = el.querySelector(".sxprize"); if (pz) pz.textContent = sxPrize();
   }
+  if (on) tmCtx(); tmSync();                // музыка Соника — пока открыта игра
 }
 function sonicDeco(on) {
   const d = $("#sxDeco"), c = $("#sxCard");
@@ -1525,7 +1526,7 @@ function sonicDeco(on) {
       if (b.dataset.sx === "pause") { if (el._game) el._game.menu(); }
       else if (b.dataset.sx === "back") sxFlip(el, false);
       else if (b.dataset.sx === "big") sxBig(el, !el.classList.contains("big"));
-      else if (b.dataset.sx === "mute" && window.SonicGame) { const off = b.getAttribute("aria-pressed") !== "true"; b.setAttribute("aria-pressed", off); SonicGame.mute(off); syncSound(); }
+      else if (b.dataset.sx === "mute" && window.SonicGame) { const off = b.getAttribute("aria-pressed") !== "true"; b.setAttribute("aria-pressed", off); SonicGame.mute(off); syncSound(); tmSync(); }
     });
     // ушла карточка с экрана во время игры — пауза, вернулась — дальше
     new IntersectionObserver(es => { if (el.classList.contains("flip") && el._game && !el.classList.contains("big")) es[0].isIntersecting ? el._game.resume() : el._game.pause(); }).observe(el);
@@ -1842,7 +1843,7 @@ function applyTheme() {
   $("#tmenu").innerHTML = Object.entries(TH).map(([k, v]) => (grp[k] ? `<div class="tgrp">${grp[k]}</div>` : "") +
     `<button role="menuitemradio" aria-checked="${k === THEME}" data-theme-set="${k}">${SWATCH[k]}${v[0]}</button>`).join("");
   const m = document.querySelector('meta[name="theme-color"]'); if (m) m.content = getComputedStyle(document.documentElement).getPropertyValue("--bg").trim() || "#2a78d6";
-  syncSound();
+  syncSound(); tmSync();
 }
 /* звук — кнопка в шапке у тем со звуком (Андрей 24.10, как в «Отклике»: «в шапке для всех последующих тем»). Выключает и включает
    звук сразу во всех играх (у «Пасьянса» — и звуки, и музыку); кнопки звука в самих играх остаются, шапка показывает состояние игры
@@ -1851,8 +1852,54 @@ const SND = {
   sonic: { off: () => LS.get("sxMute", 0) == 1, set: off => { LS.set("sxMute", off ? 1 : 0); if (window.SonicGame) SonicGame.mute(off); } },
   solitaire: { off: () => LS.get("ptMute", 0) == 1 && LS.get("ptMusic", 1) == 0,
     set: off => { LS.set("ptMute", off ? 1 : 0); LS.set("ptMusic", off ? 0 : 1); const g = $("#ptCard") && $("#ptCard")._game; if (g) { g.mute(off); g.music(!off); } } },
-  birds: { off: () => LS.get("abMute", 0) == 1, set: off => { LS.set("abMute", off ? 1 : 0); if (window.BirdsGame) BirdsGame.mute(off); } }
+  birds: { off: () => LS.get("abMute", 0) == 1, set: off => { LS.set("abMute", off ? 1 : 0); if (window.BirdsGame) BirdsGame.mute(off); } },
+  farcry: { off: () => LS.get("fcMute", 0) == 1, set: off => LS.set("fcMute", off ? 1 : 0) },
+  jim: { off: () => LS.get("jimMute", 0) == 1, set: off => LS.set("jimMute", off ? 1 : 0) }
 };
+/* музыка тем (Андрей 24.10: «соник, фар край, джим — там тоже должна быть соответствующая оттуда музыка»): оригиналы на открытый сайт
+   нельзя (авторские права), поэтому свои треки в стиле игр — NeuralBox Suno V4.5 Plus, бесшовные петли site\<тема>-music.mp3
+   (Код\unitka\muzyka: gen.js → wait_dl.py → make_loop.py). Far Cry и Джим — фоном всей темы с первого нажатия на странице (до него браузер
+   звук не даёт), Соник — пока открыта игра, как музыка «Пасьянса». Выключает кнопка звука в шапке, у Соника — и кнопка звука в игре. */
+const TMU = { a: null, b: {}, ld: {}, src: null, g: null, cur: null, want: null }, TMV = { sonic: 0.3, farcry: 0.24, jim: 0.24 };
+function tmCtx() {
+  if (!TMU.a) {
+    try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch (e) {}   // iPhone: слышно и в беззвучном режиме
+    try { TMU.a = window.__ptAC || (window.__ptAC = new (window.AudioContext || window.webkitAudioContext)()); } catch (e) { TMU.a = null; }
+  }
+  if (TMU.a && TMU.a.state === "suspended" && !document.hidden) TMU.a.resume();
+  return TMU.a;
+}
+function tmEdges(b) {                                     // у mp3 по краям тишина-заглушка — петля между первым и последним звуком
+  const d = b.getChannelData(0), n = d.length, lim = b.sampleRate * 0.2; let i = 0, j = n - 1;
+  while (i < lim && Math.abs(d[i]) < 1e-4) i++;
+  while (j > n - lim && Math.abs(d[j]) < 1e-4) j--;
+  return [i / b.sampleRate, (j + 1) / b.sampleRate];
+}
+function tmWant() {
+  if (!TMV[THEME] || SND[THEME].off()) return null;
+  if (THEME === "sonic") { const c = $("#sxCard"); return c && c.classList.contains("flip") ? "sonic" : null; }
+  return THEME;
+}
+function tmSync() {
+  const name = TMU.want = tmWant(), a = TMU.a; if (!a) return;
+  if (TMU.cur && TMU.cur !== name) {                      // другая тема или тишина — плавно гасим
+    const s = TMU.src, g = TMU.g, t = a.currentTime; TMU.src = TMU.g = TMU.cur = null;
+    g.gain.cancelScheduledValues(t); g.gain.setValueAtTime(g.gain.value, t); g.gain.linearRampToValueAtTime(0, t + 0.5); s.stop(t + 0.55);
+  }
+  if (!name || TMU.cur === name) return;
+  const b = TMU.b[name];
+  if (!b) {
+    if (!TMU.ld[name]) { TMU.ld[name] = 1; fetch(name + "-music.mp3").then(r => r.arrayBuffer()).then(d => new Promise((ok, no) => a.decodeAudioData(d, ok, no)))
+      .then(x => { TMU.b[name] = x; if (TMU.want === name) tmSync(); }).catch(() => { TMU.ld[name] = 0; }); }
+    return;
+  }
+  const [ls, le] = tmEdges(b), s = a.createBufferSource(), g = a.createGain(), t = a.currentTime;
+  s.buffer = b; s.loop = true; s.loopStart = ls; s.loopEnd = le;
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(TMV[name], t + 1.6);
+  s.connect(g); g.connect(a.destination); s.start(t, ls); TMU.src = s; TMU.g = g; TMU.cur = name;
+}
+["pointerdown", "pointerup", "touchend", "keydown"].forEach(k => document.addEventListener(k, () => { if (tmWant()) { tmCtx(); tmSync(); } }, true));
+document.addEventListener("visibilitychange", () => { if (!TMU.a || !TMU.cur) return; if (document.hidden) TMU.a.suspend(); else TMU.a.resume(); });
 let sndMem = null;                       // браузер не даёт хранить (инкогнито) — помним до перезагрузки
 function soundOff() { const s = SND[THEME]; if (!s) return false; let ok = true; try { localStorage.setItem("unitka.t", "1"); localStorage.removeItem("unitka.t"); } catch (e) { ok = false; } return ok || sndMem === null ? s.off() : sndMem; }
 function syncSound() {
@@ -1865,8 +1912,8 @@ function syncSound() {
 }
 $("#bSound").onclick = () => {
   const off = !soundOff(); sndMem = off;
-  if (!off) try { if (!window.__ptAC) window.__ptAC = new (window.AudioContext || window.webkitAudioContext)(); window.__ptAC.resume(); } catch (e) {}   // iPhone: звук разрешается только внутри нажатия
-  Object.values(SND).forEach(s => s.set(off)); syncSound();
+  if (!off) tmCtx();                     // iPhone: звук разрешается только внутри нажатия
+  Object.values(SND).forEach(s => s.set(off)); syncSound(); tmSync();
 };
 $("#bTheme").onclick = e => { e.stopPropagation(); $("#tmenu").classList.toggle("hidden"); };
 $("#tmenu").addEventListener("click", e => {
