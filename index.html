@@ -776,7 +776,7 @@ html.ab-big{overflow:hidden}
 #spCard .spnav:active{transform:scale(.94)}
 #spCard .spnav.prev{left:20px} #spCard .spnav.next{right:20px}
 #spCard .spnav svg,#spCard .spbtns svg{width:20px;height:20px;display:block}
-#spCard .spbar{position:absolute;z-index:3;left:26px;right:104px;bottom:20px;display:flex;gap:6px}
+#spCard .spbar{position:absolute;z-index:3;left:26px;right:146px;bottom:20px;display:flex;gap:6px}
 #spCard .spbar button{flex:1;min-width:0;height:16px;padding:6px 0;border:0;background:none;cursor:pointer}
 #spCard .spbar button i{display:block;height:4px;border-radius:2px;background:rgba(255,255,255,.22);overflow:hidden}
 #spCard .spbar button i b{display:block;height:100%;width:100%;background:#fff;transform:scaleX(0);transform-origin:0 50%}
@@ -788,7 +788,8 @@ html.ab-big{overflow:hidden}
 #spCard .spbtns button{width:36px;height:36px;border-radius:50%;border:1px solid rgba(220,215,255,.36);background:rgba(10,12,36,.42);color:#fff;display:grid;place-items:center;padding:0;cursor:pointer}
 #spCard .spbtns button:hover{background:rgba(164,147,255,.38)}
 #spCard .spbtns svg{width:16px;height:16px}
-#spCard [data-sp="play"] .pl,#spCard.stop [data-sp="play"] .pa{display:none}
+#spCard [data-sp="play"] .pl,#spCard.stop [data-sp="play"] .pa,#spCard [data-sp="mute"] .off,#spCard [data-sp="mute"][aria-pressed="true"] .on{display:none}
+#spCard [data-sp="mute"][aria-pressed="true"] .off{display:block}
 #spCard.stop [data-sp="play"] .pl{display:block}
 #spCard.big{position:fixed;inset:0;z-index:300;height:auto;margin:0;border-radius:0}
 #spCard.big .spq{font-size:clamp(30px,5.2vw,80px)}
@@ -805,7 +806,7 @@ html.ab-big{overflow:hidden}
   #spCard .spstage{inset:52px 20px 56px}
   #spCard .spq{max-width:none;font-size:clamp(21px,6.3vw,30px)}
   #spCard .spnav{display:none}                                     /* на телефоне — свайп или тап по краю */
-  #spCard .spbar{left:20px;right:96px;bottom:18px;gap:4px}
+  #spCard .spbar{left:20px;right:150px;bottom:18px;gap:4px}
   #spCard .spbtns{right:16px;bottom:9px}
   #spCard.big .spq{font-size:clamp(26px,8vw,44px)}
   #spCard.big .spstage{inset:70px 22px 70px}
@@ -1939,7 +1940,7 @@ function birdsDeco(on) {
       onMap: m => { sky.style.backgroundImage = `url("${m.src}")`; sky.style.backgroundSize = `${m.w.toFixed(1)}px ${m.h.toFixed(1)}px`; sky.style.backgroundPosition = `${m.x.toFixed(1)}px ${m.y.toFixed(1)}px`; } }); });
   }
 }
-/* «Космос»: аффирмации — с магнитов Андрея (Избранное, 25.10: по фразе на слайд, без «Благодарю») + три мои (последние) */
+/* «Космос»: аффирмации — с магнитов Андрея (Избранное, 25.10: по фразе на слайд, без «Благодарю») + мои (с 7-й; ещё три — по «добавь ещё 3») */
 const SP_AFF = [
   "Всё складывается наилучшим образом для моего высшего блага.",
   "Из этой ситуации выйдет только хорошее для меня.",
@@ -1949,7 +1950,10 @@ const SP_AFF = [
   "Деньги сыплются с небес.",
   "Я притягиваю изобилие легко и с радостью.",
   "Всё, что мне нужно, приходит ко мне вовремя.",
-  "Каждый новый день приносит мне подарки."
+  "Каждый новый день приносит мне подарки.",
+  "Удача улыбается мне каждый день.",
+  "Мир полон возможностей, и они сами находят меня.",
+  "Я выбираю радость и спокойствие."
 ];
 const SP_ICO = {
   prev: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
@@ -2061,7 +2065,8 @@ function spaceDeco(on) {
       '<div class="spstage" aria-live="polite"></div>' +
       `<button class="spnav prev" type="button" aria-label="Предыдущая">${SP_ICO.prev}</button><button class="spnav next" type="button" aria-label="Следующая">${SP_ICO.next}</button>` +
       '<div class="spbar">' + SP_AFF.map((_, k) => `<button type="button" aria-label="Аффирмация ${k + 1}"><i><b></b></i></button>`).join("") + "</div>" +
-      `<div class="spbtns"><button type="button" data-sp="play" aria-label="Пауза / дальше сами">${SP_ICO.play}</button><button type="button" data-sp="big" aria-label="Во весь экран">${SX_ICO.big}</button></div>`;
+      `<div class="spbtns"><button type="button" data-sp="mute" aria-label="Музыка" aria-pressed="${LS.get("spMute", 0) == 1}">${SX_ICO.mute}</button>` +
+      `<button type="button" data-sp="play" aria-label="Пауза / дальше сами">${SP_ICO.play}</button><button type="button" data-sp="big" aria-label="Во весь экран">${SX_ICO.big}</button></div>`;
     $("main").prepend(el);
     const go = d => spShow(el, el._i + d, d);
     el.querySelector(".prev").onclick = () => go(-1);
@@ -2071,6 +2076,7 @@ function spaceDeco(on) {
     el.querySelector(".spbtns").addEventListener("click", e => {
       const b = e.target.closest("[data-sp]"); if (!b) return;
       if (b.dataset.sp === "play") el.classList.toggle("stop");
+      else if (b.dataset.sp === "mute") { const off = b.getAttribute("aria-pressed") !== "true"; if (!off) tmCtx(); SND.space.set(off); syncSound(); tmSync(); }
       else spBig(el, !el.classList.contains("big"));
     });
     el.addEventListener("keydown", e => {
@@ -2123,14 +2129,19 @@ const SND = {
   sonic: { off: () => LS.get("sxMute", 0) == 1, set: off => { LS.set("sxMute", off ? 1 : 0); if (window.SonicGame) SonicGame.mute(off); } },
   solitaire: { off: () => LS.get("ptMute", 0) == 1 && LS.get("ptMusic", 1) == 0,
     set: off => { LS.set("ptMute", off ? 1 : 0); LS.set("ptMusic", off ? 0 : 1); const g = $("#ptCard") && $("#ptCard")._game; if (g) { g.mute(off); g.music(!off); } } },
-  birds: { off: () => LS.get("abMute", 0) == 1, set: off => { LS.set("abMute", off ? 1 : 0); if (window.BirdsGame) BirdsGame.mute(off); } }
+  birds: { off: () => LS.get("abMute", 0) == 1, set: off => { LS.set("abMute", off ? 1 : 0); if (window.BirdsGame) BirdsGame.mute(off); } },
+  space: { off: () => LS.get("spMute", 0) == 1, set: off => LS.set("spMute", off ? 1 : 0) }
 };
+/* 25.10 (Андрей: «где был звук — щас нету»): кнопка в шапке гасит звук сразу во всех играх и запоминает это; нажатая в Far Cry / Джиме,
+   пока там была музыка, она заглушила «Соник», «Пасьянс» и Angry Birds, а в тех темах кнопки больше нет. Один раз включаем всем обратно */
+if (LS.get("snd2", 0) != 1) { ["sxMute", "ptMute", "abMute", "spMute"].forEach(k => LS.set(k, 0)); LS.set("ptMusic", 1); LS.set("snd2", 1); }
 /* музыка тем (Андрей 24.10: «соник, фар край, джим — там тоже должна быть соответствующая оттуда музыка»): оригиналы на открытый сайт
    нельзя (авторские права), поэтому свои треки в стиле игр — NeuralBox Suno V4.5 Plus, бесшовные петли site\<тема>-music.mp3
    (Код\unitka\muzyka: gen.js → wait_dl.py → make_loop.py). Андрей 25.10 оставил только Соника («соник ок, остальное не надо»): играет,
    пока открыта игра, как музыка «Пасьянса»; выключают кнопка звука в шапке и кнопка звука в игре. Тема фоном с первого нажатия
    (так были Far Cry и Джим) — добавить её в TMV и SND, tmWant уже умеет. */
-const TMU = { a: null, b: {}, ld: {}, src: null, g: null, cur: null, want: null }, TMV = { sonic: 0.3 };
+// «Космос» (25.10): спокойный эмбиент NeuralBox Suno (Код\unitka\kosmos) — фоном темы с первого нажатия, гасят шапка и 🔊 в окошке
+const TMU = { a: null, b: {}, ld: {}, src: null, g: null, cur: null, want: null }, TMV = { sonic: 0.3, space: 0.4 };
 function tmCtx() {
   if (!TMU.a) {
     try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch (e) {}   // iPhone: слышно и в беззвучном режиме
@@ -2168,7 +2179,10 @@ function tmSync() {
   g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(TMV[name], t + 1.6);
   s.connect(g); g.connect(a.destination); s.start(t, ls); TMU.src = s; TMU.g = g; TMU.cur = name;
 }
-["pointerdown", "pointerup", "touchend", "keydown"].forEach(k => document.addEventListener(k, () => { if (tmWant()) { tmCtx(); tmSync(); } }, true));
+["pointerdown", "pointerup", "touchend", "keydown"].forEach(k => document.addEventListener(k, () => {
+  try { if (navigator.audioSession && SND[THEME]) navigator.audioSession.type = "playback"; } catch (e) {}   // iPhone: игры слышно и в беззвучном режиме
+  if (tmWant()) { tmCtx(); tmSync(); }
+}, true));
 document.addEventListener("visibilitychange", () => { if (!TMU.a || !TMU.cur) return; if (document.hidden) TMU.a.suspend(); else TMU.a.resume(); });
 let sndMem = null;                       // браузер не даёт хранить (инкогнито) — помним до перезагрузки
 function soundOff() { const s = SND[THEME]; if (!s) return false; let ok = true; try { localStorage.setItem("unitka.t", "1"); localStorage.removeItem("unitka.t"); } catch (e) { ok = false; } return ok || sndMem === null ? s.off() : sndMem; }
@@ -2179,6 +2193,7 @@ function syncSound() {
   document.querySelectorAll('[data-ab="mute"]').forEach(x => x.setAttribute("aria-pressed", LS.get("abMute", 0) == 1));
   document.querySelectorAll('[data-pt="mute"]').forEach(x => x.setAttribute("aria-pressed", LS.get("ptMute", 0) == 1));
   document.querySelectorAll('[data-pt="music"]').forEach(x => x.setAttribute("aria-pressed", LS.get("ptMusic", 1) == 0));
+  document.querySelectorAll('[data-sp="mute"]').forEach(x => x.setAttribute("aria-pressed", LS.get("spMute", 0) == 1));
 }
 $("#bSound").onclick = () => {
   const off = !soundOff(); sndMem = off;
