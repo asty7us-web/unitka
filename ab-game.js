@@ -21,7 +21,7 @@ const rnd = (a, b) => a + Math.random() * (b - a);
 const LSG = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
 const LSS = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
 const DPR = () => Math.min(2, window.devicePixelRatio || 1);
-const reduced = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+const reduced = () => false;   // игра двигается всегда, «меньше анимации» Windows не глушит (Андрей 24.10)
 const FONT = '"Rubik",system-ui,sans-serif';
 const GRAV = 10, STEP = 1 / 60, MAXP = 1.7, VMAX = 18.5, T = 0.26;      // T — толщина доски, м
 
