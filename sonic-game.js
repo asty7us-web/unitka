@@ -31,7 +31,7 @@ const OL = "#0a1a4a";
 const C = { blue: "#1f5fe6", blue2: "#1240b8", peach: "#f7c48a", peach2: "#d99a5e", red: "#e8262b", red2: "#b5161d",
   gold: "#ffcf26", gold2: "#9a5800", gold3: "#fff3a6", glove2: "#cdd8ee" };
 const DPR = () => Math.min(2, window.devicePixelRatio || 1);
-const reduced = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+const reduced = () => false;   // игра двигается всегда, «меньше анимации» Windows не глушит (Андрей 24.10)
 const FONT = '"Exo 2","Russo One",system-ui,sans-serif';
 const IMG = {};
 function pic(k, src) { if (!IMG[k]) { IMG[k] = new Image(); IMG[k].src = src; } return IMG[k]; }
