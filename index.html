@@ -1035,10 +1035,20 @@ details.how ul{padding-left:18px;margin:6px 0}
 .bt.nok{background:color-mix(in srgb,var(--bad) 12%,var(--surface));box-shadow:inset 0 0 0 2px var(--bad)}
 .bt.nok b{color:var(--bad);font-size:16px} .bt.nok small a{color:var(--bad);font-weight:700}
 .bt a,.tcard a{color:inherit}
+a.bt{text-decoration:none;color:inherit;cursor:pointer}
+a.bt>span{color:var(--accent);font-weight:700}
+.bt.nok small{color:var(--bad);font-weight:700}
+/* «нажатие чувствуется» (Андрей 26.10; пока на плашках топов): при нажатии и удержании плашка проседает и темнеет, на Android — короткая вибрация */
+.press{-webkit-tap-highlight-color:transparent;transition:transform .14s cubic-bezier(.2,.8,.3,1),filter .14s,box-shadow .14s;touch-action:manipulation}
+.press:active,.press.down{transform:scale(.95);filter:brightness(.92);box-shadow:inset 0 0 0 2px var(--accent)}
+.bt.nok.press:active,.bt.nok.press.down{box-shadow:inset 0 0 0 3px var(--bad)}
 .tcard{background:var(--surface-2);border-radius:12px;padding:10px 12px;margin-top:8px}
 .tcard .tn{font-size:14px;margin-bottom:6px;line-height:1.3}
-.chip.sm{padding:3px 10px;font-size:12.5px}
-.pnch{margin-top:6px;align-items:center;gap:6px} .pnch .m{font-size:12px;color:var(--ink-2)}
+/* срок панели — кнопка внутри третьего квадрата; квадрат обведён, чтобы было видно: срок — про него */
+.kpi.pk{box-shadow:inset 0 0 0 1.5px var(--accent)}
+.persel{position:relative;display:inline-flex;align-items:center;align-self:flex-start;margin:4px 0 3px;padding:3px 9px;border-radius:999px;background:var(--accent);color:#fff !important;font-size:12.5px;font-weight:700;white-space:nowrap;cursor:pointer}
+.persel select{position:absolute;inset:0;opacity:0;width:100%;cursor:pointer;font-size:16px}
+.kpi.pk{display:flex;flex-direction:column}
 .sig{font-size:13.5px;color:var(--bad);margin-top:6px;font-weight:700;background:color-mix(in srgb,var(--bad) 10%,transparent);border-radius:8px;padding:6px 9px}
 .sig a{color:inherit}
 .buyer{display:flex;flex-direction:column}
@@ -2431,8 +2441,14 @@ function fixState(s) {
   for (const k in MPS) { const sc = s.fees[k].scheme; if (!MPS[k].schemes.includes(sc) && !(sc === "fact" && s.tar && s.tar.mp === k && s.tar.fact)) s.fees[k].scheme = MPS[k].fees.scheme; }
   if (!MPS[s.mp]) s.mp = "wb";
   if (!TAX[s.tax]) s.tax = "ausn_d";
+  // АУСН 8% с 26.10.2026: в черновиках и «Моих расчётах» осталась старая ставка панелей 5,5% / 5,2% — меняем на 8% (Андрей: «налог как был 5,2 так и стоит»)
+  const old = v => [5.5, 5.2].includes(Math.round(num(v) * 100) / 100);
+  if (s.tax === "ausn_d") { if (old(s.taxRate)) s.taxRate = 8; for (const k in (s.cm || {})) if (old(s.cm[k].taxRate)) s.cm[k].taxRate = 8; }
   return s;
 }
+(function () {                           // то же — в «Запомнить по умолчанию»
+  try { const d = LS.get("defaults", null); if (d && d.common && [5.5, 5.2].includes(Math.round(num(d.common.taxRate) * 100) / 100)) { d.common.taxRate = 8; LS.set("defaults", d); } } catch (e) {}
+})();
 
 /* ═════════ расчёт одной штуки ═════════ */
 function calc(s, mp, p0) {
@@ -3373,20 +3389,24 @@ function buyerBlock(mp, row, base, price, spp, noChart) {
   const now = row && num(row.vit) > 0 ? num(row.vit) : spp != null && base ? base * (1 - spp) : null;
   const moved = Math.abs(price - base) >= 0.5, pb = spp != null ? price * (1 - spp) : null, ours = moved ? pb : now;
   const last = row && row.sh && row.sh.length ? row.sh[row.sh.length - 1][0] : null;
-  const tile = (cl, lbl, val, sub) => `<div class="bt ${cl}"><span>${lbl}</span><b>${val}</b>${sub ? `<small>${sub}</small>` : ""}</div>`;
-  // красная «не добавлен» ведёт прямо в этот товар «Конкурентов» и сразу на выбор (Андрей 26.10)
-  const choose = `<a href="${kurl(row)}">выбрать в «Конкурентах» ›</a>`;
+  // плашка топа — нажимается целиком (Андрей 26.10: «кликабельными сами квадраты, а не слова со ссылкой»); href — куда ведёт
+  const tile = (cl, lbl, val, sub, href, blank) => href
+    ? `<a class="bt ${cl} press" href="${esc(href)}"${blank ? ' target="_blank" rel="noopener"' : ""}><span>${lbl} ›</span><b>${val}</b>${sub ? `<small>${sub}</small>` : ""}</a>`
+    : `<div class="bt ${cl}"><span>${lbl}</span><b>${val}</b>${sub ? `<small>${sub}</small>` : ""}</div>`;
+  // красная «не добавлен» ведёт прямо в этот товар «Конкурентов» и сразу на выбор
+  const choose = `выбрать в «Конкурентах»`;
   let t = spp == null ? tile("me", "Мы для покупателя", "—", "СПП не снят — товара нет на витрине")
     : tile("me", moved ? "Мы при " + rub(price) : "Мы сейчас", rub(ours),
       moved && now ? `сейчас ${rub(now)} <span class="${cls(now - pb)}">${rub(pb - now, true)}</span>` : `наш СПП ${pct(spp, 0)}${last ? " · " + dTxt(last) : ""}`);
   tops.forEach((k, i) => {
     const d = ours != null && k.v ? ours - k.v : null;
     t += tile("tp", `Топ ${i + 1}`, k.v ? rub(k.v) : "нет в наличии",
-      `<a href="${esc(k.link)}" target="_blank" rel="noopener">${esc(shortSel(k.sel))}</a><br>` +
-      (d == null ? "" : `<span class="${cls(-d)}">мы ${Math.abs(d) < 0.5 ? "как он" : (d > 0 ? "дороже на " : "дешевле на ") + pct(Math.abs(d) / k.v, 0)}</span><br>`) + NF0.format(k.u28) + " шт за 28 дн");
+      `${esc(shortSel(k.sel))}<br>` +
+      (d == null ? "" : `<span class="${cls(-d)}">мы ${Math.abs(d) < 0.5 ? "как он" : (d > 0 ? "дороже на " : "дешевле на ") + pct(Math.abs(d) / k.v, 0)}</span><br>`) + NF0.format(k.u28) + " шт за 28 дн",
+      k.link, true);                         // топ → его карточка на Ozon (новая вкладка браузера)
   });
   if (mp === "ozon") for (let i = tops.length; i < 2; i++)
-    t += tile("nok", `Топ ${i + 1}`, "не добавлен", (wait ? `ждут решения ${wait}<br>` : "") + choose);
+    t += tile("nok", `Топ ${i + 1}`, "не добавлен", (wait ? `ждут решения ${wait}<br>` : "") + choose, kurl(row));
   const k0 = tops.find(k => k.d);
   const foot = sig && mp !== "ozon" ? `<div class="sig">⚠ ${esc(sig)}</div>`
     : k0 ? `<div class="note">Топы — витрина Ozon ${dTxt(k0.d)}${k0.tm ? " в " + k0.tm : ""}, цена «с другими банками», как у нас. Их СПП Ozon не показывает — сравниваем цену покупателя.</div>` : "";
@@ -3411,25 +3431,27 @@ function priceTrio(mp, row, x, base, price) {
   const avail = FACT && row ? ["week", "w2", "w4", "month"].filter(p => perRowOf(mp, row, p) !== undefined) : [];
   const per = avail.includes(PNPER) ? PNPER : avail.includes("w2") ? "w2" : avail[avail.length - 1];
   let sq = `<div class="kpi"><b>—</b><span>чистая по панели — данных нет</span></div>`;
+  // срок — прямо в квадрате панели: кнопка «2 недели ▾» (под ней обычный выбор телефона), чтобы было видно, к чему относится (Андрей 26.10)
+  const pick = per ? `<label class="persel" title="Срок панели">${PNL[per]} ▾<select data-pnsel aria-label="Срок панели">${avail.map(p => `<option value="${p}"${p === per ? " selected" : ""}>${PNL[p]} · ${esc(perLbl(mp, p))}</option>`).join("")}</select></label>` : "";
   if (per) {
     const pr = perRowOf(mp, row, per);
     if (pr && num(pr.units) > 0 && num(pr.sales) > 0) {
       const u = num(pr.units), P0 = num(pr.sales) / u, pr0 = num(pr.profit) / u, adR = (num(pr.ads) + num(pr.ads2)) / num(pr.sales);
       const rate = x.cR + x.aR + x.tR + (FADS === "pct" ? adR : 0), p1 = price * (1 - rate) - (P0 * (1 - rate) - pr0);
       const m0 = pr0 / P0, m1 = p1 / price;
-      sq = `<div class="kpi"><b class="${tone(m1, t)}">${pct(m1)}</b><span>чистая по панели · ${PNL[per]}<br>${rub(p1)}/шт · было ${pct(m0)}${moved ? ` <span class="${cls(m1 - m0)}">${ppTxt(m1 - m0)}</span>` : ""}</span></div>`;
-    } else sq = `<div class="kpi"><b>—</b><span>чистая по панели: за ${PNL[per]} продаж не было</span></div>`;
+      sq = `<div class="kpi pk"><b class="${tone(m1, t)}">${pct(m1)}</b><span>чистая по панели</span>${pick}<span>${rub(p1)}/шт · было ${pct(m0)}${moved ? ` <span class="${cls(m1 - m0)}">${ppTxt(m1 - m0)}</span>` : ""}</span></div>`;
+    } else sq = `<div class="kpi pk"><b>—</b><span>чистая по панели</span>${pick}<span>за этот срок продаж не было</span></div>`;
   }
-  const chips = avail.length ? `<div class="chips pnch">${avail.map(p => `<button class="chip sm${p === per ? " on" : ""}" data-pnper="${p}">${PNL[p]}</button>`).join("")}<span class="m">панель: ${esc(perLbl(mp, per))}</span></div>` : "";
+  const chips = "";
   return `<div class="kpis trio">
       <div class="kpi"><b class="${tone(n.margin, t)}">${rub(n.profit)}</b><span>прибыль/шт по юнитке${moved ? `<br><span class="delta ${cls(n.profit - b.profit)}">${rub(n.profit - b.profit, true)}</span>` : ""}</span></div>
       <div class="kpi"><b class="${tone(n.margin, t)}">${pct(n.margin)}</b><span>маржа по юнитке${moved ? `<br>сейчас ${pct(b.margin)}` : ""}</span></div>
       ${sq}</div>${chips}`;
 }
-document.addEventListener("click", e => {
-  const b = e.target.closest("[data-pnper]"); if (!b) return;
-  PNPER = b.dataset.pnper; LS.set("pnPer", PNPER);
-  if (b.closest("#sOut")) paintSppOut(); else if (b.closest("#dOut")) keepScroll(paintDetail);
+document.addEventListener("change", e => {
+  const s = e.target.closest("[data-pnsel]"); if (!s) return;
+  PNPER = s.value; LS.set("pnPer", PNPER);
+  if (s.closest("#sOut")) paintSppOut(); else if (s.closest("#dOut")) keepScroll(paintDetail);
 });
 
 /* ═════════ вкладка «СПП»: все товары с гистограммой СПП за 2 недели «на ладони»; нажал на товар — его карточка с начала (Андрей 26.10) ═════════ */
@@ -3553,6 +3575,14 @@ $("#sppDet").addEventListener("click", e => {
     if (isPhone()) { $("#detailWrap").classList.add("open"); $("#detailWrap").scrollTop = 0; navPush("d"); }
   }
 });
+
+/* нажатие на .press: класс down, пока палец держит (iOS без него :active не рисует), и короткая вибрация, где телефон умеет */
+(function () {
+  let el = null;
+  const up = () => { if (el) el.classList.remove("down"); el = null; };
+  addEventListener("pointerdown", e => { const p = e.target.closest(".press"); if (!p) return; el = p; p.classList.add("down"); try { navigator.vibrate && navigator.vibrate(8); } catch (x) {} }, { passive: true });
+  ["pointerup", "pointercancel", "pointerleave", "scroll"].forEach(t => addEventListener(t, up, { passive: true, capture: true }));
+})();
 
 /* ═════════ обновить «на том же месте» (Андрей 26.10: «обновляешь внутри, где менять, — возвращает в главную, так не надо»):
    перед перезагрузкой запоминаем вкладку, открытый товар и карточку, новую цену, прокрутку; после загрузки данных возвращаем ═════════ */
