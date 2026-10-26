@@ -2235,8 +2235,9 @@ const FLBL = { comm: ["комиссия", "%"], acq: ["эквайринг", "%"]
   lastPct: ["последняя миля", "%"], lastMax: ["последняя миля, не больше", "₽"], nonloc: ["нелокальные", "%"], xdock: ["кросс-докинг", "₽/л"],
   back: ["возврат невыкупа", "₽"], buyout: ["выкуп", "%"], stor: ["хранение", "₽"], accept: ["приёмка", "₽"] };
 const schName = x => (x === "fact" ? "По панели" : x);
-const tarOf = (s, mp) => (s.tar && s.tar.mp === mp ? s.tar : null);
-const schemesOf = (s, mp) => (tarOf(s, mp) && s.tar.fact ? ["fact"] : []).concat(MPS[mp].schemes);
+// s.tars — тот же товар на других площадках (linkTars): переключили площадку — его тарифы, а не типовые (Бондарев 26.10: ЯМ FBS 243 ₽ при 672 ₽ в кабинете)
+const tarOf = (s, mp) => (s.tar && s.tar.mp === mp ? s.tar : (s.tars && s.tars[mp]) || null);
+const schemesOf = (s, mp) => (tarOf(s, mp) && tarOf(s, mp).fact ? ["fact"] : []).concat(MPS[mp].schemes);
 /* без тарифа товара: что меняется при переходе со схемы x на y (f — поля схемы x) */
 function genProfile(mp, y, x, f) {
   const mine = ((LS.get("defaults", {}).sch || {})[mp] || {})[y];
@@ -2463,7 +2464,7 @@ function onField(el) {
 $("#form").addEventListener("click", e => {
   const b = e.target.closest("button");
   if (!b) return;
-  if (b.dataset.mp) { if (b.dataset.mp !== S.mp) { S.mp = b.dataset.mp; saveDraft(); writeFees(); render(); } }
+  if (b.dataset.mp) { if (b.dataset.mp !== S.mp) { if (S.tar && !S.tars) linkTars(S); S.mp = b.dataset.mp; saveDraft(); writeFees(); render(); } }
   else if (b.dataset.scheme) setScheme(b.dataset.scheme);
   else if (b.dataset.ads) { S.adsMode = b.dataset.ads; syncToggles(); saveDraft(); schedule(); }
   else if (b.dataset.base) { S.taxBase = b.dataset.base; syncToggles(); saveDraft(); schedule(); }
@@ -2608,7 +2609,7 @@ function render() {
     </div>
     <div><div class="h">Та же цена по схемам ${m.short}</div>
       <table class="t" id="schTab"><thead><tr><th></th><th>Расходы ${m.short}</th><th>Прибыль/шт</th><th>Маржа</th><th>Цена под ${NF1.format(t * 100)}%</th></tr></thead><tbody>${schRows}</tbody></table>
-      <div class="note" style="margin-top:4px">${tarOf(S, S.mp) && S.tar.t ? "Схемы — по тарифам этого товара" + (S.tar.fact ? ", «По панели» — факт" : "") : "Схемы — по типовым разницам; найдите товар по артикулу, чтобы взять его тарифы"}. Переключатель — в «Расходах ${m.short}».</div></div>
+      <div class="note" style="margin-top:4px">${tarOf(S, S.mp) && tarOf(S, S.mp).t ? "Схемы — по тарифам этого товара" + (tarOf(S, S.mp).fact ? ", «По панели» — факт" : "") : "Схемы — по типовым разницам; найдите товар по артикулу, чтобы взять его тарифы"}. Переключатель — в «Расходах ${m.short}».</div></div>
     <div><div class="h">Та же цена на других площадках</div>
       <table class="t"><thead><tr><th></th><th>Прибыль/шт</th><th>Маржа</th><th>Цена под ${NF1.format(t * 100)}%</th></tr></thead><tbody>${others}</tbody></table>
       <div class="note" style="margin-top:4px">По расходам, заданным для каждой площадки (переключатель «Площадка» над названием).</div></div>
@@ -3144,7 +3145,20 @@ function emptyToState(mp, row) {
   return s;
 }
 /* товар из факта → расчёт: общее площадки для пояснений к тарифам схем (в factToState его нет — она общая с расширением) */
-function withMeta(s) { if (s.tar && FACT && FACT.mp[s.tar.mp]) s.tar.m = FACT.mp[s.tar.mp].tq || null; return s; }
+function withMeta(s) { if (s.tar && FACT && FACT.mp[s.tar.mp]) s.tar.m = FACT.mp[s.tar.mp].tq || null; return linkTars(s); }
+/* тот же артикул продавца на других площадках → их тарифы схем сразу в расходы этих площадок (там до этого стояли типовые) */
+function linkTars(s) {
+  if (!s.tar || !FACT) return s;
+  const k = canon(s.tar.a); s.tars = {}; s.auto = s.auto || {};
+  for (const mp in MPS) {
+    if (mp === s.tar.mp || !FACT.mp[mp]) continue;
+    const row = (FACT.mp[mp].rows || []).find(r => r.t && canon(r.a) === k); if (!row) continue;
+    s.tars[mp] = { mp, a: row.a, fact: false, t: row.t, m: FACT.mp[mp].tq || null };
+    const f = s.fees[mp], v = tarVals(mp, f.scheme, row.t, s.tars[mp].m);
+    if (v) { Object.assign(f, v); s.auto[mp + "|" + f.scheme] = pickSch(f); }
+  }
+  return s;
+}
 /* АУСН как в панели площадки: налог ÷ выручка (медиана по товарам), в % */
 function mpTax(mp) {
   const v = ((FACT && FACT.mp[mp] && FACT.mp[mp].rows) || []).filter(r => num(r.sales) > 0 && num(r.tax) > 0).map(r => num(r.tax) / num(r.sales)).sort((a, b) => a - b);
@@ -3189,7 +3203,8 @@ function acItems(q) {
   const out = [];
   for (const mp of ["wb", "ozon", "ym"]) for (const r of (FACT.mp[mp] || { rows: [] }).rows)
     if (hitRow(words, r)) { const x = unit(r), now = num(r.now) || null; out.push({ mp, r, x, now, n: x && now ? at(x, now, FADS) : null }); }
-  out.sort((a, b) => (!a.x !== !b.x ? (a.x ? -1 : 1) : num(b.r.sales) - num(a.r.sales)));
+  // сначала выбранная площадка (Бондарев 26.10: выбрал ЯМ — поиск подсовывал WB/Ozon), потом с продажами, по выручке
+  out.sort((a, b) => ((a.mp === S.mp) !== (b.mp === S.mp) ? (a.mp === S.mp ? -1 : 1) : !a.x !== !b.x ? (a.x ? -1 : 1) : num(b.r.sales) - num(a.r.sales)));
   return out.slice(0, 12);
 }
 function acShow() {
@@ -3214,7 +3229,7 @@ function acPick(i) {
   const o = AC[i]; if (!o) return;
   $("#ac").classList.add("hidden");
   if (o.x) { S = withMeta(factToState(o.mp, o.r, o.x, o.now || o.x.price)); toast("Подставил «" + o.r.a + "»: цена сейчас и расходы из факта — правьте любые цифры"); }
-  else { S = emptyToState(o.mp, o.r); toast(emptyTip(o.r, o.mp)); }
+  else { S = withMeta(emptyToState(o.mp, o.r)); toast(emptyTip(o.r, o.mp)); }
   saveDraft(); writeForm(); render();
 }
 $("#name").addEventListener("input", acShow);
