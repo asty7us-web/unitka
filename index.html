@@ -836,6 +836,12 @@ body{padding-top:var(--hdr,57px)}
 .seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
 .seg.sm button{padding:4px 10px;font-size:13px;min-width:0}
 nav.tabs{display:flex;gap:4px;margin-left:auto}
+/* переход в Склейки и Конкуренты (Андрей 26.10: «из одного в другой быстро») — такой же переключатель стоит в их шапках */
+.appsw{display:flex;gap:2px;padding:2px;border-radius:11px;background:var(--surface-2);border:1px solid var(--ring);flex:none}
+.appsw a{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:9px;color:var(--ink-2);font-weight:600;font-size:13.5px;text-decoration:none;white-space:nowrap}
+.appsw a:hover{background:var(--surface);color:var(--ink)} .appsw a:active{transform:scale(.94)}
+.appsw svg{width:16px;height:16px;flex:none}
+@media (max-width:1100px){.appsw .lbl{display:none}.appsw a{padding:6px 8px}}
 nav.tabs button{border:0;background:transparent;padding:8px 12px;border-radius:9px;color:var(--ink-2);font-weight:600;display:flex;align-items:center;gap:6px}
 nav.tabs button[aria-current="page"]{background:var(--accent-wash);color:var(--accent)}
 nav.tabs svg{width:20px;height:20px}
@@ -1216,6 +1222,7 @@ a.btn{text-decoration:none;color:inherit}
 <header>
   <div class="bar">
     <div class="brand"><i>Ю</i><span>Юнитка</span></div>
+    <nav class="appsw" aria-label="Другие сервисы"><a href="../shov/" title="Склейки: склейки карточек WB / Ozon / ЯМ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="6" width="9" height="13" rx="2.4" transform="rotate(-8 7.5 12.5)"/><rect x="11" y="4" width="9" height="13" rx="2.4" transform="rotate(7 15.5 10.5)"/></svg><span class="lbl">Склейки</span></a><a href="https://asty7us-web.github.io/shov/konkurenty/" id="toKonk" title="Конкуренты Озон — на открытом товаре"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="12" width="4.5" height="9" rx="1.5"/><rect x="9.75" y="7" width="4.5" height="14" rx="1.5"/><rect x="16.5" y="3" width="4.5" height="18" rx="1.5"/></svg><span class="lbl">Конкуренты</span></a></nav>
     <nav class="tabs" id="tabs">
       <button data-tab="sum"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg>Сводка</button>
       <button data-tab="calc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="5" y="3" width="14" height="18" rx="2.5"/><path d="M8.5 7.5h7M8.5 12h.01M12 12h.01M15.5 12h.01M8.5 16h.01M12 16h.01M15.5 16h.01"/></svg>Расчёт</button>
@@ -2376,9 +2383,32 @@ function defaults() {
 function newState(mp) {
   const s = Object.assign({ v: 2, name: "", mp: mp || "wb", price0: 1500, disc: 0, buy: 400, lotShip: 0, lotQty: 100, ff: 0, costOther: 0, vol: 0 }, defaults());
   for (const k in MPS) { if (!MPS[k].schemes.includes(s.fees[k].scheme)) s.fees[k].scheme = MPS[k].fees.scheme; }
-  s.keep = {}; s.auto = {};
+  s.keep = {}; s.auto = {}; s.cm = {};
   for (const k in MPS) s.auto[k + "|" + s.fees[k].scheme] = pickSch(s.fees[k]);
+  Object.assign(s, mpCommon(s, s.mp));
   return s;
+}
+/* налог и ДРР — у каждой площадки свои (Андрей 26.10: «налог АУСН не верно и рекламу надо 20% Озон», «в расчёт»):
+   у товара — по его факту на этой площадке; без факта — АУСН по ставке панели площадки (налог ÷ выручка, как в «Сводке»: ВБ и ЯМ 5,5%, Озон 5,2%)
+   и тогда соинвест 0 — ставка панели уже от всей цены; ДРР по умолчанию: Ozon — 20%, остальные — из настроек. Пока панели не загружены — как было (8%) */
+function drrMp(mp) { const dd = (LS.get("defaults", {}).common || {}).drr; return dd != null ? dd : mp === "ozon" ? 20 : 10; }
+function mpCommon(s, mp) {
+  const o = { drr: drrMp(mp) };
+  try {                                   // зовётся и при старте страницы, когда панели ещё не загружены
+    const tr = s.tar ? (s.tar.mp === mp ? s.tar : s.tars && s.tars[mp]) : null, row = tr && FACT ? rowOf(mp, tr.a) : null, x = row && unit(row);
+    if (x) { if (s.adsMode !== "rub") o.drr = Math.round(x.drr * 1e6) / 1e4; if (s.tax === "ausn_d") o.taxRate = Math.round(x.tR * 1e6) / 1e4; }
+    else { const t = s.tax === "ausn_d" && FACT ? mpTax(mp) : null; if (t) o.taxRate = t; }
+  } catch (e) {}
+  if (o.taxRate != null && s.fees && s.fees[mp]) s.fees[mp].soinv = 0;
+  return o;
+}
+/* смена площадки в «Расчёте»: налог и ДРР старой — запоминаем, новой — её свои (что правили на ней раньше, иначе mpCommon) */
+function switchMp(mp) {
+  S.cm = S.cm || {};
+  S.cm[S.mp] = { drr: S.drr, taxRate: S.taxRate, soinv: S.fees[S.mp].soinv };
+  const c = S.cm[mp];
+  if (c) { S.drr = c.drr; S.taxRate = c.taxRate; S.fees[mp].soinv = c.soinv; } else Object.assign(S, mpCommon(S, mp));
+  S.mp = mp;
 }
 function fixState(s) {
   const base = newState(s && s.mp);
@@ -2512,7 +2542,7 @@ function onField(el) {
 $("#form").addEventListener("click", e => {
   const b = e.target.closest("button");
   if (!b) return;
-  if (b.dataset.mp) { if (b.dataset.mp !== S.mp) { if (S.tar && !S.tars) linkTars(S); S.mp = b.dataset.mp; saveDraft(); writeFees(); render(); } }
+  if (b.dataset.mp) { if (b.dataset.mp !== S.mp) { if (S.tar && !S.tars) linkTars(S); switchMp(b.dataset.mp); saveDraft(); writeForm(); render(); } }
   else if (b.dataset.scheme) setScheme(b.dataset.scheme);
   else if (b.dataset.ads) { S.adsMode = b.dataset.ads; syncToggles(); saveDraft(); schedule(); }
   else if (b.dataset.base) { S.taxBase = b.dataset.base; syncToggles(); saveDraft(); schedule(); }
@@ -2972,6 +3002,22 @@ function panelM(pr) {
   const ads = num(pr.ads) + num(pr.ads2) || Math.max(0, nd - num(pr.profit));
   return { m: num(pr.profit) / s, nd: nd / s, drr: ads / s, ads };
 }
+/* прогноз «по панели» при новой цене (Андрей 26.10: «как будто панель показала бы, если цену поменять, но комиссия и прочее — фактические панели»):
+   те же продажи в штуках, выручка × k (k = новая ÷ сейчас); комиссия, эквайринг, налог — × k (те же % панели); реклама — × k при «ДРР в %», иначе те же рубли;
+   логистика, хранение, ФФ, себестоимость и прочее — те же рубли панели за срок */
+function panelAt(pr, k) {
+  const pm = panelM(pr);
+  if (pm.m == null || !(k > 0)) return pm;
+  const s = num(pr.sales), v = num(pr.comm) + num(pr.acq) + num(pr.tax), dA = FADS === "pct" ? pm.ads * (k - 1) : 0;
+  const s2 = s * k, d = (s2 - s) - v * (k - 1);
+  return { m: (num(pr.profit) + d - dA) / s2, nd: (pm.nd * s + d) / s2, drr: (pm.ads + dA) / s2, ads: pm.ads + dA, now: pm };
+}
+/* плитка «маржа по панели»: при цене сейчас — факт, при другой — прогноз и рядом факт */
+function panelKpi(pr, k, t, lbl) {
+  const moved = Math.abs(k - 1) >= 0.0005, q = panelAt(pr, k), f = panelM(pr);
+  if (q.m == null) return `<div class="kpi"><b>—</b><span>${lbl} — продаж не было</span></div>`;
+  return `<div class="kpi"><b class="${tone(q.m, t)}">${pct(q.m)}</b><span>${lbl}${moved ? " — прогноз" : ""}<br>без ДРР ${pct(q.nd)} · ДРР ${pct(q.drr)}${moved ? `<br>факт ${pct(f.m)} · <span class="${cls(q.m - f.m)}">${ppTxt(q.m - f.m)} п.п.</span>` : ""}</span></div>`;
+}
 function sumItems() {
   const words = qWords(FQ), out = [];
   for (const mp of ["wb", "ozon", "ym"]) {
@@ -3090,6 +3136,7 @@ function curFact() {
 function renderDetail() {
   const box = $("#detail");
   const { mp, p, row, x, now } = curFact();
+  setKonkLink(mp, row);
   const back = row ? `<div class="backbar"><button class="btn sm back" id="bBack">‹ Сводка</button><span class="bt">${esc(row.a)}</span></div>` : "";
   if (!x) {
     if (!row) { box.innerHTML = `<div class="empty">Выберите товар в списке</div>`; return; }
@@ -3149,7 +3196,8 @@ function paintDetail() {
     ${buyerBlock(mp, row, base, price)}
     <div class="kpis">
       <div class="kpi"><b class="${tone(n.margin, t)}">${rub(n.profit)}</b><span>прибыль/шт <span class="delta ${cls(n.profit - b.profit)}">${rub(n.profit - b.profit, true)}</span></span></div>
-      <div class="kpi"><b class="${tone(n.margin, t)}">${pct(n.margin)}</b><span>маржа</span></div>
+      <div class="kpi"><b class="${tone(n.margin, t)}">${pct(n.margin)}</b><span>маржа по юнитке</span></div>
+      ${panelKpi(perRow(mp, row), price / base, t, "маржа по панели " + PER[SUMP])}
       <div class="kpi"><b class="${cls(monthN)}">${rub(monthN)}</b><span>за месяц <span class="delta ${cls(monthN - monthB)}">${rub(monthN - monthB, true)}</span></span></div>
     </div>
     <div class="rows">
@@ -3205,7 +3253,8 @@ function emptyToState(mp, row) {
   const s = newState(mp), r2 = v => Math.round(v * 100) / 100, t = mpTax(mp);
   Object.assign(s, { name: row.a, disc: 0, buy: r2(num(row.c1)), lotShip: 0, ff: r2(num(row.ffs) || num(row.ff1)), costOther: r2(num(row.dop1) || num(row.dops)),
     tax: "ausn_d", taxBase: "sale", nds: 0 });
-  if (t) s.taxRate = t;
+  if (t) { s.taxRate = t; s.fees[mp].soinv = 0; }          // ставка панели уже от всей цены — соинвест второй раз не вычитаем (26.10)
+  s.drr = drrMp(mp);                                     // ДРР Ozon по умолчанию 20% (Андрей 26.10)
   if (num(row.now) > 0) s.price0 = r2(num(row.now));
   // комиссия, логистика, возврат и выкуп — тариф схемы по умолчанию для этого товара (shemy.py), если он есть
   s.tar = { mp, a: row.a, fact: false, t: row.t || null, m: FACT && FACT.mp[mp] ? FACT.mp[mp].tq || null : null };
@@ -3260,6 +3309,8 @@ function renderFactKeep() { const y = window.scrollY; renderFact(true); window.s
    Топы Ozon — двое одобренных в «Конкурентах Озон», первые по выручке, их витрина — раз в 3 ч (konk.py). Их СПП Ozon не показывает. ═════════ */
 const dTxt = n => new Date(Date.UTC(1899, 11, 30) + n * 864e5).toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit", timeZone: "UTC" });
 const KURL = "https://asty7us-web.github.io/shov/konkurenty/";
+/* «Конкуренты» на этом товаре и сразу лист выбора: «Ждут решения» или «Другие из топа» (#sku=<SKU Ozon>&pick, разбирает app.html «Конкурентов») */
+const kurl = row => KURL + (row && row.sku ? "#sku=" + encodeURIComponent(row.sku) + "&pick" : "");
 function rowOf(mp, a) { const k = canon(a); return ((FACT && FACT.mp[mp] && FACT.mp[mp].rows) || []).find(r => canon(r.a) === k) || null; }
 const topsOf = row => (row && row.kc && row.kc.t) || [];
 function kcSig(mp, row) {             /* почему топов нет — сигнал; null — топы есть */
@@ -3316,7 +3367,8 @@ function buyerBlock(mp, row, base, price, spp, noChart) {
   const moved = Math.abs(price - base) >= 0.5, pb = spp != null ? price * (1 - spp) : null, ours = moved ? pb : now;
   const last = row && row.sh && row.sh.length ? row.sh[row.sh.length - 1][0] : null;
   const tile = (cl, lbl, val, sub) => `<div class="bt ${cl}"><span>${lbl}</span><b>${val}</b>${sub ? `<small>${sub}</small>` : ""}</div>`;
-  const choose = `<a href="${KURL}" target="_blank" rel="noopener">добавить в «Конкуренты»</a>`;
+  // красная «не добавлен» ведёт прямо в этот товар «Конкурентов» и сразу на выбор (Андрей 26.10)
+  const choose = `<a href="${kurl(row)}">выбрать в «Конкурентах» ›</a>`;
   let t = spp == null ? tile("me", "Мы для покупателя", "—", "СПП не снят — товара нет на витрине")
     : tile("me", moved ? "Мы при " + rub(price) : "Мы сейчас", rub(ours),
       moved && now ? `сейчас ${rub(now)} <span class="${cls(now - pb)}">${rub(pb - now, true)}</span>` : `наш СПП ${pct(spp, 0)}${last ? " · " + dTxt(last) : ""}`);
@@ -3335,7 +3387,7 @@ function buyerBlock(mp, row, base, price, spp, noChart) {
 }
 
 /* ═════════ вкладка «СПП»: все товары с гистограммой СПП за 2 недели «на ладони»; нажал на товар — его карточка с начала (Андрей 26.10) ═════════ */
-let SPPF = LS.get("sppMp", "all"), SPPS = LS.get("sppSort", "sales"), SPPBACK = false, SPPSEL = null, SPPPRICE = null;
+let SPPF = LS.get("sppMp", "all"), SPPS = LS.get("sppSort", "sales"), SPPBACK = false, SPPSEL = null, SPPPRICE = null, SPPHASH = null;
 function sppItems() {
   const all = [];
   for (const mp of ["wb", "ozon", "ym"]) for (const r of (FACT.mp[mp] || { rows: [] }).rows) {
@@ -3350,6 +3402,12 @@ function renderSpp() {
     if (LS.get("pass", "") || LS.get("kc", null)) { box.innerHTML = '<div class="empty">Загружаю товары…</div>'; loadFact().then(d => { FACT = d; if (TAB === "spp") renderSpp(); }).catch(() => { box.innerHTML = '<div class="empty">Не загрузилось — откройте «Сводку».</div>'; }); }
     else box.innerHTML = '<div class="empty">Один раз введите пароль во вкладке «Сводка» — здесь появится СПП по всем товарам.</div>';
     return;
+  }
+  let open = null;
+  if (SPPHASH) {                         // пришли по ссылке на товар — показать все площадки и открыть его карточку
+    const [hm, ...ha] = SPPHASH.split(":"), k = canon(ha.join(":")); SPPHASH = null;
+    const o = sppItems().find(z => z.mp === hm && canon(z.r.a) === k);
+    if (o) { SPPF = "all"; SPPSEL = o.key; SPPPRICE = null; open = o.key; } else toast("СПП по этому товару нет — нет на витрине");
   }
   $$("#sppMp button").forEach(b => b.setAttribute("aria-pressed", b.dataset.sf === SPPF));
   $("#sppSort").value = SPPS;
@@ -3372,7 +3430,13 @@ function renderSpp() {
       Нет СПП: ${esc(no)}. Нажмите на товар — его карточка: гистограмма крупно и смена цены с ценой для покупателя и топами.</div>`;
   if (!isPhone() && (!SPPSEL || !items.some(o => o.key === SPPSEL))) { SPPSEL = items.length ? items[0].key : null; SPPPRICE = null; $$("#sppList .item").forEach(x => x.classList.toggle("sel", x.dataset.key === SPPSEL)); }
   renderSppDet();
+  if (open) {
+    if (isPhone() && !$("#sppWrap").classList.contains("open")) { $("#sppWrap").classList.add("open"); navPush("s"); }
+    else { const it = $$("#sppList .item").find(b => b.dataset.key === open); if (it) it.scrollIntoView({ block: "center" }); }
+  }
 }
+/* кнопка «Конкуренты» в шапке ведёт на открытый товар Ozon (карточка «СПП» или «Сводки»), иначе — на начало сервиса */
+function setKonkLink(mp, row) { const a = $("#toKonk"); if (a) a.href = KURL + (mp === "ozon" && row && row.sku ? "#sku=" + encodeURIComponent(row.sku) : ""); }
 function curSpp() {
   if (!FACT || !SPPSEL) return {};
   const [mp, ip, ...rest] = SPPSEL.split("|"), a = rest.join("|"), row = FACT.mp[mp] && FACT.mp[mp].rows.find(r => r.a === a && (r.ip || "") === ip);
@@ -3380,6 +3444,7 @@ function curSpp() {
 }
 function renderSppDet() {
   const box = $("#sppDet"), { mp, row, x, now } = curSpp();
+  setKonkLink(mp, row);
   if (!row) { box.innerHTML = '<div class="empty">Выберите товар в списке</div>'; return; }
   const s = sppNow(row), d14 = sppD(row.sh, 14), d7 = sppD(row.sh, 7), vit = num(row.vit);
   const base = now || (x && x.price) || 0, price = Math.round(SPPPRICE || base);
@@ -3402,19 +3467,19 @@ function paintSppOut() {
   const { mp, p, row, x, now } = curSpp(), base = now || (x && x.price), price = SPPPRICE || base, t = num(S.target) / 100 || 0.1;
   let h = buyerBlock(mp, row, base, price, null, true);
   // прибыль: «по юнитке» — расходы на 1 шт из панели за месяц, пересчитанные на новую цену; «по панели» — факт за месяц, как в «Сводке»
-  const pm = panelM(row), mon = p && p.month ? String(p.month).toLowerCase() : "месяц";
+  const mon = p && p.month ? String(p.month).toLowerCase() : "месяц";
   if (x) {             // как у ползунка «Сводки» (Андрей 26.10: «маржа по панели там, где цену меняешь, — верни»)
     const b = at(x, base, FADS), n = at(x, price, FADS), monthB = b.profit * x.units, monthN = n.profit * x.units;
     const need = n.profit > 0 && b.profit > 0 ? Math.ceil(x.units * b.profit / n.profit) : null, be = factPrice(x, FADS, 0), ptg = factPrice(x, FADS, t);
     h += `<div class="kpis"><div class="kpi"><b class="${tone(n.margin, t)}">${rub(n.profit)}</b><span>прибыль/шт по юнитке <span class="delta ${cls(n.profit - b.profit)}">${rub(n.profit - b.profit, true)}</span></span></div>
       <div class="kpi"><b class="${tone(n.margin, t)}">${pct(n.margin)}</b><span>маржа по юнитке${Math.abs(price - base) >= 0.5 ? " при " + rub(price) : ""}<br>сейчас ${pct(b.margin)}</span></div>
-      <div class="kpi"><b class="${pm.m != null ? tone(pm.m, t) : ""}">${pm.m != null ? pct(pm.m) : "—"}</b><span>маржа по панели за ${esc(mon)}${pm.nd != null ? `<br>без ДРР ${pct(pm.nd)} · ДРР ${pct(pm.drr)}` : ""}</span></div></div>
+      ${panelKpi(row, price / base, t, "маржа по панели за " + esc(mon))}</div>
       <div class="rows">
         <span>За месяц при ${NF0.format(x.units)} шт</span><span class="r ${cls(monthN)}">${rub(monthN)} <span class="delta ${cls(monthN - monthB)}">(${rub(monthN - monthB, true)})</span></span>
         <span>Чтобы заработать столько же, сколько сейчас</span><span class="r">${need == null ? (n.profit <= 0 ? '<span class="neg">каждая продажа в минус</span>' : "—") : NF0.format(need) + " шт/мес"}</span>
         <span>Безубыточная цена</span><span class="r">${be ? rub(be) : "—"}</span>
         <span>Цена под маржу ${NF1.format(t * 100)}%</span><span class="r">${ptg ? rub(ptg) : "недостижимо"}</span></div>
-      <div class="note">По юнитке — расходы на 1 шт из панели за ${esc(x.src || mon)} (комиссия, эквайринг, налог, реклама — в % от новой цены, остальное — те же рубли). По панели — факт за месяц, как продавали.</div>`;
+      <div class="note">По юнитке — расходы на 1 шт из панели за ${esc(x.src || mon)} (комиссия, эквайринг, налог, реклама — в % от новой цены, остальное — те же рубли). По панели — факт панели за месяц, пересчитанный на новую цену: те же штуки, комиссия, эквайринг и налог — в тех же % панели, логистика, ФФ, хранение и себестоимость — те же рубли.</div>`;
   } else h += `<div class="note">Продаж не было — прибыль по юнитке посчитать не из чего, посчитайте во вкладке «Расчёт».</div>`;
   out.innerHTML = h;
 }
@@ -3700,7 +3765,8 @@ function setHdr() { document.documentElement.style.setProperty("--hdr", $("heade
   if (h.get("k")) { LS.set("pass", h.get("k")); LS.del("kc"); TAB = "sum"; }
   if (h.get("c")) { try { S = fixState(decodeState(h.get("c"))); delete S.id; saveDraft(); TAB = "calc"; } catch (e) { toast("Ссылка на расчёт повреждена"); } }
   if (h.get("z")) { TAB = "calc"; unpackZ(h.get("z")).then(st => { S = fixState(st); delete S.id; saveDraft(); writeForm(); render(); }).catch(() => toast("Ссылка на расчёт повреждена")); }
-  if (h.get("k") || h.get("c") || h.get("z")) history.replaceState(null, "", location.pathname + location.search);
+  if (h.get("spp")) { SPPHASH = h.get("spp"); TAB = "spp"; }           // из «Конкурентов»: #spp=ozon:<артикул> — СПП этого товара
+  if (h.get("k") || h.get("c") || h.get("z") || h.get("spp")) history.replaceState(null, "", location.pathname + location.search);
   if (isPhone()) $$("details.sec").forEach(d => { if (!["price", "cost", "mp"].includes(d.dataset.sec)) d.open = false; });
   writeForm(); render(); setTab(["sum", "calc", "spp", "saved"].includes(TAB) ? TAB : "sum");
   if (location.hash === "#ext") extOpen();
