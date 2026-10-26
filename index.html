@@ -2401,7 +2401,7 @@ function newState(mp) {
   return s;
 }
 /* налог и ДРР — у каждой площадки свои (Андрей 26.10: «налог АУСН не верно и рекламу надо 20% Озон», «в расчёт»):
-   у товара — по его факту на этой площадке; без факта — АУСН по ставке панели площадки (налог ÷ выручка, как в «Сводке»: ВБ и ЯМ 5,5%, Озон 5,2%)
+   у товара — по его факту на этой площадке; без факта — АУСН по ставке панели площадки (налог ÷ выручка, как в «Сводке»: с 26.10 во всех панелях 8%, было 5,5% / 5,2%)
    и тогда соинвест 0 — ставка панели уже от всей цены; ДРР по умолчанию: Ozon — 20%, остальные — из настроек. Пока панели не загружены — как было (8%) */
 function drrMp(mp) { const dd = (LS.get("defaults", {}).common || {}).drr; return dd != null ? dd : mp === "ozon" ? 20 : 10; }
 function mpCommon(s, mp) {
@@ -3422,10 +3422,10 @@ function panelAtBlock(mp, row, x, price) {
     const u = num(pr.units), P0 = num(pr.sales) / u, pr0 = num(pr.profit) / u, adR = (num(pr.ads) + num(pr.ads2)) / num(pr.sales);
     const rate = x.cR + x.aR + x.tR + (FADS === "pct" ? adR : 0), fixed = P0 * (1 - rate) - pr0, p1 = price * (1 - rate) - fixed;
     const m0 = pr0 / P0, m1 = p1 / price;
-    // без ДРР — как колонка панели «прибыль с налогом БЕЗ дрр»: прибыль + реклама (при «ДРР в %» реклама идёт вслед за ценой)
-    const nd0 = pr.nodrr != null ? num(pr.nodrr) / num(pr.sales) : (pr0 + adR * P0) / P0, nd1 = (p1 + (FADS === "pct" ? adR * price : adR * P0)) / price;
-    body = `<div class="kpis"><div class="kpi"><b class="${tone(m0, t)}">${pct(m0)}</b><span>было по панели<br>средняя цена ${rub(P0)}<br>без ДРР ${pct(nd0)} · ДРР ${pct(adR)}</span></div>
-      <div class="kpi"><b class="${tone(m1, t)}">${pct(m1)}</b><span>было бы при ${rub(price)}<br><span class="${cls(m1 - m0)}">${ppTxt(m1 - m0)} п.п.</span><br>без ДРР ${pct(nd1)}</span></div>
+    // без рекламы — прибыль панели + реклама, одинаково для всех сроков (колонка панели «с налогом БЕЗ дрр» у недель налог не вычитает, у месяца — вычитает)
+    const nd0 = (pr0 + adR * P0) / P0, nd1 = (p1 + (FADS === "pct" ? adR * price : adR * P0)) / price;
+    body = `<div class="kpis"><div class="kpi"><b class="${tone(m0, t)}">${pct(m0)}</b><span>было по панели<br>средняя цена ${rub(P0)}<br>без рекламы ${pct(nd0)} · ДРР ${pct(adR)}</span></div>
+      <div class="kpi"><b class="${tone(m1, t)}">${pct(m1)}</b><span>было бы при ${rub(price)}<br><span class="${cls(m1 - m0)}">${ppTxt(m1 - m0)} п.п.</span><br>без рекламы ${pct(nd1)}</span></div>
       <div class="kpi"><b class="${cls(p1 * u)}">${rub(p1 * u)}</b><span>прибыль за срок<br>было ${rub(pr0 * u)}</span></div></div>
       <div class="note">${esc(perLbl(mp, per))}, ${NF0.format(u)} шт: прибыль панели по товару. При другой цене — те же штуки; комиссия, эквайринг, налог${FADS === "pct" ? " и реклама (ДРР срока " + pct(adR) + ")" : ""} — в % от цены, остальное — те же рубли.</div>`;
   }
