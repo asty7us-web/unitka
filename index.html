@@ -1012,7 +1012,7 @@ details.how ul{padding-left:18px;margin:6px 0}
 #sppList .item .nm{display:flex;gap:8px;align-items:center}
 #sppList .item .nm small{font-weight:500;font-size:12px}
 #sppList .item .ch{grid-column:1/-1;display:block;margin-top:2px}
-.spc path.vit{opacity:.2} .spc path.vit.cur{opacity:.55} .spc text.it{font-style:italic;fill:var(--ink-2)}
+.spc path.vit{opacity:.32} .spc path.vit.cur{opacity:.6} .spc text.it{font-style:italic;fill:var(--ink-2)}
 .spc.row text.v{font-size:10px}
 #ptr{position:fixed;top:calc(var(--hdr,53px) + 8px);left:50%;transform:translate(-50%,0);width:36px;height:36px;border-radius:50%;background:var(--surface);color:var(--accent);
   box-shadow:0 2px 10px rgba(0,0,0,.18);display:grid;place-items:center;font:800 20px/1 system-ui,sans-serif;opacity:0;z-index:70;pointer-events:none;transition:opacity .15s}
@@ -1021,7 +1021,7 @@ details.how ul{padding-left:18px;margin:6px 0}
 @keyframes ptrspin{from{transform:translate(-50%,40px) rotate(0)}to{transform:translate(-50%,40px) rotate(360deg)}}
 .tline{display:flex;gap:9px;align-items:center}
 .spc svg{display:block;overflow:visible;margin-top:2px}
-.spc path{fill:var(--accent);opacity:.45} .spc path.cur{opacity:1}
+.spc path{opacity:.88} .spc path.cur{opacity:1;stroke:var(--ink);stroke-width:1.3;stroke-opacity:.55}
 .spc .ax{stroke:var(--line);stroke-width:1} .spc .gap{fill:var(--ink-2);opacity:.35} .spc .hit{fill:transparent}
 .spc text{fill:var(--ink-2);font-size:10px;text-anchor:middle;font-variant-numeric:tabular-nums}
 .spc text.v{fill:var(--ink);font-size:10.5px} .spc text.b{font-weight:800}
@@ -1038,17 +1038,28 @@ details.how ul{padding-left:18px;margin:6px 0}
 a.bt{text-decoration:none;color:inherit;cursor:pointer}
 a.bt>span{color:var(--accent);font-weight:700}
 .bt.nok small{color:var(--bad);font-weight:700}
-/* «нажатие чувствуется» (Андрей 26.10; пока на плашках топов): при нажатии и удержании плашка проседает и темнеет, на Android — короткая вибрация */
+/* «нажатие чувствуется» (Андрей 26.10: на плашках топов «ок, распространяй» — теперь на всём, что нажимается): при нажатии и удержании
+   проседает и темнеет, на Android — короткая вибрация. :where — слабее любых правил тем, их собственные переходы не ломает */
 .press{-webkit-tap-highlight-color:transparent;transition:transform .14s cubic-bezier(.2,.8,.3,1),filter .14s,box-shadow .14s;touch-action:manipulation}
 .press:active,.press.down{transform:scale(.95);filter:brightness(.92);box-shadow:inset 0 0 0 2px var(--accent)}
+:where(button,a,.item,.chip,.pill,.persel,summary,label.f){-webkit-tap-highlight-color:transparent;transition:transform .14s cubic-bezier(.2,.8,.3,1),filter .14s}
+:where(button,a,.chip,.pill,.persel,summary):where(:active,.down){transform:scale(.94);filter:brightness(.9)}
+:where(.item):where(:active,.down){transform:scale(.985);filter:brightness(.95)}
+:where(nav.tabs button):where(:active,.down){transform:scale(.9)}
 .bt.nok.press:active,.bt.nok.press.down{box-shadow:inset 0 0 0 3px var(--bad)}
 .tcard{background:var(--surface-2);border-radius:12px;padding:10px 12px;margin-top:8px}
 .tcard .tn{font-size:14px;margin-bottom:6px;line-height:1.3}
 /* срок панели — кнопка внутри третьего квадрата; квадрат обведён, чтобы было видно: срок — про него */
 .kpi.pk{box-shadow:inset 0 0 0 1.5px var(--accent)}
-.persel{position:relative;display:inline-flex;align-items:center;align-self:flex-start;margin:4px 0 3px;padding:3px 9px;border-radius:999px;background:var(--accent);color:#fff !important;font-size:12.5px;font-weight:700;white-space:nowrap;cursor:pointer}
-.persel select{position:absolute;inset:0;opacity:0;width:100%;cursor:pointer;font-size:16px}
 .kpi.pk{display:flex;flex-direction:column}
+.persel{margin-top:auto;align-self:flex-start;border:0;display:inline-flex;align-items:center;gap:4px;padding:4px 11px;border-radius:999px;background:var(--accent);color:#fff;font-size:12.5px;font-weight:700;white-space:nowrap;cursor:pointer}
+.kpi.pk .persel{margin-top:auto;transform-origin:left center}
+.kpi.pk b+span{margin-bottom:6px}
+/* выбор срока — под рядом квадратов, теми же синими полукруглыми кнопками */
+.perrow{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px;padding:9px;border-radius:12px;background:var(--accent-wash)}
+.pill{border:0;border-radius:999px;background:var(--accent);color:#fff;font-weight:700;font-size:13.5px;padding:7px 13px;display:inline-flex;flex-direction:column;align-items:flex-start;line-height:1.15;cursor:pointer;opacity:.82}
+.pill small{font-weight:500;font-size:11px;opacity:.9}
+.pill.on{opacity:1;box-shadow:0 0 0 2px var(--surface),0 0 0 4px var(--accent)}
 .sig{font-size:13.5px;color:var(--bad);margin-top:6px;font-weight:700;background:color-mix(in srgb,var(--bad) 10%,transparent);border-radius:8px;padding:6px 9px}
 .sig a{color:inherit}
 .buyer{display:flex;flex-direction:column}
@@ -3353,6 +3364,10 @@ function sppD(sh, n) {
 }
 const ppTxt = d => (d == null ? "—" : Math.abs(d) < 0.0005 ? "=" : (d > 0 ? "▲ +" : "▼ " + MINUS) + NF1.format(Math.abs(d) * 100));
 const shortSel = s => { s = String(s || "").replace(/^(ООО|ИП|АО|ОАО)\s+/i, "").replace(/["«»]/g, "").trim(); return !s ? "конкурент" : s.length > 18 ? s.slice(0, 17) + "…" : s; };
+/* цвет столбика по значению СПП (Андрей 26.10: «покрасивей, зелёный — жёлтый, переходы по значениям»): шкала — по самому графику:
+   самый низкий день — жёлтый, самый высокий — зелёный, между ними плавно (OKLab); разброс не меньше 15 п.п., чтобы мелочь не красилась как скачок */
+let SPPLO = 0, SPPHI = 0.6;
+const sppColor = v => `color-mix(in oklab, #1f9d55 ${Math.round(Math.max(0, Math.min(1, (v - SPPLO) / (SPPHI - SPPLO))) * 100)}%, #f5b301)`;
 /* гистограмма СПП за 2 недели по календарным дням. mode: "full" — карточка (значение над каждым столбиком, даты через день, пояснение),
    "row" — строка списка (значения над каждым, даты по краям и в середине, без шапки), "mini" — у смены цены (значения первого и последнего).
    Столбик по продажам — сплошной, по витрине (продаж не было) — бледный, подпись курсивом; день без данных — черта у основания */
@@ -3363,13 +3378,14 @@ function sppChart(sh, mode) {
   const got = pts.filter(Boolean); if (got.length < (rowm ? 1 : 2)) return "";
   const W = 336, H = full ? 150 : rowm ? 66 : 76, T = full ? 16 : 14, B = full ? 18 : 15, ph = H - T - B, slot = W / N, bw = Math.min(full ? 16 : 14, slot - 5);
   const mx = Math.max(0.05, ...got.map(z => z[1])) * 1.08, i0 = pts.findIndex(Boolean), y0 = T + ph;
+  SPPLO = Math.min(...got.map(z => z[1])); SPPHI = Math.max(SPPLO + 0.15, ...got.map(z => z[1]));
   let g = `<line x1="0" x2="${W}" y1="${y0}" y2="${y0}" class="ax"/>`;
   days.forEach((d, i) => {
     const z = pts[i], cx = i * slot + slot / 2;
     if (!z) g += `<rect x="${cx - bw / 2}" y="${y0 - 2}" width="${bw}" height="2" class="gap"/>`;
     else {
       const v = z[1], h = Math.max(2, ph * v / mx), x = cx - bw / 2, y = y0 - h, r = Math.min(3, h / 2), vit = z[3] === 0;
-      g += `<path d="M${x},${y0}V${y + r}Q${x},${y} ${x + r},${y}H${x + bw - r}Q${x + bw},${y} ${x + bw},${y + r}V${y0}Z" class="${vit ? "vit" : ""}${i === N - 1 ? " cur" : ""}"/>`;
+      g += `<path d="M${x},${y0}V${y + r}Q${x},${y} ${x + r},${y}H${x + bw - r}Q${x + bw},${y} ${x + bw},${y + r}V${y0}Z" class="${vit ? "vit" : ""}${i === N - 1 ? " cur" : ""}" style="fill:${sppColor(v)}"/>`;
       g += `<text x="${cx}" y="${y - 3}" class="v${i === N - 1 ? " b" : ""}${vit ? " it" : ""}">${NF0.format(v * 100)}</text>`;     // цифра за каждый день — везде (Андрей 26.10)
     }
     const lab = full ? (N - 1 - i) % 2 === 0 : rowm ? i === 0 || i === 7 || i === N - 1 : i === i0 || i === N - 1;
@@ -3380,7 +3396,7 @@ function sppChart(sh, mode) {
   if (rowm) return `<span class="ch spc row">${svg}</span>`;
   const a = got[0][1], zz = pts[N - 1][1], dd = zz - a;
   return `<div class="spc${full ? "" : " sm"}"><div class="h">${full ? "СПП по дням за 2 недели, %" : "СПП за 2 недели, %"} <span>${pct(a, 0)} → <b>${pct(zz, 0)}</b> <span class="${cls(dd)}">${ppTxt(dd)} п.п.</span></span></div>${svg}
-    ${full ? `<div class="note">Как в дашборде «СПП» панели: сплошной столбик — по продажам дня (СПП ₽ ÷ наша цена × шт), бледный с курсивом — продаж не было, по цене витрины; черта у основания — данных нет. Тёмный — последний день ${dTxt(end)}.</div>` : ""}</div>`;
+    ${full ? `<div class="note">Как в дашборде «СПП» панели: сплошной столбик — по продажам дня (СПП ₽ ÷ наша цена × шт), бледный с курсивом — продаж не было, по цене витрины; черта у основания — данных нет. Цвет — от жёлтого (самый низкий СПП за 2 недели) к зелёному (самый высокий); с обводкой — последний день ${dTxt(end)}.</div>` : ""}</div>`;
 }
 /* «Цена для покупателя» у смены цены: мы сейчас / при новой цене (по нашему СПП) и два топа плашками; не добавлен топ — красная плашка */
 function buyerBlock(mp, row, base, price, spp, noChart) {
@@ -3431,29 +3447,29 @@ function priceTrio(mp, row, x, base, price) {
   const avail = FACT && row ? ["week", "w2", "w4", "month"].filter(p => perRowOf(mp, row, p) !== undefined) : [];
   const per = avail.includes(PNPER) ? PNPER : avail.includes("w2") ? "w2" : avail[avail.length - 1];
   let sq = `<div class="kpi"><b>—</b><span>чистая по панели — данных нет</span></div>`;
-  // срок — прямо в квадрате панели: кнопка «2 недели ▾» (под ней обычный выбор телефона), чтобы было видно, к чему относится (Андрей 26.10)
-  const pick = per ? `<label class="persel" title="Срок панели">${PNL[per]} ▾<select data-pnsel aria-label="Срок панели">${avail.map(p => `<option value="${p}"${p === per ? " selected" : ""}>${PNL[p]} · ${esc(perLbl(mp, p))}</option>`).join("")}</select></label>` : "";
+  // срок — кнопкой внизу квадрата панели; выбор открывается под рядом квадратов синими кнопками, экран не закрывает (Андрей 26.10)
+  const pick = per ? `<button class="persel" data-pnopen aria-expanded="false" title="Срок панели">${PNL[per]} ▾</button>` : "";
   if (per) {
     const pr = perRowOf(mp, row, per);
     if (pr && num(pr.units) > 0 && num(pr.sales) > 0) {
       const u = num(pr.units), P0 = num(pr.sales) / u, pr0 = num(pr.profit) / u, adR = (num(pr.ads) + num(pr.ads2)) / num(pr.sales);
-      const rate = x.cR + x.aR + x.tR + (FADS === "pct" ? adR : 0), p1 = price * (1 - rate) - (P0 * (1 - rate) - pr0);
-      const m0 = pr0 / P0, m1 = p1 / price;
-      sq = `<div class="kpi pk"><b class="${tone(m1, t)}">${pct(m1)}</b><span>чистая по панели</span>${pick}<span>${rub(p1)}/шт · было ${pct(m0)}${moved ? ` <span class="${cls(m1 - m0)}">${ppTxt(m1 - m0)}</span>` : ""}</span></div>`;
-    } else sq = `<div class="kpi pk"><b>—</b><span>чистая по панели</span>${pick}<span>за этот срок продаж не было</span></div>`;
+      const rate = x.cR + x.aR + x.tR + (FADS === "pct" ? adR : 0), p1 = price * (1 - rate) - (P0 * (1 - rate) - pr0), m1 = p1 / price;
+      sq = `<div class="kpi pk"><b class="${tone(m1, t)}">${pct(m1)}</b><span>чистая по панели<br>${rub(p1)}/шт</span>${pick}</div>`;
+    } else sq = `<div class="kpi pk"><b>—</b><span>чистая по панели: за этот срок продаж не было</span>${pick}</div>`;
   }
-  const chips = "";
+  const row2 = per ? `<div class="perrow hidden" data-perrow>${avail.map(p => `<button class="pill${p === per ? " on" : ""}" data-pnper="${p}">${p === per ? "✓ " : ""}${PNL[p]}<small>${esc(perLbl(mp, p))}</small></button>`).join("")}</div>` : "";
   return `<div class="kpis trio">
       <div class="kpi"><b class="${tone(n.margin, t)}">${rub(n.profit)}</b><span>прибыль/шт по юнитке${moved ? `<br><span class="delta ${cls(n.profit - b.profit)}">${rub(n.profit - b.profit, true)}</span>` : ""}</span></div>
       <div class="kpi"><b class="${tone(n.margin, t)}">${pct(n.margin)}</b><span>маржа по юнитке${moved ? `<br>сейчас ${pct(b.margin)}` : ""}</span></div>
-      ${sq}</div>${chips}`;
+      ${sq}</div>${row2}`;
 }
-document.addEventListener("change", e => {
-  const s = e.target.closest("[data-pnsel]"); if (!s) return;
-  PNPER = s.value; LS.set("pnPer", PNPER);
-  if (s.closest("#sOut")) paintSppOut(); else if (s.closest("#dOut")) keepScroll(paintDetail);
+document.addEventListener("click", e => {
+  const o = e.target.closest("[data-pnopen]");
+  if (o) { const r = o.closest(".kpis").nextElementSibling; if (r && r.matches("[data-perrow]")) { const on = r.classList.toggle("hidden"); o.setAttribute("aria-expanded", String(!on)); } return; }
+  const b = e.target.closest("[data-pnper]"); if (!b) return;
+  PNPER = b.dataset.pnper; LS.set("pnPer", PNPER);
+  if (b.closest("#sOut")) paintSppOut(); else if (b.closest("#dOut")) keepScroll(paintDetail);
 });
-
 /* ═════════ вкладка «СПП»: все товары с гистограммой СПП за 2 недели «на ладони»; нажал на товар — его карточка с начала (Андрей 26.10) ═════════ */
 let SPPF = LS.get("sppMp", "all"), SPPS = LS.get("sppSort", "sales"), SPPBACK = false, SPPSEL = null, SPPPRICE = null, SPPHASH = null;
 function sppItems() {
@@ -3494,7 +3510,7 @@ function renderSpp() {
   box.innerHTML = `<div class="lhead"><span>Товар · СПП по дням за 2 недели, %</span><span>СПП<small>сейчас</small></span><span>За 2 нед<small>п.п.</small></span></div>
     <div class="list">${items.map(row).join("") || '<div class="empty">Нет товаров с СПП</div>'}</div>
     <div class="note" style="padding:10px 14px"><b>СПП</b> — доля нашей цены, которую доплатила площадка (WB — СПП, Ozon — соинвест, ЯМ — скидка Маркета). По дням — как дашборд «СПП» панели:
-      сплошной столбик — по продажам дня, бледный с курсивом — продаж не было, по цене витрины; черта — данных нет. «Сейчас» — последний снимок витрины (WB и Ozon — раз в день, ЯМ — раз в 3 часа).
+      сплошной столбик — по продажам дня, бледный с курсивом — продаж не было, по цене витрины; черта — данных нет; цвет — от жёлтого (самый низкий СПП товара за 2 недели) к зелёному (самый высокий). «Сейчас» — последний снимок витрины (WB и Ozon — раз в день, ЯМ — раз в 3 часа).
       Нет СПП: ${esc(no)}. Нажмите на товар — его карточка: гистограмма крупно и смена цены с ценой для покупателя и топами.</div>`;
   if (!isPhone() && (!SPPSEL || !items.some(o => o.key === SPPSEL))) { SPPSEL = items.length ? items[0].key : null; SPPPRICE = null; $$("#sppList .item").forEach(x => x.classList.toggle("sel", x.dataset.key === SPPSEL)); }
   renderSppDet();
@@ -3580,7 +3596,10 @@ $("#sppDet").addEventListener("click", e => {
 (function () {
   let el = null;
   const up = () => { if (el) el.classList.remove("down"); el = null; };
-  addEventListener("pointerdown", e => { const p = e.target.closest(".press"); if (!p) return; el = p; p.classList.add("down"); try { navigator.vibrate && navigator.vibrate(8); } catch (x) {} }, { passive: true });
+  addEventListener("pointerdown", e => {
+    const p = e.target.closest(".press,button,a[href],.item,.chip,.pill,.persel,summary"); if (!p || p.disabled || e.target.closest("canvas,input,select,textarea")) return;
+    el = p; p.classList.add("down"); try { navigator.vibrate && navigator.vibrate(p.matches(".press,.item,.pill") ? 8 : 5); } catch (x) {}
+  }, { passive: true });
   ["pointerup", "pointercancel", "pointerleave", "scroll"].forEach(t => addEventListener(t, up, { passive: true, capture: true }));
 })();
 
