@@ -1240,7 +1240,7 @@ a.btn{text-decoration:none;color:inherit}
 <!-- ═════════ СПП НАШИХ ТОВАРОВ (Андрей 26.10) ═════════ -->
 <section class="page" id="p-spp">
   <div class="sumbar">
-    <div class="seg" id="sppMp"><button data-sf="all">Все</button><button data-sf="wb"><span class="mpi wb"></span>WB</button><button data-sf="ozon"><span class="mpi ozon"></span>Ozon</button></div>
+    <div class="seg" id="sppMp"><button data-sf="all">Все</button><button data-sf="wb"><span class="mpi wb"></span>WB</button><button data-sf="ozon"><span class="mpi ozon"></span>Ozon</button><button data-sf="ym"><span class="mpi ym"></span>ЯМ</button></div>
     <select class="sel" id="sppSort" aria-label="Порядок"><option value="sales">по выручке за месяц</option><option value="spp">по СПП: сначала больше</option><option value="d7">по изменению за 7 дней</option><option value="name">по алфавиту</option></select>
   </div>
   <div class="sumtot" id="sppTot" aria-label="Средний СПП"></div>
@@ -3235,7 +3235,7 @@ function buyerBlock(mp, row, base, price, spp) {
   const pb = spp != null ? price * (1 - spp) : null, moved = Math.abs(price - base) >= 0.5;
   const last = row && row.sh && row.sh.length ? row.sh[row.sh.length - 1][0] : null;
   let h = "";
-  if (spp == null) h += `<span>Наша для покупателя</span><span class="r m">${mp === "ym" ? "СПП ЯМ ещё не снимается" : "СПП не снят — товара нет на витрине"}</span>`;
+  if (spp == null) h += `<span>Наша для покупателя</span><span class="r m">СПП не снят — товара нет на витрине</span>`;
   else {
     h += `<span>Наша сейчас на витрине</span><span class="r">${now ? rub(now) : "—"}</span>`;
     if (moved) h += `<span>При цене ${rub(price)} будет ≈</span><span class="r"><b>${rub(pb)}</b>${now ? ` <span class="delta ${cls(now - pb)}">(${rub(pb - now, true)})</span>` : ""}</span>`;
@@ -3286,7 +3286,7 @@ function renderSpp() {
   $$("#sppMp button").forEach(b => b.setAttribute("aria-pressed", b.dataset.sf === SPPF));
   $("#sppSort").value = SPPS;
   const all = [];
-  for (const mp of ["wb", "ozon"]) for (const r of (FACT.mp[mp] || { rows: [] }).rows) {
+  for (const mp of ["wb", "ozon", "ym"]) for (const r of (FACT.mp[mp] || { rows: [] }).rows) {
     const s = sppOf(r); if (s == null) continue;
     all.push({ mp, r, s, d: sppD7(r.sh), key: mp + "|" + (r.ip || "") + "|" + r.a });
   }
@@ -3296,7 +3296,7 @@ function renderSpp() {
   const tile = (lbl, v, sub) => `<div><span>${lbl}</span><b>${v}</b>${sub ? `<span>${sub}</span>` : ""}</div>`;
   const up = items.filter(o => o.d > 0.0049).length, dn = items.filter(o => o.d < -0.0049).length;
   const nomp = mp => (FACT.mp[mp] ? FACT.mp[mp].rows.length : 0) - all.filter(o => o.mp === mp).length;
-  $("#sppTot").innerHTML = ["wb", "ozon"].filter(mp => SPPF === "all" || SPPF === mp).map(mp => { const L = all.filter(o => o.mp === mp); return tile("СПП " + MPS[mp].short + " в среднем", L.length ? pct(avg(L), 1) : "—", L.length + " товаров"); }).join("") +
+  $("#sppTot").innerHTML = ["wb", "ozon", "ym"].filter(mp => SPPF === "all" || SPPF === mp).map(mp => { const L = all.filter(o => o.mp === mp); return tile("СПП " + MPS[mp].short + " в среднем", L.length ? pct(avg(L), 1) : "—", L.length + " товаров"); }).join("") +
     tile("За 7 дней", `<span class="pos">▲ ${up}</span> · <span class="neg">▼ ${dn}</span>`, "вырос · упал");
   const row = o => {
     const k = o.r.kc && o.r.kc.s ? o.r.kc : null, sig = kcSig(o.mp, o.r), now = num(o.r.now), vit = num(o.r.vit);
@@ -3305,12 +3305,12 @@ function renderSpp() {
       <span class="s">${k && k.v ? `топ ${rub(k.v)}${kd != null && Math.abs(kd) >= 0.5 ? ` · мы <span class="${cls(-kd)}">${kd > 0 ? "дороже" : "дешевле"} на ${pct(Math.abs(kd) / k.v, 0)}</span>` : ""}` : o.mp === "ozon" && sig ? `<span class="mid">⚠ ${esc(sig)}</span>` : ""}</span>${sppBars(o.r.sh, 14, 120)}</span>
       <span class="c">${pct(o.s, 1)}</span><span class="c ${o.d == null ? "" : cls(o.d)}">${ppTxt(o.d)}</span></button>`;
   };
-  const no = ["wb", "ozon"].filter(mp => SPPF === "all" || SPPF === mp).map(mp => MPS[mp].short + " — " + nomp(mp)).join(", ");
+  const no = ["wb", "ozon", "ym"].filter(mp => SPPF === "all" || SPPF === mp).map(mp => MPS[mp].short + " — " + nomp(mp)).join(", ");
   box.innerHTML = `<div class="lhead"><span>Товар · цена для покупателя</span><span>СПП<small>сейчас</small></span><span>За 7 дн<small>п.п.</small></span></div>
     <div class="list">${items.map(row).join("") || '<div class="empty">Нет товаров с СПП</div>'}</div>
-    <div class="note" style="padding:10px 14px"><b>СПП</b> — скидка площадки к нашей цене: 1 − цена на витрине ÷ наша до СПП (WB — СПП, Ozon — соинвест, цена «с другими банками»), из листа «Цены витрина» панелей, снимок раз в день.
+    <div class="note" style="padding:10px 14px"><b>СПП</b> — скидка площадки к нашей цене: 1 − цена на витрине ÷ наша до СПП (WB — СПП, Ozon — соинвест, цена «с другими банками», ЯМ — цена без Яндекс Пэй), из листа «Цены витрина» панелей: WB и Ozon — снимок раз в день, ЯМ — раз в 3 часа.
       Столбики — СПП по дням: зелёный — вырос, красный — упал. <b>Топ</b> — конкурент, одобренный в «Конкурентах Озон», первый по выручке; его цена с витрины обновляется раз в 3 часа.
-      Нет СПП (нет на витрине или нет в снимке): ${esc(no)}. ЯМ — СПП в панели пока не снимается. Нажмите на товар — карточка с ползунком цены и СПП по дням.</div>`;
+      Нет СПП (нет на витрине или нет в снимке): ${esc(no)}. Нажмите на товар — карточка с ползунком цены и СПП по дням.</div>`;
 }
 $("#sppMp").addEventListener("click", e => { const b = e.target.closest("button"); if (b) { SPPF = b.dataset.sf; LS.set("sppMp", SPPF); keepScroll(renderSpp); } });
 $("#sppSort").addEventListener("change", e => { SPPS = e.target.value; LS.set("sppSort", SPPS); renderSpp(); });
