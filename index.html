@@ -2269,7 +2269,15 @@ function tmSync() {
   try { if (navigator.audioSession && SND[THEME]) navigator.audioSession.type = "playback"; } catch (e) {}   // iPhone: игры слышно и в беззвучном режиме
   if (tmWant()) { tmCtx(); tmSync(); }
 }, true));
-document.addEventListener("visibilitychange", () => { if (!TMU.a || !TMU.cur) return; if (document.hidden) TMU.a.suspend(); else TMU.a.resume(); });
+document.addEventListener("visibilitychange", () => { if (!TMU.a || !TMU.cur) return; if (document.hidden) TMU.a.suspend(); else tmWake(); });
+/* Андрей 28.10: «ушёл, вернулся через 3 часа — звук вроде вкл, а не играет, надо выключить и включить». После долгого сна вкладки
+   браузер не всегда даёт resume() с первого раза (или ставит «interrupted») — сторож раз в 2 с и при возврате будит звук сам. */
+function tmWake() {
+  if (!TMU.a || document.hidden) return;
+  if (tmWant() && TMU.a.state !== "running") TMU.a.resume().then(() => tmSync()).catch(() => {});
+  else if (tmWant() && !TMU.cur) tmSync();
+}
+setInterval(tmWake, 2000); window.addEventListener("focus", tmWake); window.addEventListener("pageshow", tmWake);
 let sndMem = null;                       // браузер не даёт хранить (инкогнито) — помним до перезагрузки
 function soundOff() { const s = SND[THEME]; if (!s) return false; let ok = true; try { localStorage.setItem("unitka.t", "1"); localStorage.removeItem("unitka.t"); } catch (e) { ok = false; } return ok || sndMem === null ? s.off() : sndMem; }
 function syncSound() {
