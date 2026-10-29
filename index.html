@@ -20,7 +20,8 @@ var TFONT = { comic: "Rubik:wght@400;500;600;700;800&family=Unbounded:wght@600;8
   space: "Manrope:wght@400;500;600;700;800&family=Unbounded:wght@600;700" };
 function themeFont(t) { if (!TFONT[t] || document.getElementById("tf-" + t)) return; var l = document.createElement("link"); l.id = "tf-" + t; l.rel = "stylesheet";
   l.href = "https://fonts.googleapis.com/css2?family=" + TFONT[t] + "&display=swap"; document.head.appendChild(l); }
-try { var t = JSON.parse(localStorage.getItem("unitka.theme")); if (/^(light|dark|beige|comic|farcry|jim|sonic|solitaire|birds|paper|dusk|space)$/.test(t)) { document.documentElement.setAttribute("data-theme", t); themeFont(t); } } catch (e) {}</script>
+try { var t = JSON.parse(localStorage.getItem("unitka.theme")); if (/^(light|dark|beige|comic|farcry|jim|sonic|solitaire|birds|paper|dusk|space)$/.test(t)) { document.documentElement.setAttribute("data-theme", t); themeFont(t); }
+  if (/^(farcry|sonic|solitaire|birds)$/.test(t)) { document.documentElement.dataset.igra = t; document.write('<link rel="stylesheet" id="igcss" href="igry.css?v=2">'); } } catch (e) {}</script>
 <style>
 :root{
   color-scheme: light;
@@ -108,8 +109,7 @@ try { var t = JSON.parse(localStorage.getItem("unitka.theme")); if (/^(light|dar
   --fct:clamp(42px,6.8vw,96px); --fcp:min(2.6vw,30px); --fcl:min(3.6vw,42px);
 }
 [data-theme="farcry"] body{background:#1d140c;cursor:var(--aim)}
-[data-theme="farcry"] body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
-  background:radial-gradient(ellipse at 50% 42%,transparent 42%,rgba(0,0,0,.6) 100%),url("fc3-wall.webp") center/cover}
+/* фон-стена и баннер-обложка — общий модуль игровых тем igry.css (#igBg, #fcCard), 29.10 */
 [data-theme="farcry"] :is(input,textarea){cursor:text} [data-theme="farcry"] :is(select,input[type=range]){cursor:pointer}
 [data-theme="farcry"] .item{cursor:var(--aim)}
 /* шапка — тёмные доски, под ней лента татау */
@@ -122,13 +122,6 @@ try { var t = JSON.parse(localStorage.getItem("unitka.theme")); if (/^(light|dar
   text-shadow:-1px -1px 0 #3a0808,1px -1px 0 #3a0808,-1px 1px 0 #3a0808,1px 1px 0 #3a0808,0 3px 0 rgba(0,0,0,.4);transform:rotate(-4deg)}
 /* баннер-обложка сверху вкладки + вопрос Вааса */
 [data-theme="farcry"] main{position:relative;padding-top:32px}
-[data-theme="farcry"] main::before{content:"ЮНИТКА";display:flex;align-items:flex-start;box-sizing:border-box;height:clamp(190px,30vw,380px);margin:0 0 30px;padding:var(--fcp) 0 0 var(--fcl);
-  border-radius:var(--r);background:url("fc3-tatau-red.png") 0 100%/auto 18px repeat-x,linear-gradient(180deg,rgba(0,0,0,.3),transparent 38%),url("fc3-hero.webp") 60% 32%/cover;
-  box-shadow:0 14px 34px rgba(0,0,0,.6),0 0 0 2px #0e0905;
-  font:400 var(--fct)/1 var(--font-h);letter-spacing:.02em;color:#f4efe4;text-shadow:0 4px 0 rgba(0,0,0,.45),0 0 26px rgba(0,0,0,.55)}
-[data-theme="farcry"] main::after{content:"«Знаешь, что такое безумие?»";position:absolute;pointer-events:none;
-  left:calc(16px + var(--fcl) + 4px);top:calc(32px + var(--fcp) + var(--fct) + 10px);
-  font:italic 700 clamp(14px,1.7vw,22px)/1.2 var(--font);color:#f4efe4;text-shadow:0 2px 0 rgba(0,0,0,.6),0 0 14px rgba(0,0,0,.7)}
 /* листы дневника */
 [data-theme="farcry"] :is(.card,details.sec,.search,.sumtot,.tmenu,.ac,.tour-tip,.seg,.inp,select.sel,.btn,.chip,.themeb,.namebar input,.lock input,.shurl){background-color:var(--surface);background-image:var(--paper)}
 [data-theme="farcry"] :is(.card,details.sec,.search,.sumtot){border:0;box-shadow:var(--burn),var(--shadow)}
@@ -252,87 +245,7 @@ try { var t = JSON.parse(localStorage.getItem("unitka.theme")); if (/^(light|dar
   --sbh:clamp(200px,30vw,380px); --st:clamp(44px,7vw,100px); --sp:min(2.6vw,30px); --sl:min(3.6vw,42px);
 }
 [data-theme="sonic"] body{background:#1d5fe6}
-[data-theme="sonic"] body::before{content:"";position:fixed;inset:0;z-index:-2;pointer-events:none;background:linear-gradient(180deg,#0046e0 0%,#0f6efa 42%,#5fb0ff 78%,#a8dcff 100%)}
-/* живой фон: облака (два слоя с разной скоростью), холмы, кольца по краям */
-#sxDeco{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
-#sxDeco .sxp{position:absolute;inset:0}
-#sxDeco .sxc{position:absolute;left:0;will-change:transform}
-#sxDeco .far{top:4vh;height:156px;width:calc(100% + 960px);background:url("sonic-clouds.svg") 0 0/960px 156px repeat-x;opacity:.6;animation:sx-far 150s linear infinite}
-#sxDeco .near{top:15vh;height:260px;width:calc(100% + 1600px);background:url("sonic-clouds.svg") 0 0/1600px 260px repeat-x;animation:sx-near 80s linear infinite}
-@keyframes sx-far{to{transform:translateX(-960px)}}
-@keyframes sx-near{to{transform:translateX(-1600px)}}
-#sxDeco .sxh{position:absolute;left:0;right:0;bottom:0;height:clamp(170px,30vh,300px);background:url("sonic-hills.svg") 0 100%/auto 100% repeat-x}
-#sxDeco .sl{position:absolute;width:36px;height:36px;animation:sx-bob 3.4s ease-in-out infinite}
-@keyframes sx-bob{50%{transform:translateY(-14px)}}
-/* кольцо по краям: крутится (scaleX), рядом вспыхивает звёздочка */
-#sxDeco .rg{display:block;width:100%;height:100%;background:var(--ringi);animation:sx-spin 1.5s linear infinite}
-#sxDeco .sl::after{content:"";position:absolute;top:-10%;right:-10%;width:48%;height:48%;background:#fff;opacity:0;
-  clip-path:polygon(50% 0,61% 39%,100% 50%,61% 61%,50% 100%,39% 61%,0 50%,39% 39%);animation:sx-tw 2.6s ease-in-out infinite;animation-delay:inherit}
-@keyframes sx-spin{0%,100%{transform:scaleX(1)}25%,75%{transform:scaleX(.14)}50%{transform:scaleX(-1)}}
-@keyframes sx-tw{0%,62%,100%{opacity:0;transform:scale(.3) rotate(0)}78%{opacity:1;transform:scale(1) rotate(45deg)}}
-/* карточка-баннер: лицо — пейзаж, живой Соник (canvas .sxrun) и заголовок-кнопка; оборот — игра (canvas .sxgame); переворот — rotateY */
-#sxCard{position:relative;height:var(--sbh);margin:0 0 28px}
-#sxCard .sxin{position:absolute;inset:0}
-#sxCard .sxf{position:absolute;inset:0;border:3px solid #0a1a4a;border-radius:var(--r);box-shadow:0 6px 0 #0a1a4a;overflow:hidden;background:#1d5fe6}
-#sxCard .sxfr{background:linear-gradient(100deg,rgba(0,40,170,.42),rgba(0,40,170,0) 42%),url("sonic-hill.webp") 50% 42%/cover}
-/* 3D — только пока карточка переворачивается (.anim, sxFlip); в покое видна одна сторона, плоско: так легче телефону */
-#sxCard:not(.anim).flip .sxfr,#sxCard:not(.anim):not(.flip) .sxbk{visibility:hidden}
-#sxCard.flip .sxfr,#sxCard:not(.flip) .sxbk{pointer-events:none}     /* отвёрнутая сторона не ловит нажатия */
-#sxCard.anim{perspective:1800px}
-#sxCard.anim .sxin{transform-style:preserve-3d}
-#sxCard.anim.tr .sxin{transition:transform .9s cubic-bezier(.3,.1,.2,1)}
-#sxCard.anim.flip .sxin{transform:rotateY(180deg)}
-#sxCard.anim .sxf{-webkit-backface-visibility:hidden;backface-visibility:hidden}
-#sxCard.anim .sxbk{transform:rotateY(180deg)}
-#sxCard canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
-#sxCard .sxrun{pointer-events:none}
-#sxCard .sxgame{touch-action:none;cursor:pointer;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
-#sxCard .sp{position:absolute;left:100%;height:3px;border-radius:2px;background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.95));opacity:0;animation:sx-dash 3.4s linear infinite;pointer-events:none}
-@keyframes sx-dash{0%{transform:translateX(0);opacity:0}4%{opacity:1}34%{transform:translateX(-2200px);opacity:1}35%,100%{transform:translateX(-2200px);opacity:0}}
-/* «ЮНИТКА» — кнопка: золотая рамка, мягкое свечение, по буквам пробегает блик, рядом мигает «▶ ИГРАТЬ» */
-#sxCard .sxtitle{position:absolute;z-index:3;left:var(--sl);top:var(--sp);margin:0;padding:0;border:0;background:none;cursor:pointer;transition:transform .15s ease;-webkit-tap-highlight-color:transparent}
-#sxCard .sxt{position:relative;display:block;overflow:hidden;padding:.04em .26em .14em .18em;border:3px solid #ffd21f;border-radius:.24em;background:rgba(10,26,74,.34);
-  box-shadow:0 0 0 3px #0a1a4a,0 7px 0 3px #0a1a4a,0 0 26px rgba(255,210,31,.5);font:italic 900 var(--st)/1 "Exo 2",var(--font);letter-spacing:.01em;color:#ffd21f;text-shadow:var(--ol3),0 7px 0 #0a1a4a}
-#sxCard .sxt::before{content:"";position:absolute;inset:0;background:radial-gradient(closest-side,rgba(255,226,90,.55),rgba(255,226,90,0));opacity:0;animation:sx-glow 1.8s ease-in-out infinite;z-index:-1}
-#sxCard .sxt::after{content:"";position:absolute;top:-10%;bottom:-10%;left:0;width:34%;pointer-events:none;background:linear-gradient(100deg,rgba(255,255,255,0),rgba(255,255,255,.6),rgba(255,255,255,0));
-  transform:translateX(-170%) skewX(-16deg);animation:sx-shine 3.4s ease-in-out .8s infinite}
-@keyframes sx-glow{50%{opacity:1}}
-@keyframes sx-shine{0%,55%{transform:translateX(-170%) skewX(-16deg)}85%,100%{transform:translateX(420%) skewX(-16deg)}}
-#sxCard .sxtitle:hover,#sxCard .sxtitle:focus-visible{transform:translateY(-3px) scale(1.03)}
-#sxCard .sxtitle:active{transform:translateY(2px) scale(.98)}
-#sxCard .sxtitle:focus-visible{outline:3px solid #fff;outline-offset:8px;border-radius:.3em}
-#sxCard .sxgo{position:absolute;right:-.7em;bottom:-.75em;font:italic 900 clamp(11px,1.3vw,16px)/1 "Exo 2",var(--font);letter-spacing:.03em;color:#fff;background:#e8262b;
-  border:2.5px solid #0a1a4a;border-radius:999px;padding:.4em .85em;box-shadow:0 3px 0 #0a1a4a;transform:rotate(-5deg);white-space:nowrap;animation:sx-blink 1.1s steps(1) infinite}
-@keyframes sx-blink{50%{opacity:.4}}
-#sxCard .sxsub{position:absolute;z-index:2;pointer-events:none;left:calc(var(--sl) + 10px);top:calc(var(--sp) + var(--st) * 1.25 + 26px);
-  font:italic 800 clamp(12px,1.6vw,21px)/1.1 "Exo 2",var(--font);color:#fff;text-shadow:var(--ol);transform:rotate(-3deg)}
-/* приманка до игры (23.10, Андрей: «ещё до открытия игры — Пройди и получишь ценный приз!», дальше «приз уже ближе»): текст по прогрессу, нажатие — в игру */
-#sxCard .sxprize{pointer-events:auto;cursor:pointer;border:2.5px solid #0a1a4a;border-radius:999px;padding:.38em .85em;background:linear-gradient(#ffe86a,#ffb000);
-  color:#0a1a4a;text-shadow:none;box-shadow:0 3px 0 #0a1a4a,0 0 16px rgba(255,210,31,.65);animation:sx-prize 1.6s ease-in-out infinite}
-#sxCard .sxprize:focus-visible{outline:3px solid #fff;outline-offset:3px}
-@keyframes sx-prize{0%,100%{transform:rotate(-3deg) scale(1)}50%{transform:rotate(-3deg) scale(1.07)}}
-/* кнопки игры на обороте: звук, во весь экран, перевернуть обратно */
-#sxCard .sxbtns{position:absolute;z-index:3;top:8px;right:8px;display:flex;gap:6px}
-#sxCard .sxbtns button{width:34px;height:34px;border-radius:50%;border:2px solid #ffd21f;background:rgba(10,26,74,.62);color:#fff;display:grid;place-items:center;padding:0;box-shadow:0 2px 0 #0a1a4a;cursor:pointer}
-#sxCard .sxbtns svg{width:18px;height:18px;display:block}
-#sxCard .sxbtns [data-sx="mute"] .off,#sxCard .sxbtns [data-sx="mute"][aria-pressed="true"] .on{display:none}
-#sxCard .sxbtns [data-sx="mute"][aria-pressed="true"] .off{display:block}
-#sxCard.big{position:fixed;inset:0;z-index:300;height:auto;margin:0}
-#sxCard.big .sxf{border-radius:0;border:0;box-shadow:none}
-#sxCard.big .sxfr{visibility:hidden}
-html.sx-big{overflow:hidden}
-html.sx-play #sxDeco,html.sx-play #sxDeco *,html.sx-play #sxDeco *::after{animation-play-state:paused!important}     /* пока играют — фон стоит */
-@media (orientation: portrait){                                       /* во весь экран стоя — игра широкой полосой по центру */
-  #sxCard.big .sxbk{background:#0a1a4a}
-  #sxCard.big .sxgame{inset:auto 0;top:50%;height:min(100%,calc(100vw / 1.6));transform:translateY(-50%)}
-  #sxCard.big .sxbk::after{content:"Поверните телефон — будет крупнее";position:absolute;left:0;right:0;top:calc(50% + 100vw / 3.2 + 18px);text-align:center;color:#bfe3ff;font:italic 800 14px/1.2 "Exo 2",sans-serif}
-}
-@supports (animation-timeline: scroll()){
-  #sxDeco .sxp.cl{animation:sx-up linear both;animation-timeline:scroll(root)}
-  #sxDeco .sxp.rn{animation:sx-up2 linear both;animation-timeline:scroll(root)}
-  @keyframes sx-up{to{transform:translateY(-90px)}}
-  @keyframes sx-up2{to{transform:translateY(-240px)}}
-}
+/* фон, облака, холмы, кольца и карточка-баннер #sxCard с игрой — общий модуль igry.css / igry.js (29.10) */
 /* шапка — синяя, под ней земля в клетку с травой */
 [data-theme="sonic"] header{background:linear-gradient(180deg,#0b2c8f,#1748c9);border-bottom:0}
 [data-theme="sonic"] header::after{content:"";position:absolute;left:0;right:0;top:100%;height:14px;pointer-events:none;
@@ -405,13 +318,7 @@ html.sx-play #sxDeco,html.sx-play #sxDeco *,html.sx-play #sxDeco *::after{animat
   --hall:url("pasyans-hall.webp");
 }
 [data-theme="solitaire"] body{background:#04150d}
-[data-theme="solitaire"] body::before{content:"";position:fixed;inset:0;z-index:-2;pointer-events:none;
-  background:var(--lamp),linear-gradient(rgba(3,10,6,.42),rgba(3,10,6,.7)),var(--hall) 50% 30%/cover no-repeat,#04150d}
-/* по краям медленно плывут и вращаются настоящие фишки (6 кадров в pasyans-chips.webp); дальние — мельче и прозрачнее */
-#ptDeco{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
-#ptDeco i{position:absolute;width:var(--z);height:var(--z);background:url("pasyans-chips.webp") var(--c) 0/600% 100% no-repeat;opacity:var(--o);filter:drop-shadow(0 10px 14px rgba(0,0,0,.55));
-  animation:pt-drift var(--d) ease-in-out infinite alternate;will-change:transform}
-@keyframes pt-drift{from{transform:translate(0,0) rotate(-25deg)}to{transform:translate(var(--dx),var(--dy)) rotate(40deg)}}
+/* фон зала, плывущие фишки и карточка-баннер #ptCard с «Косынкой» — общий модуль igry.css / igry.js (29.10) */
 /* шапка — чёрная, золотая кромка; «Ю» — ровная золотая фишка */
 [data-theme="solitaire"] header{background:linear-gradient(180deg,#070b09,#0c1711);border-bottom:0;box-shadow:0 1px 0 rgba(232,194,96,.85),0 10px 24px rgba(0,0,0,.5)}
 [data-theme="solitaire"] .brand span{color:#f0dca0;font:400 23px/1 var(--font-h);letter-spacing:.06em}
@@ -456,63 +363,6 @@ html.sx-play #sxDeco,html.sx-play #sxDeco *,html.sx-play #sxDeco *::after{animat
 [data-theme="solitaire"] input[type=range]::-moz-range-thumb{width:26px;height:26px;border:0;border-radius:50%;background:radial-gradient(circle,#c41230 0 40%,#fff 41% 47%,transparent 48%),repeating-conic-gradient(#c41230 0 30deg,#fff 30deg 45deg)}
 [data-theme="solitaire"] .toast{background:var(--solid);color:var(--ink);border:1px solid #e8c260;box-shadow:0 10px 26px rgba(0,0,0,.55)}
 [data-theme="solitaire"] .mini{background:#08180f;color:#f3ead2;border:1px solid #e8c260}
-/* карточка-баннер: стол казино; лицо — «ЮНИТКА», веер, ведущая; оборот — «Косынка» внутри карточки (вытягивается вниз), весь экран — кнопкой */
-#ptCard{position:relative;height:var(--pbh);margin:0 0 28px;transition:height .45s cubic-bezier(.2,.8,.2,1)}
-#ptCard.tall{height:var(--pbh-play)}
-#ptCard .ptin{position:absolute;inset:0}
-#ptCard .ptf{position:absolute;inset:0;border-radius:16px;overflow:hidden;box-shadow:0 0 0 1px #e8c260,0 0 0 5px #2a1d0a,0 0 0 6px #b9903a,0 18px 40px rgba(0,0,0,.6)}
-#ptCard .ptfr{background:#050b07}
-#ptCard .ptbk{display:flex;flex-direction:column;background:var(--lamp),radial-gradient(ellipse 85% 75% at 50% 42%,transparent 55%,rgba(0,0,0,.42)),url("pasyans-felt.webp") 50% 50%/cover,#0b3a24}
-/* живая ведущая: видео-петля на всю карточку (постер — первый кадр), слева и снизу — тень под надписи */
-#ptCard .ptvid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 0;display:block;pointer-events:none;background:#050b07}
-#ptCard .ptshade{position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,rgba(3,8,5,.84) 0%,rgba(3,8,5,.55) 30%,rgba(3,8,5,0) 56%),linear-gradient(0deg,rgba(3,8,5,.5),rgba(3,8,5,0) 32%)}
-/* лампочки по рамке, как на вывеске казино (рисует ptBulbs): второй слой мигает — огоньки бегут */
-#ptCard .ptbulbs{position:absolute;inset:0;z-index:2;pointer-events:none}
-#ptCard .ptbulbs canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
-#ptCard .ptbulbs .b2{animation:pt-chase .9s steps(1) infinite}
-@keyframes pt-chase{50%{opacity:0}}
-#ptCard:not(.anim).flip .ptfr,#ptCard:not(.anim):not(.flip) .ptbk{visibility:hidden}
-#ptCard.flip .ptfr,#ptCard:not(.flip) .ptbk{pointer-events:none}
-#ptCard.anim{perspective:1800px}
-#ptCard.anim .ptin{transform-style:preserve-3d}
-#ptCard.anim.tr .ptin{transition:transform .75s cubic-bezier(.3,.1,.2,1)}
-#ptCard.anim.flip .ptin{transform:rotateY(180deg)}
-#ptCard.anim .ptf{-webkit-backface-visibility:hidden;backface-visibility:hidden}
-#ptCard.anim .ptbk{transform:rotateY(180deg)}
-#ptCard .pttitle{position:absolute;z-index:3;left:var(--pl);top:var(--pp);margin:0;padding:0;border:0;background:none;cursor:pointer;text-align:left;transition:transform .2s ease;-webkit-tap-highlight-color:transparent}
-#ptCard .ptt{display:block;font:400 var(--pt)/1 "Forum",Georgia,serif;letter-spacing:.06em;background:var(--gold);-webkit-background-clip:text;background-clip:text;color:transparent;
-  filter:drop-shadow(0 2px 0 #3a2706) drop-shadow(0 0 18px rgba(240,200,110,.35))}
-#ptCard .ptgo{display:inline-flex;align-items:center;gap:.5em;margin-top:.55em;font:700 clamp(11px,1.3vw,15px)/1 "Montserrat",system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#1b1306;
-  background:var(--goldbtn);border:1px solid #f7df95;border-radius:999px;padding:.75em 1.2em;box-shadow:0 3px 0 #6b4a12,0 8px 22px rgba(0,0,0,.5),0 0 18px rgba(232,194,96,.3);animation:pt-pulse 2.2s ease-in-out infinite}
-@keyframes pt-pulse{50%{transform:scale(1.05)}}
-#ptCard .pttitle:hover,#ptCard .pttitle:focus-visible{transform:translateY(-3px)}
-#ptCard .pttitle:active{transform:translateY(1px)}
-#ptCard .pttitle:focus-visible{outline:2px solid #f0c96a;outline-offset:6px;border-radius:8px}
-#ptCard .ptsub{position:absolute;z-index:2;left:var(--pl);bottom:var(--pp);font:400 clamp(13px,1.5vw,19px)/1.2 "Forum",Georgia,serif;letter-spacing:.04em;color:#e9d39a;text-shadow:0 1px 3px rgba(0,0,0,.7);pointer-events:none}
-/* ведущая — в видео; поверх неё прозрачная кнопка «сыграть»; облачко «Сыграем?» — у её лица */
-#ptCard .pthost{position:absolute;z-index:2;right:0;top:0;bottom:0;width:46%;padding:0;border:0;background:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
-#ptCard .ptbub{position:absolute;z-index:3;right:32%;top:14%;padding:.55em .9em;border-radius:14px 14px 4px 14px;background:#fff8e6;color:#3a1020;
-  font:700 clamp(11px,1.25vw,15px)/1.15 "Montserrat",system-ui,sans-serif;box-shadow:0 6px 18px rgba(0,0,0,.45);pointer-events:none;transform-origin:100% 100%;animation:pt-bub 5.2s ease-in-out infinite}
-@keyframes pt-bub{0%,8%{opacity:0;transform:scale(.6)}14%,70%{opacity:1;transform:scale(1)}78%,100%{opacity:0;transform:scale(.8)}}
-#ptCard .ptbar{display:flex;align-items:center;gap:6px;padding:8px 10px;padding-top:max(8px,env(safe-area-inset-top));background:linear-gradient(180deg,rgba(0,0,0,.55),rgba(0,0,0,.18));border-bottom:1px solid rgba(232,194,96,.25);flex:none}
-#ptCard .ptbar button{height:36px;min-width:36px;border-radius:10px;border:1px solid rgba(232,194,96,.6);background:rgba(255,255,255,.04);color:#f0dca0;font:600 13px/1 "Montserrat",system-ui,sans-serif;
-  display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:0 11px;cursor:pointer;transition:background .15s,transform .08s}
-#ptCard .ptbar button:hover{background:rgba(232,194,96,.14)} #ptCard .ptbar button:active{transform:translateY(1px)}
-#ptCard .ptbar button[disabled]{opacity:.35;cursor:default}
-#ptCard .ptbar svg{width:18px;height:18px;flex:none;display:block}
-#ptCard .ptbar .pri{background:var(--goldbtn);color:#1b1306;border-color:#f7df95}
-#ptCard .ptbar :is([data-pt="mute"],[data-pt="music"]) .off,#ptCard .ptbar :is([data-pt="mute"],[data-pt="music"])[aria-pressed="true"] .on{display:none}
-#ptCard .ptbar :is([data-pt="mute"],[data-pt="music"])[aria-pressed="true"] .off{display:block}
-#ptCard .ptbar [data-pt="new"].ask{background:var(--goldbtn);color:#1b1306;border-color:#f7df95}     /* «Новая?» — второе нажатие начинает заново */
-#ptCard .ptstat{margin-left:auto;font:600 13px/1 "Montserrat",system-ui,sans-serif;color:#e9d39a;white-space:nowrap;font-variant-numeric:tabular-nums}
-#ptCard .ptgame{display:block;flex:1;min-height:0;width:100%;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
-@media (max-width: 560px){ #ptCard .ptbar .lbl{display:none} #ptCard .ptbar [data-pt="new"].ask .lbl{display:inline} #ptCard .ptbar{gap:4px;padding-left:6px;padding-right:6px}
-  #ptCard .ptbar button{padding:0 7px;min-width:34px} #ptCard .ptstat{font-size:11.5px} #ptCard .ptstat .w{display:none} }
-#ptCard.big{position:fixed;inset:0;z-index:300;height:auto;margin:0;transition:none}
-#ptCard.big .ptf{border-radius:0;box-shadow:none}
-#ptCard.big .ptfr{visibility:hidden}
-html.pt-big{overflow:hidden}
-html.pt-play #ptDeco i,html.pt-play #ptCard :is(.ptgo,.ptbub,.b2){animation-play-state:paused}
 /* «Angry Birds» (23.10.2026, Андрей: «тему энгри бердс максимально похоже + 3д ощущения, полная смена темы, погружение…
    логику открытия как в Сонике, визуал мощнее»). Картинки — NeuralBox NB Pro (Код\unitka\birds): остров свиней во весь экран
    (ab-scene*.webp) — едет от мыши и при прокрутке (параллакс), по небу пролетают птицы, падают перья (#abDeco); шапка и нижнее
@@ -538,20 +388,7 @@ html.pt-play #ptDeco i,html.pt-play #ptCard :is(.ptgo,.ptbub,.b2){animation-play
   --abh:clamp(220px,32vw,400px); --abt:clamp(46px,7.6vw,108px); --abp:min(2.4vw,28px); --abl:min(3.2vw,38px);
 }
 [data-theme="birds"] body{background:#52c1ec}
-/* живой фон: остров свиней едет от мыши (--bx/--by) и при прокрутке; птицы пролетают дугой (abFly), перья падают и качаются */
-#abDeco{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
-#abDeco .abscw{position:absolute;inset:-50px}
-#abDeco .absc{position:absolute;inset:0;background:url("ab-scene.webp") 50% 62%/cover no-repeat;transform:translate3d(calc(var(--bx,0) * -18px),calc(var(--by,0) * -12px),0) scale(1.03);will-change:transform}
-#abDeco .abfly{position:absolute;left:0;top:0;width:var(--z);height:var(--z);background:url("ab-chars.webp") var(--c)/400% 300% no-repeat;filter:drop-shadow(0 10px 8px rgba(10,40,70,.28));will-change:transform}
-#abDeco .abft{position:absolute;top:-30px;width:var(--z);height:calc(var(--z) * .36);border-radius:50%;background:var(--c);box-shadow:inset 0 -2px 0 rgba(0,0,0,.12);opacity:.9;
-  animation:ab-fall var(--d) linear var(--dl) infinite}
-#abDeco .abft::after{content:"";position:absolute;left:8%;right:8%;top:47%;height:1px;background:rgba(0,0,0,.22)}
-@keyframes ab-fall{0%{transform:translate(0,0) rotate(0)}25%{transform:translate(28px,26vh) rotate(70deg)}50%{transform:translate(-14px,52vh) rotate(-30deg)}75%{transform:translate(24px,78vh) rotate(60deg)}100%{transform:translate(-6px,108vh) rotate(-20deg)}}
-@supports (animation-timeline: scroll()){
-  #abDeco .abscw{animation:ab-up linear both;animation-timeline:scroll(root)}
-  @keyframes ab-up{to{transform:translateY(-80px)}}
-}
-html.ab-play #abDeco *{animation-play-state:paused!important}
+/* остров свиней, птицы, перья и карточка-баннер #abCard с игрой — общий модуль igry.css / igry.js (29.10) */
 /* шапка — деревянная доска, под ней трава */
 [data-theme="birds"] header{background:linear-gradient(180deg,rgba(255,240,200,.18),rgba(60,25,0,.18)),var(--wood);border-bottom:0;box-shadow:0 3px 0 #3b220e}
 [data-theme="birds"] header::after{content:"";position:absolute;left:0;right:0;top:calc(100% + 3px);height:16px;pointer-events:none;background:var(--grass) 0 0/64px 16px repeat-x;filter:drop-shadow(0 3px 2px rgba(0,0,0,.2))}
@@ -601,64 +438,6 @@ html.ab-play #abDeco *{animation-play-state:paused!important}
 [data-theme="birds"] input[type=range]::-moz-range-thumb{width:32px;height:32px;border:0;border-radius:0;background:url("ab-i-red.webp") center/contain no-repeat}
 [data-theme="birds"] .toast{background:linear-gradient(rgba(40,15,0,.12),rgba(40,15,0,.22)),var(--wood);color:#fff;font-weight:800;text-shadow:var(--ol);border:3px solid #3b220e;box-shadow:0 4px 0 #3b220e,0 10px 24px rgba(0,0,0,.3)}
 [data-theme="birds"] .mini{background:linear-gradient(#fffdf7,#fff1d4);color:var(--ink);border:3px solid #3b220e;box-shadow:0 -4px 0 #e0241c,0 6px 20px rgba(0,0,0,.3)}
-/* карточка-баннер: лицо — объёмная диорама (небо дальше, земля и живая сцена ближе), «ЮНИТКА» и Чак впереди; оборот — игра */
-#abCard{position:relative;height:var(--abh);margin:0 0 32px;--tx:0;--ty:0}
-#abCard .abin{position:absolute;inset:0}
-#abCard .abf{position:absolute;inset:0;border:3px solid #3b220e;border-radius:var(--r);box-shadow:0 7px 0 #3b220e,0 18px 34px rgba(16,45,80,.35);overflow:hidden;background:#52c1ec}
-#abCard .abfr{perspective:900px}
-#abCard .abfr::after{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;border-radius:inherit;box-shadow:inset 0 0 0 2px rgba(255,255,255,.35),inset 0 -40px 50px -30px rgba(40,20,0,.35)}
-#abCard .ab3d{position:absolute;inset:0;transform-style:preserve-3d;transform:rotateY(calc(var(--tx) * 5deg)) rotateX(calc(var(--ty) * -3.5deg))}
-#abCard :is(.absky,.abrun){position:absolute;left:-4%;top:-4%;width:108%;height:108%;display:block}
-#abCard .absky{background:url("ab-land.webp") 50% 78%/cover no-repeat;transform:translateZ(-90px) scale(1.1)}
-#abCard .abrun{pointer-events:none}
-#abCard:not(.anim).flip .abfr,#abCard:not(.anim):not(.flip) .abbk{visibility:hidden}
-#abCard.flip .abfr,#abCard:not(.flip) .abbk{pointer-events:none}
-#abCard.anim{perspective:1800px}
-#abCard.anim .abin{transform-style:preserve-3d}
-#abCard.anim.tr .abin{transition:transform .9s cubic-bezier(.3,.1,.2,1)}
-#abCard.anim.flip .abin{transform:rotateY(180deg)}
-#abCard.anim .abf{-webkit-backface-visibility:hidden;backface-visibility:hidden}
-#abCard.anim .abbk{transform:rotateY(180deg)}
-#abCard .abbk{background:#52c1ec}
-#abCard .abgame{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;outline:0}
-/* «ЮНИТКА» — как логотип игры: буквы вразнобой, красные глянцевые, толстая обводка, объём; рядом «▶ ИГРАТЬ» */
-#abCard .abtitle{position:absolute;z-index:3;left:var(--abl);top:var(--abp);margin:0;padding:0;border:0;background:none;cursor:pointer;-webkit-tap-highlight-color:transparent;
-  transform:translate(calc(var(--tx) * -8px),calc(var(--ty) * -6px))}
-#abCard .abt{display:flex;font:900 var(--abt)/1.05 "Rubik",var(--font);letter-spacing:.01em;padding:0 .05em .12em 0}
-#abCard .abt b{position:relative;display:inline-block;font-weight:900;color:#c4170f;text-shadow:var(--ol3),0 5px 0 #6b1006,0 8px 0 #2b1405,0 14px 16px rgba(0,0,0,.35);
-  transform:rotate(var(--r)) translateY(var(--y));transition:transform .3s cubic-bezier(.3,1.7,.5,1)}
-#abCard .abt b::after{content:attr(data-l);position:absolute;left:0;top:0;text-shadow:none;background:linear-gradient(180deg,#ffb79c 0%,#ff5a3a 30%,#e3211a 58%,#a8100a 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
-#abCard .abtitle:hover .abt b,#abCard .abtitle:focus-visible .abt b{transform:rotate(calc(var(--r) * -1)) translateY(calc(var(--y) - 5px))}
-#abCard .abtitle:active .abt b{transform:rotate(var(--r)) translateY(calc(var(--y) + 2px)) scale(.97)}
-#abCard .abtitle:focus-visible{outline:3px solid #fff;outline-offset:8px;border-radius:.3em}
-#abCard .abgo{position:absolute;right:-.5em;bottom:-.7em;font:900 clamp(12px,1.35vw,17px)/1 "Rubik",var(--font);letter-spacing:.03em;color:#fff;text-shadow:0 2px 0 #173d04;white-space:nowrap;
-  background:linear-gradient(#c4f56a,#5cb51c 55%,#2f7a0a);border:3px solid #173d04;border-radius:999px;padding:.45em .95em;box-shadow:0 4px 0 #173d04,inset 0 2px 0 rgba(255,255,255,.55);transform:rotate(-4deg);animation:ab-go 1.4s ease-in-out infinite}
-@keyframes ab-go{0%,100%{transform:rotate(-4deg) scale(1)}50%{transform:rotate(-4deg) scale(1.08)}}
-#abCard .abprize{position:absolute;z-index:3;left:calc(var(--abl) + 6px);bottom:2.4%;cursor:pointer;font:800 clamp(12px,1.35vw,17px)/1.15 "Rubik",var(--font);color:#3b220e;
-  white-space:nowrap;background:linear-gradient(#fff07a,#ffc21a);border:2.5px solid #3b220e;border-radius:999px;padding:.42em .9em;box-shadow:0 3px 0 #3b220e,inset 0 2px 0 rgba(255,255,255,.6);transform:rotate(-2deg);-webkit-tap-highlight-color:transparent}
-#abCard .abprize:focus-visible{outline:3px solid #fff;outline-offset:3px}
-#abCard .abprize .sm{display:none}
-/* Чак вылетает из рамки к зрителю — едет сильнее всех слоёв */
-#abCard .abpop{position:absolute;z-index:4;right:2%;top:-15%;width:clamp(76px,10.5vw,140px);aspect-ratio:1;pointer-events:none;background:url("ab-chars.webp") 100% 0/400% 300% no-repeat;
-  filter:drop-shadow(0 16px 12px rgba(10,30,60,.35));transform:translate(calc(var(--tx) * 20px),calc(var(--ty) * 14px)) rotate(-14deg);transition:opacity .3s}
-#abCard .abpop::after{content:"";position:absolute;right:88%;top:46%;width:120%;height:6%;border-radius:4px;background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.85));box-shadow:0 -14px 0 -1px rgba(255,255,255,.6),0 14px 0 -1px rgba(255,255,255,.5)}
-#abCard.flip .abpop,#abCard.anim .abpop{opacity:0}
-/* кнопки игры на обороте: пауза, звук, во весь экран, назад */
-#abCard .abbtns{position:absolute;z-index:3;top:8px;right:8px;display:flex;gap:6px}
-#abCard .abbtns button{width:36px;height:36px;border-radius:50%;border:2.5px solid #3b220e;background:linear-gradient(#fffdf6,#f1e2c2);color:#3b220e;display:grid;place-items:center;padding:0;box-shadow:0 3px 0 #3b220e,inset 0 2px 0 #fff;cursor:pointer}
-#abCard .abbtns button:active{transform:translateY(3px);box-shadow:none}
-#abCard .abbtns svg{width:18px;height:18px;display:block}
-#abCard .abbtns [data-ab="mute"] .off,#abCard .abbtns [data-ab="mute"][aria-pressed="true"] .on{display:none}
-#abCard .abbtns [data-ab="mute"][aria-pressed="true"] .off{display:block}
-#abCard.big{position:fixed;inset:0;z-index:300;height:auto;margin:0}
-#abCard.big .abf{border-radius:0;border:0;box-shadow:none}
-#abCard.big .abfr{visibility:hidden}
-html.ab-big{overflow:hidden}
-@media (orientation: portrait){                                       /* во весь экран стоя — игра широкой полосой по центру */
-  #abCard.big .abbk{background:#1d4f7a}
-  #abCard.big .abgame{inset:auto 0;top:50%;height:min(100%,calc(100vw / 1.6));transform:translateY(-50%)}
-  #abCard.big .abbk::after{content:"Поверните телефон — будет крупнее";position:absolute;left:0;right:0;top:calc(50% + 100vw / 3.2 + 18px);text-align:center;color:#fff;font:800 14px/1.2 "Rubik",sans-serif;text-shadow:0 2px 0 #0c2f5c}
-}
 /* «Тетрадь» — спокойная: лист в клетку, синие «чернила», заголовки и цифры с засечками, вместо теней — тонкие линии, шрифты PT Sans + PT Serif */
 :root[data-theme="paper"]{
   color-scheme: light;
@@ -1256,11 +1035,7 @@ a.btn{text-decoration:none;color:inherit}
   [data-theme="farcry"] nav.tabs::before{content:"";position:absolute;left:0;right:0;bottom:100%;height:14px;pointer-events:none;background:url("fc3-tatau-red.png") 0 100%/auto 14px repeat-x}
   [data-theme="farcry"] nav.tabs button{color:#e9dcbc}
   [data-theme="farcry"] nav.tabs button[aria-current="page"]{color:#ff6a5a;box-shadow:inset 0 -3px 0 #c8241d;border-radius:0}
-  [data-theme="farcry"] body::before{background-image:radial-gradient(ellipse at 50% 42%,transparent 42%,rgba(0,0,0,.6) 100%),url("fc3-wall-m.webp")}
   [data-theme="farcry"] main{padding-top:26px}
-  [data-theme="farcry"] main::before{height:48vw;margin:0 0 22px;font-size:8vw;
-    background:url("fc3-tatau-red.png") 0 100%/auto 14px repeat-x,linear-gradient(180deg,rgba(0,0,0,.3),transparent 40%),url("fc3-hero-m.webp") center/cover}
-  [data-theme="farcry"] main::after{top:calc(26px + var(--fcp) + 8vw + 6px);left:calc(12px + var(--fcl) + 2px);max-width:40%;font-size:12px}
   [data-theme="farcry"] .detail-wrap.open .detail{box-shadow:var(--burn)}
   [data-theme="jim"] nav.tabs{background:#3a1859;border-top:4px solid var(--slime)}
   [data-theme="jim"] nav.tabs button{color:#fff3c4}
@@ -1288,20 +1063,7 @@ a.btn{text-decoration:none;color:inherit}
   /* стол в игре — ровно под раздачу и ещё ~8 открытых карт в столбце; длиннее — веер в столбце сам ужимается (Андрей 23.10: «окно
      чуть увеличенное — для чего?»; было 128vw) */
   :root[data-theme="solitaire"]{--pbh:56vw;--pbh-play:min(100vw,calc(100vh - var(--hdr,53px) - var(--nav-h) - 24px));--pt:9.4vw;--pp:4vw;--pl:4.4vw;--hall:url("pasyans-hall-m.webp")}
-  #ptCard{margin:0 0 22px}
-  #ptCard .ptsub,#ptCard .ptgo2{display:none}                   /* на телефоне — надпись, кнопка и ведущая (видео — правая часть кадра) */
-  #ptCard .ptvid{object-position:50% 50%}
-  #ptCard .ptshade{background:linear-gradient(90deg,rgba(3,8,5,.86) 0%,rgba(3,8,5,.5) 36%,rgba(3,8,5,0) 60%)}
-  #ptCard .pthost{width:48%}
-  #ptCard .ptbub{right:auto;left:var(--pl);top:auto;bottom:13%;font-size:11px;border-radius:12px 12px 4px 12px}
   :root[data-theme="sonic"]{--sbh:50vw;--st:9.5vw}
-  #sxCard{margin:0 0 22px}
-  #sxCard .sxfr{background:linear-gradient(100deg,rgba(0,40,170,.42),rgba(0,40,170,0) 55%),url("sonic-hill-m.webp") 55% 42%/cover}
-  #sxCard .sxsub{top:calc(var(--sp) + var(--st) * 1.25 + 18px);font-size:11px;max-width:58%}
-  #sxCard .sxgo{font-size:10px;right:-1em;bottom:-.95em}
-  #sxCard .sxt{border-width:2.5px;box-shadow:0 0 0 2.5px #0a1a4a,0 5px 0 2.5px #0a1a4a,0 0 18px rgba(255,210,31,.5)}
-  #sxDeco .sl{display:none}
-  #sxDeco .near{top:10vh}
   [data-theme="birds"] nav.tabs{background:linear-gradient(180deg,rgba(255,240,200,.12),rgba(40,15,0,.3)),var(--wood);border-top:0;box-shadow:0 -3px 0 #3b220e}
   [data-theme="birds"] nav.tabs::before{content:"";position:absolute;left:0;right:0;bottom:calc(100% + 2px);height:16px;pointer-events:none;background:var(--grass) 0 0/64px 16px repeat-x;transform:scaleY(-1)}
   [data-theme="birds"] nav.tabs button{color:#fff;font-weight:800;text-shadow:var(--ol)}
@@ -1309,17 +1071,7 @@ a.btn{text-decoration:none;color:inherit}
   [data-theme="birds"] nav.tabs button[aria-current="page"]{color:#ffd21f}
   [data-theme="birds"] main{padding-top:30px}
   [data-theme="birds"] .detail-wrap.open .backbar{background:#fffaf0;border-bottom:3px solid #3b220e}
-  #abDeco .absc{background-image:url("ab-scene-m.webp");background-position:50% 50%}
   :root[data-theme="birds"]{--abh:50vw;--abt:9.8vw;--abp:3vw;--abl:3.6vw}
-  #abCard{margin:0 0 24px}
-  #abCard .abprize{bottom:1.6%;font-size:10.5px;padding:.36em .8em;max-width:64%}
-  #abCard .abgo{font-size:10.5px;right:-1em;bottom:-.95em;border-width:2.5px}
-  #abCard .abt b{text-shadow:var(--ol),0 3px 0 #6b1006,0 5px 0 #2b1405,0 8px 10px rgba(0,0,0,.3)}
-  #abCard .abpop{width:19vw;top:-11%;right:1%}
-  #abCard .abbtns{top:6px;right:6px;gap:5px}
-  #abCard .abbtns button{width:31px;height:31px;border-width:2px}
-  #abCard .abbtns svg{width:16px;height:16px}
-  #abCard .abprize .lg{display:none} #abCard .abprize .sm{display:inline}
 }
 @media (max-width: 380px){ .inp{width:116px} .hero .big{font-size:30px} .lhead,.item{grid-template-columns:minmax(0,1fr) 54px 54px 54px} }
 </style>
@@ -1770,402 +1522,25 @@ const SWATCH = {          /* кружки тем — векторные, без 
   dusk: '<svg class="sw" viewBox="0 0 20 20"><defs><linearGradient id="swDusk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2d4c50"/><stop offset="1" stop-color="#3b3653"/></linearGradient></defs><circle cx="10" cy="10" r="8.6" fill="url(#swDusk)" stroke="#8a8a85" stroke-width="1.2"/><circle cx="10" cy="10" r="3.4" fill="#7fc8b4"/></svg>',
   space: '<svg class="sw" viewBox="0 0 20 20"><defs><radialGradient id="swSp" cx=".3" cy=".3" r=".9"><stop offset="0" stop-color="#7a4fd6"/><stop offset=".55" stop-color="#1c1a5e"/><stop offset="1" stop-color="#060818"/></radialGradient></defs><circle cx="10" cy="10" r="8.6" fill="url(#swSp)" stroke="#a493ff" stroke-width="1.2"/><path d="M3.4 14.6a8.6 8.6 0 0 0 13.2 0c-1.6-1.6-4-2.4-6.6-2.4s-5 .8-6.6 2.4Z" fill="#3fa0e8"/><path d="M3.4 14.6c1.6-1.6 4-2.4 6.6-2.4s5 .8 6.6 2.4" fill="none" stroke="#8ff0ff" stroke-width=".8"/><circle cx="13.6" cy="12.6" r="1.3" fill="#ffd27a"/><circle cx="6" cy="6.4" r=".7" fill="#fff"/><circle cx="12.4" cy="5" r=".5" fill="#fff"/></svg>'
 };
-/* «Соник»: живые слои — облака в два слоя, холмы, кольца по краям (#sxDeco) и карточка-баннер #sxCard: на лице бегает Соник
-   (sonic-game.js → SonicGame.runner по картинке), «ЮНИТКА» — кнопка; нажал — карточка переворачивается, на обороте игра (SonicGame.mount).
-   Есть только в этой теме; sonic-game.js грузится, только когда тема выбрана */
+/* значки кнопок окошек тем («Космос» и др.). Соник, Пасьянс, Angry Birds и баннер Far Cry — общий модуль igry.js / igry.css (29.10):
+   те же темы стоят в Склейках и Конкурентах, правка — там, в одном месте */
 const SX_ICO = {
   mute: '<svg class="on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4Z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg><svg class="off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4Z"/><path d="m17 9 5 6M22 9l-5 6"/></svg>',
   big: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>',
   back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 7 4 12l5 5"/><path d="M4 12h11a5 5 0 0 1 0 10h-2"/></svg>',
   pause: '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>'
 };
-// приманка на лице карточки: чем дальше прошёл (unitka.sxProg пишет игра), тем «ближе приз»
-function sxPrize() {
-  const p = +LS.get("sxProg", 0) || 0;
-  return ["🎁 Пройди игру — получи ценный приз!", "🎁 Приз уже ближе — остался акт 2!", "🎁 До приза — только босс!",
-    "🎁 Приз совсем рядом — секретный этап!", "🏆 Приз получен — играй Супер Соником!"][Math.min(4, p)];
-}
-function loadSonic(cb) {
-  if (window.SonicGame) return cb();
-  let s = document.getElementById("sxjs");
-  if (!s) { s = document.createElement("script"); s.id = "sxjs"; s.src = "sonic-game.js?v=5"; document.head.appendChild(s); }
-  s.addEventListener("load", () => cb(), { once: true });
-}
-/* где на экране исходная картинка баннера (cover + background-position как в CSS) — чтобы Соник бежал по её земле */
-function sxMap(cw, ch) {
-  const m = isPhone(), ix0 = m ? 570 : 0, iw = m ? 2598 : 3168, ih = 1344, px = m ? 0.55 : 0.5, py = 0.42, s = Math.max(cw / iw, ch / ih);
-  return { ix0, s, ox: (cw - iw * s) * px, oy: (ch - ih * s) * py };
-}
-document.addEventListener("fullscreenchange", () => { const el = $("#sxCard"); if (el && !document.fullscreenElement && el.classList.contains("big")) { el.classList.remove("big"); document.documentElement.classList.remove("sx-big"); } });
-document.addEventListener("keydown", e => { const el = $("#sxCard"); if (el && e.key === "Escape" && el.classList.contains("big")) sxBig(el, false); });
-function sxBig(el, on) {
-  el.classList.toggle("big", on); document.documentElement.classList.toggle("sx-big", on);
-  if (on && el.requestFullscreen && !document.fullscreenElement)       // Android: во весь экран и сразу лёжа
-    el.requestFullscreen({ navigationUI: "hide" }).then(() => { try { screen.orientation.lock("landscape").catch(() => {}); } catch (e) {} }).catch(() => {});
-  if (!on) { try { screen.orientation.unlock(); } catch (e) {} if (document.fullscreenElement) document.exitFullscreen().catch(() => {}); }
-}
 // игровые темы двигаются всегда: «меньше анимации» Windows (на сервере и по удалённому столу включено) их не глушит (Андрей 24.10)
 function noMotion() { return false; }
-function sxFlip(el, on) {
-  if (on === el.classList.contains("flip")) return;
-  if (noMotion()) el.classList.toggle("flip", on);
-  else {                                   // включаем 3D в текущем положении, потом анимацию, потом переворот; в конце 3D выключаем
-    el.classList.add("anim"); void el.offsetWidth; el.classList.add("tr"); void el.offsetWidth;
-    el.classList.toggle("flip", on);
-    const inner = el.querySelector(".sxin"), done = e => { if (e && e.target !== inner) return; clearTimeout(el._ft); inner.removeEventListener("transitionend", done); el.classList.remove("anim", "tr"); };
-    inner.addEventListener("transitionend", done); el._ft = setTimeout(done, 1200);
-  }
-  if (on) loadSonic(() => {
-    if (!el.isConnected) return;
-    if (!el._game) el._game = SonicGame.mount(el.querySelector(".sxgame"));
-    el._game.resume(); if (el._run) el._run.pause(true); document.documentElement.classList.add("sx-play");
-    if (el._game.menu) el._game.menu(true);          // вернулся к начатой игре — сначала пауза (на заставке не открывается)
-    setTimeout(() => { if (el.classList.contains("flip")) el.querySelector(".sxgame").focus({ preventScroll: true }); }, 900);
-  });
-  else {
-    if (el._game) el._game.pause(); if (el._run) el._run.pause(false); sxBig(el, false); document.documentElement.classList.remove("sx-play");
-    const pz = el.querySelector(".sxprize"); if (pz) pz.textContent = sxPrize();
-  }
-  if (on) tmCtx(); tmSync();                // музыка Соника — пока открыта игра
-}
-function sonicDeco(on) {
-  const d = $("#sxDeco"), c = $("#sxCard");
-  if (!on) {
-    if (d) d.remove();
-    if (c) { if (c._run) c._run.destroy(); if (c._game) c._game.destroy(); sxBig(c, false); c.remove(); }
-    document.documentElement.classList.remove("sx-play", "sx-big");
-    return;
-  }
-  const ring = (st, dl) => `<i class="sl" style="${st};animation-delay:${dl}s"><b class="rg" style="animation-delay:${dl}s"></b></i>`;
-  if (!d) {
-    const el = document.createElement("div"); el.id = "sxDeco"; el.setAttribute("aria-hidden", "true");
-    el.innerHTML = '<div class="sxp cl"><i class="sxc far"></i><i class="sxc near"></i></div><i class="sxh"></i><div class="sxp rn">' +
-      [["2.5%", "30%"], ["94.5%", "21%"], ["4%", "64%"], ["93%", "55%"]].map(([x, y], i) => ring(`left:${x};top:${y}`, -i * 0.7)).join("") + "</div>";
-    document.body.appendChild(el);
-  }
-  if (!c) {
-    const el = document.createElement("div"); el.id = "sxCard";
-    // лицо: линии скорости ниже надписи, живой Соник (canvas), заголовок-кнопка; оборот: игра и её кнопки
-    el.innerHTML = '<div class="sxin"><div class="sxf sxfr">' +
-      [[54, 140, 0], [63, 90, -.9], [71, 170, -1.6], [80, 110, -2.3], [89, 130, -2.9]].map(([y, w, dl]) => `<i class="sp" style="top:${y}%;width:${w}px;animation-delay:${dl}s"></i>`).join("") +
-      '<canvas class="sxrun" aria-hidden="true"></canvas>' +
-      '<button class="sxtitle" type="button" aria-label="Играть в Соника"><span class="sxt">ЮНИТКА</span><span class="sxgo">▶ ИГРАТЬ</span></button>' +
-      `<button class="sxsub sxprize" type="button">${sxPrize()}</button></div>` +
-      '<div class="sxf sxbk"><canvas class="sxgame" tabindex="0" aria-label="Игра «Соник»: бежит сам (тап — прыжок) или управляю сам — одним пальцем или стрелками и пробелом"></canvas>' +
-      `<div class="sxbtns"><button type="button" data-sx="pause" aria-label="Пауза: продолжить, начать заново, сменить режим">${SX_ICO.pause}</button>` +
-      `<button type="button" data-sx="mute" aria-label="Звук" aria-pressed="${LS.get("sxMute", 0) == 1}">${SX_ICO.mute}</button>` +
-      `<button type="button" data-sx="big" aria-label="Во весь экран">${SX_ICO.big}</button><button type="button" data-sx="back" aria-label="Перевернуть обратно">${SX_ICO.back}</button></div></div></div>`;
-    $("main").prepend(el);
-    el.querySelector(".sxtitle").onclick = () => sxFlip(el, true);
-    el.querySelector(".sxprize").onclick = () => sxFlip(el, true);
-    el.querySelector(".sxbtns").addEventListener("click", e => {
-      const b = e.target.closest("[data-sx]"); if (!b) return;
-      if (b.dataset.sx === "pause") { if (el._game) el._game.menu(); }
-      else if (b.dataset.sx === "back") sxFlip(el, false);
-      else if (b.dataset.sx === "big") sxBig(el, !el.classList.contains("big"));
-      else if (b.dataset.sx === "mute" && window.SonicGame) { const off = b.getAttribute("aria-pressed") !== "true"; b.setAttribute("aria-pressed", off); SonicGame.mute(off); syncSound(); tmSync(); }
-    });
-    // ушла карточка с экрана во время игры — пауза, вернулась — дальше
-    new IntersectionObserver(es => { if (el.classList.contains("flip") && el._game && !el.classList.contains("big")) es[0].isIntersecting ? el._game.resume() : el._game.pause(); }).observe(el);
-    loadSonic(() => { if (el.isConnected && !el._run) el._run = SonicGame.runner(el.querySelector(".sxrun"), { map: sxMap }); });
-  }
-}
-/* «Пасьянс»: плывущие фишки (#ptDeco) и карточка-баннер #ptCard — на лице живое видео ведущей и лампочки по рамке, «ЮНИТКА» — кнопка;
-   нажал — карточка переворачивается и вытягивается вниз, на обороте «Косынка» (Solitaire.mount). solitaire.js грузится только в этой теме */
-const PT_ICO = {
-  // «Новая раздача»: круговая стрелка вокруг карты (раньше две карты — Андрей принял за «копировать»)
-  deal: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20 3.5v4.6h-4.6"/><rect x="9.3" y="8.6" width="5.4" height="7.2" rx="1.1"/></svg>',
-  music: '<svg class="on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg><svg class="off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/><path d="M3 3l18 18"/></svg>',
-  undo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>',
-  hint: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.6 10.8c.8.6 1.1 1.3 1.1 2.2h5c0-.9.3-1.6 1.1-2.2A6 6 0 0 0 12 3Z"/></svg>',
-  auto: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>'
-};
-function loadSoli(cb) {
-  if (window.Solitaire) return cb();
-  let s = document.getElementById("ptjs");
-  if (!s) { s = document.createElement("script"); s.id = "ptjs"; s.src = "solitaire.js?v=3"; document.head.appendChild(s); }
-  s.addEventListener("load", () => cb(), { once: true });
-}
-const ptReduced = () => noMotion();
-function ptTurn(el, on, done) {                     // переворот (3D только на время анимации)
-  if (ptReduced()) { el.classList.toggle("flip", on); return done && done(); }
-  el.classList.add("anim"); void el.offsetWidth; el.classList.add("tr"); void el.offsetWidth;
-  el.classList.toggle("flip", on);
-  const inner = el.querySelector(".ptin"), fin = e => { if (e && e.target !== inner) return; clearTimeout(el._pt); inner.removeEventListener("transitionend", fin); el.classList.remove("anim", "tr"); done && done(); };
-  inner.addEventListener("transitionend", fin); el._pt = setTimeout(fin, 1100);
-}
-function ptTall(el, on, done) {                     // в игре карточка вытягивается вниз (стол выше), потом — обратно в баннер
-  if (on === el.classList.contains("tall")) return done && done();
-  el.classList.toggle("tall", on);
-  if (ptReduced()) return done && done();
-  let ok = false; const fin = e => { if (ok || (e && (e.target !== el || e.propertyName !== "height"))) return; ok = true; el.removeEventListener("transitionend", fin); done && done(); };
-  el.addEventListener("transitionend", fin); setTimeout(fin, 650);
-}
-function ptBig(el, on) {                            // во весь экран — только кнопкой (как в «Сонике»); на Android — настоящий полноэкранный режим
-  el.classList.toggle("big", on); document.documentElement.classList.toggle("pt-big", on);
-  if (on && el.requestFullscreen && !document.fullscreenElement && isPhone()) el.requestFullscreen({ navigationUI: "hide" }).catch(() => {});
-  if (!on && document.fullscreenElement) document.exitFullscreen().catch(() => {});
-}
-function ptAudio() {                               // iPhone даёт звук только внутри нажатия — контекст создаём сразу, игра его подхватит
-  try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch (e) {}
-  try { if (!window.__ptAC) window.__ptAC = new (window.AudioContext || window.webkitAudioContext)(); window.__ptAC.resume(); } catch (e) {}
-}
-function ptVid(el, play) {                          // видео ведущей: играет, пока баннер виден и игра закрыта
-  const v = el.querySelector(".ptvid"); if (!v || ptReduced()) return;
-  if (play && !el.classList.contains("flip") && el._vis !== false && !document.hidden) { v.muted = true; const pr = v.play(); if (pr && pr.catch) pr.catch(() => {}); } else v.pause();
-}
-function ptOpen(el, on) {
-  if (el._busy || on === el.classList.contains("flip")) return;
-  el._busy = true;
-  if (on) {
-    ptAudio(); ptVid(el, false); document.documentElement.classList.add("pt-play");
-    ptTurn(el, true, () => ptTall(el, true, () => {
-      el._busy = false;
-      const top = el.getBoundingClientRect().top; if (top < 0 || top > innerHeight * 0.35) scrollTo({ top: scrollY + top - (parseInt(getComputedStyle(document.documentElement).getPropertyValue("--hdr")) || 57) - 12, behavior: ptReduced() ? "auto" : "smooth" });
-      loadSoli(() => {
-        if (!el.isConnected) return;
-        if (!el._game) el._game = Solitaire.mount(el.querySelector(".ptgame"), { onStat: s => ptStat(el, s) });
-        el._game.resume(); el.querySelector('[data-pt="back"]').focus({ preventScroll: true });
-      });
-    }));
-  } else {
-    if (el._game) el._game.pause();
-    ptBig(el, false);
-    ptTall(el, false, () => ptTurn(el, false, () => { el._busy = false; document.documentElement.classList.remove("pt-play"); ptVid(el, true); }));
-  }
-}
-function ptStat(el, s) {
-  el.querySelector(".ptstat").innerHTML = s.time + " · " + s.moves + ' <span class="w">' + (s.moves % 10 === 1 && s.moves % 100 !== 11 ? "ход" : s.moves % 10 >= 2 && s.moves % 10 <= 4 && (s.moves % 100 < 12 || s.moves % 100 > 14) ? "хода" : "ходов") + "</span>";
-  el.querySelector('[data-pt="auto"]').classList.toggle("hidden", !s.canAuto);
-  el.querySelector('[data-pt="undo"]').disabled = !s.canUndo;
-}
-/* лампочки по рамке баннера, как на вывеске казино: тёмная латунная полоса, по ней лампочки через равный шаг; слой b1 — все горят
-   (нечётные ярче), слой b2 — чётные ярче, нечётные притушены; b2 мигает (CSS) — огоньки бегут по кругу */
-function ptBulbs(el) {
-  const box = el.querySelector(".ptbulbs"); if (!box) return;
-  const [c1, c2] = box.querySelectorAll("canvas"), W = box.clientWidth, H = box.clientHeight; if (!W || !H) return;
-  const dpr = Math.min(2, devicePixelRatio || 1), small = W < 560, bw = small ? 10 : 14, r = small ? 2.3 : 3.2, step = small ? 17 : 24, R = 16;
-  // точки по периметру скруглённого прямоугольника посередине полосы
-  const ins = bw / 2, w = W - bw, h = H - bw, rr = R - ins, per = 2 * (w + h) - 8 * rr + 2 * Math.PI * rr, n = Math.max(8, Math.round(per / step) & ~1), pts = [];
-  for (let i = 0; i < n; i++) {
-    let d = i * per / n; const seg = [w - 2 * rr, Math.PI * rr / 2, h - 2 * rr, Math.PI * rr / 2, w - 2 * rr, Math.PI * rr / 2, h - 2 * rr, Math.PI * rr / 2];
-    let k = 0; while (d > seg[k]) { d -= seg[k]; k++; }
-    const cx = [ins + w - rr, ins + w - rr, ins + rr, ins + rr], cy = [ins + rr, ins + h - rr, ins + h - rr, ins + rr];
-    if (k === 0) pts.push([ins + rr + d, ins]); else if (k === 2) pts.push([ins + w, ins + rr + d]); else if (k === 4) pts.push([ins + w - rr - d, ins + h]); else if (k === 6) pts.push([ins, ins + h - rr - d]);
-    else { const q = (k - 1) / 2, a = -Math.PI / 2 + q * Math.PI / 2 + d / rr; pts.push([cx[q] + Math.cos(a) * rr, cy[q] + Math.sin(a) * rr]); }
-  }
-  const bulb = (g, x, y, on) => {
-    if (on) { const gl = g.createRadialGradient(x, y, 0, x, y, r * 3.4); gl.addColorStop(0, "rgba(255,226,140,.75)"); gl.addColorStop(1, "rgba(255,190,80,0)"); g.fillStyle = gl; g.beginPath(); g.arc(x, y, r * 3.4, 0, 7); g.fill(); }
-    const b = g.createRadialGradient(x - r * 0.3, y - r * 0.3, 0, x, y, r); b.addColorStop(0, on ? "#fffbe8" : "#8a6a30"); b.addColorStop(0.6, on ? "#ffd56a" : "#5a4218"); b.addColorStop(1, on ? "#d79a2a" : "#2e2009");
-    g.fillStyle = b; g.beginPath(); g.arc(x, y, r, 0, 7); g.fill();
-  };
-  [c1, c2].forEach((c, li) => {
-    c.width = Math.round(W * dpr); c.height = Math.round(H * dpr); const g = c.getContext("2d"); g.setTransform(dpr, 0, 0, dpr, 0, 0);
-    if (li === 0) {                                       // латунная полоса: тёмная середина, золотые кромки
-      g.lineWidth = bw; g.strokeStyle = "rgba(20,12,3,.82)"; g.beginPath(); g.roundRect(ins, ins, w, h, rr); g.stroke();
-      g.lineWidth = 1.2; g.strokeStyle = "rgba(232,194,96,.85)"; g.beginPath(); g.roundRect(bw - 0.5, bw - 0.5, W - 2 * bw + 1, H - 2 * bw + 1, Math.max(2, R - bw)); g.stroke();
-    }
-    pts.forEach(([x, y], i) => bulb(g, x, y, li === 0 ? i % 2 === 1 : i % 2 === 0));
-  });
-}
-function soliDeco(on) {
-  const d = $("#ptDeco"), c = $("#ptCard");
-  if (!on) {
-    if (d) d.remove();
-    if (c) { if (c._game) c._game.destroy(); const v = c.querySelector(".ptvid"); if (v) { v.pause(); v.removeAttribute("src"); v.load(); } c.remove(); }
-    document.documentElement.classList.remove("pt-play", "pt-big");
-    return;
-  }
-  if (!d) {
-    const el = document.createElement("div"); el.id = "ptDeco"; el.setAttribute("aria-hidden", "true");
-    // фишки медленно плывут и вращаются по краям (чётко, без размытия): [слева, сверху, размер, кадр 0–5, прозрачность, длительность, сдвиг]
-    el.innerHTML = [["2%", "16%", 110, 0, .9, 26, "40px,-30px"], ["89%", "10%", 84, 1, .85, 31, "-30px,40px"], ["5%", "64%", 64, 2, .55, 23, "30px,30px"],
-      ["86%", "56%", 120, 4, .9, 34, "-40px,-20px"], ["44%", "86%", 58, 5, .5, 28, "20px,-40px"], ["63%", "28%", 46, 3, .4, 25, "-20px,30px"]]
-      .map(([x, y, z, k, o, t, dd]) => { const [dx, dy] = dd.split(","); return `<i style="left:${x};top:${y};--z:${z}px;--c:${k * 20}%;--o:${o};--d:${t}s;--dx:${dx};--dy:${dy}"></i>`; }).join("");
-    document.body.appendChild(el);
-  }
-  if (!c) {
-    const el = document.createElement("div"); el.id = "ptCard";
-    const ph = matchMedia("(max-width: 860px)").matches ? "-m" : "", red = ptReduced();
-    el.innerHTML = '<div class="ptin"><div class="ptf ptfr">' +
-      `<video class="ptvid" src="pasyans-live${ph}.mp4?v=3" poster="pasyans-live${ph}.webp?v=3" muted playsinline loop ${red ? 'preload="none"' : "autoplay"} disablepictureinpicture aria-hidden="true"></video>` +
-      '<div class="ptshade" aria-hidden="true"></div><div class="ptbulbs" aria-hidden="true"><canvas class="b1"></canvas><canvas class="b2"></canvas></div>' +
-      '<button class="pttitle" type="button" aria-label="Сыграть в пасьянс"><span class="ptt">ЮНИТКА</span><span class="ptgo">♠ Сыграть<span class="ptgo2">&nbsp;в пасьянс</span></span></button>' +
-      '<div class="ptsub" aria-hidden="true">«Косынка» · казино «Юнитка» открыто</div>' +
-      '<button class="pthost" type="button" aria-label="Ведущая казино приглашает сыграть в пасьянс"></button><div class="ptbub" aria-hidden="true">Сыграем партию? 😉</div></div>' +
-      '<div class="ptf ptbk"><div class="ptbar">' +
-      `<button type="button" data-pt="back" aria-label="Закрыть пасьянс">${SX_ICO.back}<span class="lbl">Назад</span></button>` +
-      `<button type="button" data-pt="new" aria-label="Новая раскладка">${PT_ICO.deal}<span class="lbl">Новая</span></button>` +
-      `<button type="button" data-pt="undo" aria-label="Отменить ход" disabled>${PT_ICO.undo}<span class="lbl">Отменить</span></button>` +
-      `<button type="button" data-pt="hint" aria-label="Подсказка">${PT_ICO.hint}<span class="lbl">Подсказка</span></button>` +
-      `<button type="button" data-pt="auto" class="pri hidden" aria-label="Собрать карты в дома">${PT_ICO.auto}<span class="lbl">Собрать</span></button>` +
-      `<button type="button" data-pt="music" aria-label="Музыка" aria-pressed="${LS.get("ptMusic", 1) == 0}">${PT_ICO.music}</button>` +
-      `<button type="button" data-pt="mute" aria-label="Звуки карт и фишек" aria-pressed="${LS.get("ptMute", 0) == 1}">${SX_ICO.mute}</button>` +
-      `<button type="button" data-pt="big" aria-label="Во весь экран">${SX_ICO.big}</button>` +
-      '<span class="ptstat">0:00 · 0 ходов</span></div><canvas class="ptgame" aria-label="Пасьянс «Косынка»: перетаскивай карты или нажимай — карта сама уйдёт, куда можно"></canvas></div></div>';
-    $("main").prepend(el);
-    el.querySelector(".pttitle").onclick = () => ptOpen(el, true);
-    el.querySelector(".pthost").onclick = () => ptOpen(el, true);
-    const nb = el.querySelector('[data-pt="new"]'), nbl = nb.querySelector(".lbl");
-    const unask = () => { clearTimeout(el._ask); nb.classList.remove("ask"); nbl.textContent = "Новая"; };
-    el.querySelector(".ptbar").addEventListener("click", e => {
-      const b = e.target.closest("[data-pt]"); if (!b) return;
-      const k = b.dataset.pt, g = el._game;
-      if (k === "back") ptOpen(el, false);
-      else if (k === "big") ptBig(el, !el.classList.contains("big"));
-      else if (!g) return;
-      else if (k === "new") {                         // идёт партия — сначала «Новая?», второе нажатие (3 с) раздаёт заново
-        if (!g.started || nb.classList.contains("ask")) { unask(); g.newGame(); }
-        else { nb.classList.add("ask"); nbl.textContent = "Новая?"; el._ask = setTimeout(unask, 3000); }
-      }
-      else if (k === "undo") g.undo();
-      else if (k === "hint") g.hint();
-      else if (k === "auto") g.auto();
-      else if (k === "mute") { const off = b.getAttribute("aria-pressed") !== "true"; b.setAttribute("aria-pressed", off); g.mute(off); syncSound(); }
-      else if (k === "music") { const off = b.getAttribute("aria-pressed") !== "true"; b.setAttribute("aria-pressed", off); g.music(!off); syncSound(); }
-    });
-    document.addEventListener("keydown", e => { if (e.key === "Escape" && el.classList.contains("big") && el.isConnected) ptBig(el, false); });
-    document.addEventListener("fullscreenchange", () => { if (!document.fullscreenElement && el.classList.contains("big") && isPhone()) ptBig(el, false); });
-    // видео — только когда баннер на экране; лампочки — перерисовать по размеру карточки
-    new IntersectionObserver(es => { el._vis = es[0].isIntersecting; ptVid(el, el._vis); }).observe(el);
-    document.addEventListener("visibilitychange", () => { if (el.isConnected) ptVid(el, !document.hidden); });
-    new ResizeObserver(() => ptBulbs(el)).observe(el.querySelector(".ptfr"));
-    if (!red) ptVid(el, true);
-  }
-}
-/* «Angry Birds»: живой фон #abDeco (остров свиней с параллаксом, пролетающие птицы, перья) и карточка-баннер #abCard — объёмная
-   диорама с живой сценой (BirdsGame.face), «ЮНИТКА» — кнопка; нажал — карточка переворачивается, на обороте игра (BirdsGame.mount).
-   Физика planck.js и ab-game.js грузятся только в этой теме (loadBirds) */
-let abP = null;
-function loadBirds(cb) {
-  if (window.BirdsGame) return cb();
-  if (!abP) abP = new Promise((ok, no) => {
-    const add = (id, src, next) => { const s = document.createElement("script"); s.id = id; s.src = src; s.onload = next; s.onerror = no; document.head.appendChild(s); };
-    add("abpl", "planck.min.js?v=1", () => add("abjs", "ab-game.js?v=1", ok));
-  }).catch(() => { abP = null; throw 0; });
-  abP.then(cb).catch(() => {});
-}
-// приманка на лице: сколько звёзд собрано (unitka.abStars пишет игра)
-function abLure(el) {
-  let got = 0; try { got = (JSON.parse(localStorage.getItem("unitka.abStars") || "[]") || []).reduce((a, b) => a + (+b || 0), 0); } catch (e) {}
-  // длинная часть (.lg) на телефоне скрыта — плашка в одну строку на земле баннера
-  const t = got === 0 ? '⭐ <span class="lg">Сбей всех свиней — собери</span><span class="sm">Собери</span> 15 звёзд!' : got < 15 ? `⭐ ${got} из 15 звёзд<span class="lg"> — добей до трёх!</span>` : '🏆 Все 15 звёзд<span class="lg"> — Король свиней повержен!</span>';
-  const b = el.querySelector(".abprize"); if (b) b.innerHTML = t;
-}
-function abBig(el, on) {
-  el.classList.toggle("big", on); document.documentElement.classList.toggle("ab-big", on);
-  if (on && el.requestFullscreen && !document.fullscreenElement)       // Android: во весь экран и сразу лёжа
-    el.requestFullscreen({ navigationUI: "hide" }).then(() => { try { screen.orientation.lock("landscape").catch(() => {}); } catch (e) {} }).catch(() => {});
-  if (!on) { try { screen.orientation.unlock(); } catch (e) {} if (document.fullscreenElement) document.exitFullscreen().catch(() => {}); }
-}
-function abFlip(el, on) {
-  if (on === el.classList.contains("flip")) return;
-  if (noMotion()) el.classList.toggle("flip", on);
-  else {                                   // 3D только на время переворота, потом карточка снова плоская (легче телефону)
-    el.classList.add("anim"); void el.offsetWidth; el.classList.add("tr"); void el.offsetWidth;
-    el.classList.toggle("flip", on);
-    const inner = el.querySelector(".abin"), done = e => { if (e && e.target !== inner) return; clearTimeout(el._ft); inner.removeEventListener("transitionend", done); el.classList.remove("anim", "tr"); };
-    inner.addEventListener("transitionend", done); el._ft = setTimeout(done, 1200);
-  }
-  if (on) {
-    ptAudio();                                // звук на iPhone — только из нажатия
-    loadBirds(() => {
-      if (!el.isConnected || !el.classList.contains("flip")) return;
-      if (!el._game) el._game = BirdsGame.mount(el.querySelector(".abgame"), { onStars: () => abLure(el) });
-      el._game.resume(); if (el._face) el._face.pause(true); document.documentElement.classList.add("ab-play");
-      if (el._game.playing) el._game.menu(true);          // вернулся к начатому уровню — сначала пауза
-      setTimeout(() => { if (el.classList.contains("flip")) el.querySelector(".abgame").focus({ preventScroll: true }); }, 900);
-    });
-  } else {
-    if (el._game) el._game.pause(); if (el._face) el._face.pause(false); abBig(el, false); document.documentElement.classList.remove("ab-play"); abLure(el);
-    if (el._tilt) el._tilt();
-  }
-}
-/* наклон диорамы: мышь над баннером или наклон телефона (Android — без спроса); иначе — лёгкое покачивание. Только --tx/--ty → transform */
-function abTilt(el) {
-  if (noMotion()) return;
-  let tx = 0, ty = 0, x = 0, y = 0, raf = 0, src = "", t0 = performance.now();
-  const frame = now => {
-    raf = 0; if (!el.isConnected) return;
-    if (!src) { const t = (now - t0) / 1000; tx = Math.sin(t * 0.55) * 0.45; ty = Math.sin(t * 0.39 + 1) * 0.3; }
-    x += (tx - x) * 0.07; y += (ty - y) * 0.07;
-    el.style.setProperty("--tx", x.toFixed(3)); el.style.setProperty("--ty", y.toFixed(3));
-    if (!el.classList.contains("flip") && el._vis !== false && !document.hidden) raf = requestAnimationFrame(frame);
-  };
-  const kick = () => { if (!raf) raf = requestAnimationFrame(frame); };
-  el.addEventListener("pointermove", e => { if (e.pointerType !== "mouse" || el.classList.contains("flip")) return; const r = el.getBoundingClientRect(); tx = ((e.clientX - r.left) / r.width - 0.5) * 2; ty = ((e.clientY - r.top) / r.height - 0.5) * 2; src = "m"; kick(); });
-  el.addEventListener("pointerleave", () => { if (src === "m") src = ""; kick(); });
-  const ori = e => { if (e.gamma == null || src === "m" || !el.isConnected) return; tx = Math.max(-1, Math.min(1, e.gamma / 22)); ty = Math.max(-1, Math.min(1, (e.beta - 40) / 22)); src = "o"; kick(); };
-  window.addEventListener("deviceorientation", ori); el._unTilt = () => window.removeEventListener("deviceorientation", ori);
-  new IntersectionObserver(es => { el._vis = es[0].isIntersecting; kick(); }).observe(el);
-  document.addEventListener("visibilitychange", kick);
-  el._tilt = kick; kick();
-}
-// птица пролетает по небу дугой (на фоне); ближние — крупнее и быстрее
-function abFly(d) {
-  if (!d.isConnected || document.hidden || document.documentElement.classList.contains("ab-play") || noMotion()) return;
-  const k = [["33.333% 0", 1], ["100% 0", 1], ["33.333% 50%", 0.8], ["66.667% 50%", 0.6]][(Math.random() * 4) | 0];
-  const near = Math.random() < 0.35, z = Math.round((near ? 84 : 46) * k[1] + Math.random() * 18), W = innerWidth, H = innerHeight;
-  const el = document.createElement("i"); el.className = "abfly"; el.style.cssText = `--z:${z}px;--c:${k[0]}`; d.appendChild(el);
-  const y0 = H * (0.16 + Math.random() * 0.3), up = H * (0.1 + Math.random() * 0.16), fr = [];
-  for (let i = 0; i <= 12; i++) { const t = i / 12; fr.push({ transform: `translate(${(-z + (W + 2 * z) * t).toFixed(1)}px,${(y0 - up * 4 * t * (1 - t) + (t > 0.5 ? (t - 0.5) * H * 0.25 : 0)).toFixed(1)}px) rotate(${(-22 + 50 * t).toFixed(1)}deg)` }); }
-  const a = el.animate(fr, { duration: (near ? 4200 : 7200) + Math.random() * 1800, easing: "linear" });
-  a.onfinish = () => el.remove();
-}
-function birdsDeco(on) {
-  const d = $("#abDeco"), c = $("#abCard");
-  if (!on) {
-    if (d) { clearInterval(d._iv); window.removeEventListener("pointermove", d._pm); d.remove(); }
-    if (c) { if (c._face) c._face.destroy(); if (c._game) c._game.destroy(); if (c._unTilt) c._unTilt(); abBig(c, false); c.remove(); }
-    document.documentElement.classList.remove("ab-play", "ab-big");
-    return;
-  }
-  const red = noMotion();
-  if (!d) {
-    const el = document.createElement("div"); el.id = "abDeco"; el.setAttribute("aria-hidden", "true");
-    // перья: [слева, размер, цвет, длительность, задержка]
-    el.innerHTML = '<div class="abscw"><i class="absc"></i></div>' + [["8%", 26, "#ffffff", 19, -3], ["23%", 18, "#e0241c", 23, -14], ["47%", 22, "#ffffff", 26, -8],
-      ["71%", 16, "#ffd21f", 21, -17], ["88%", 24, "#ffffff", 24, -1], ["60%", 14, "#62b9ec", 28, -22]]
-      .map(([x, z, col, t, dl]) => `<i class="abft" style="left:${x};--z:${z}px;--c:${col};--d:${t}s;--dl:${dl}s"></i>`).join("");
-    document.body.appendChild(el);
-    // фон едет от мыши (на телефоне — только прокрутка)
-    let raf = 0, mx = 0, my = 0;
-    el._pm = e => { if (e.pointerType !== "mouse") return; mx = e.clientX / innerWidth - 0.5; my = e.clientY / innerHeight - 0.5;
-      if (!raf) raf = requestAnimationFrame(() => { raf = 0; el.style.setProperty("--bx", (mx * 2).toFixed(3)); el.style.setProperty("--by", (my * 2).toFixed(3)); }); };
-    if (!red) { window.addEventListener("pointermove", el._pm, { passive: true }); setTimeout(() => abFly(el), 1500); el._iv = setInterval(() => abFly(el), 6500); }
-  }
-  if (!c) {
-    const el = document.createElement("div"); el.id = "abCard";
-    const L = [["Ю", -7, 3], ["Н", 4, -4], ["И", -3, 1], ["Т", 6, -3], ["К", -4, 2], ["А", 7, -2]];
-    el.innerHTML = '<div class="abin"><div class="abf abfr"><div class="ab3d"><i class="absky" aria-hidden="true"></i><canvas class="abrun" aria-hidden="true"></canvas></div>' +
-      '<button class="abtitle" type="button" aria-label="Играть в Angry Birds"><span class="abt">' + L.map(([l, r, y]) => `<b data-l="${l}" style="--r:${r}deg;--y:${y}px">${l}</b>`).join("") +
-      '</span><span class="abgo">▶ ИГРАТЬ</span></button><button class="abprize" type="button"></button></div>' +
-      '<div class="abf abbk"><canvas class="abgame" tabindex="0" aria-label="Игра Angry Birds: тяни птицу назад и отпусти; в полёте нажми — умение птицы"></canvas>' +
-      `<div class="abbtns"><button type="button" data-ab="pause" aria-label="Пауза: продолжить, заново, уровни">${SX_ICO.pause}</button>` +
-      `<button type="button" data-ab="mute" aria-label="Звук" aria-pressed="${LS.get("abMute", 0) == 1}">${SX_ICO.mute}</button>` +
-      `<button type="button" data-ab="big" aria-label="Во весь экран">${SX_ICO.big}</button><button type="button" data-ab="back" aria-label="Перевернуть обратно">${SX_ICO.back}</button></div></div></div>` +
-      '<i class="abpop" aria-hidden="true"></i>';
-    $("main").prepend(el);
-    abLure(el);
-    el.querySelector(".abtitle").onclick = () => abFlip(el, true);
-    el.querySelector(".abprize").onclick = () => abFlip(el, true);
-    el.querySelector(".abbtns").addEventListener("click", e => {
-      const b = e.target.closest("[data-ab]"); if (!b) return;
-      if (b.dataset.ab === "pause") { if (el._game) el._game.menu(); }
-      else if (b.dataset.ab === "back") abFlip(el, false);
-      else if (b.dataset.ab === "big") abBig(el, !el.classList.contains("big"));
-      else if (b.dataset.ab === "mute" && window.BirdsGame) { const off = b.getAttribute("aria-pressed") !== "true"; b.setAttribute("aria-pressed", off); BirdsGame.mute(off); syncSound(); }
-    });
-    document.addEventListener("keydown", e => { if (e.key === "Escape" && el.classList.contains("big") && el.isConnected) abBig(el, false); });
-    document.addEventListener("fullscreenchange", () => { if (!document.fullscreenElement && el.classList.contains("big") && el.isConnected) { el.classList.remove("big"); document.documentElement.classList.remove("ab-big"); } });
-    // ушла карточка с экрана во время игры — пауза, вернулась — дальше
-    new IntersectionObserver(es => { if (el.classList.contains("flip") && el._game && !el.classList.contains("big")) es[0].isIntersecting ? el._game.resume() : el._game.pause(); }).observe(el);
-    abTilt(el);
-    // небо диорамы — тот же кадр поля, что рисует сцена (земля совпадает); сцена — живая: рогатка стреляет сама
-    const sky = el.querySelector(".absky");
-    loadBirds(() => { if (el.isConnected && !el._face) el._face = BirdsGame.face(el.querySelector(".abrun"), {
-      onMap: m => { sky.style.backgroundImage = `url("${m.src}")`; sky.style.backgroundSize = `${m.w.toFixed(1)}px ${m.h.toFixed(1)}px`; sky.style.backgroundPosition = `${m.x.toFixed(1)}px ${m.y.toFixed(1)}px`; } }); });
-  }
+/* игровые темы — общий модуль igry.js (+ igry.css): грузится, только когда тема выбрана; баннер встаёт в начало main */
+const IGRY_T = ["farcry", "sonic", "solitaire", "birds"]; let igryP = null;
+function igry(t) {
+  const on = IGRY_T.includes(t), r = document.documentElement;
+  if (!on) { if (window.IGRY) IGRY.apply(null); delete r.dataset.igra; return; }
+  r.dataset.igra = t;
+  if (!document.getElementById("igcss")) { const l = document.createElement("link"); l.id = "igcss"; l.rel = "stylesheet"; l.href = "igry.css?v=2"; document.head.appendChild(l); }
+  if (!igryP) igryP = new Promise(ok => { const s = document.createElement("script"); s.src = "igry.js?v=2"; s.onload = ok; document.head.appendChild(s); });
+  igryP.then(() => { IGRY.apply(IGRY_T.includes(THEME) ? THEME : null, { name: "Юнитка", wrap: $("main"), onSound: () => syncSound() }); syncSound(); });
 }
 /* «Космос»: аффирмации — с магнитов Андрея (Избранное, 25.10: по фразе на слайд, без «Благодарю») + мои (с 7-й; ещё три — по «добавь ещё 3») */
 const SP_AFF = [
@@ -2337,9 +1712,7 @@ function applyTheme() {
   if (!TH[THEME]) THEME = "auto";
   if (THEME === "auto") document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme", THEME);
   themeFont(THEME);
-  sonicDeco(THEME === "sonic");
-  soliDeco(THEME === "solitaire");
-  birdsDeco(THEME === "birds");
+  igry(THEME);
   spaceDeco(THEME === "space");
   $("#bTheme").innerHTML = TH[THEME][2] + "<span>" + TH[THEME][0] + "</span>";
   $("#bTheme").title = "Тема: " + TH[THEME][0].toLowerCase();
@@ -2368,7 +1741,7 @@ if (LS.get("snd2", 0) != 1) { ["sxMute", "ptMute", "abMute", "spMute"].forEach(k
    пока открыта игра, как музыка «Пасьянса»; выключают кнопка звука в шапке и кнопка звука в игре. Тема фоном с первого нажатия
    (так были Far Cry и Джим) — добавить её в TMV и SND, tmWant уже умеет. */
 // «Космос» (25.10): спокойный эмбиент NeuralBox Suno (Код\unitka\kosmos) — фоном темы с первого нажатия, гасят шапка и 🔊 в окошке
-const TMU = { a: null, b: {}, ld: {}, src: null, g: null, cur: null, want: null }, TMV = { sonic: 0.3, space: 0.4 };
+const TMU = { a: null, b: {}, ld: {}, src: null, g: null, cur: null, want: null }, TMV = { space: 0.4 };   // музыка Соника — в igry.js (играет, пока открыта игра)
 function tmCtx() {
   if (!TMU.a) {
     try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch (e) {}   // iPhone: слышно и в беззвучном режиме
@@ -2385,7 +1758,6 @@ function tmEdges(b) {                                     // у mp3 по кра�
 }
 function tmWant() {
   if (!TMV[THEME] || SND[THEME].off()) return null;
-  if (THEME === "sonic") { const c = $("#sxCard"); return c && c.classList.contains("flip") ? "sonic" : null; }
   return THEME;
 }
 function tmSync() {
@@ -2433,7 +1805,7 @@ function syncSound() {
 $("#bSound").onclick = () => {
   const off = !soundOff(); sndMem = off;
   if (!off) tmCtx();                     // iPhone: звук разрешается только внутри нажатия
-  Object.values(SND).forEach(s => s.set(off)); syncSound(); tmSync();
+  Object.values(SND).forEach(s => s.set(off)); syncSound(); tmSync(); if (window.IGRY) IGRY.sync();
 };
 $("#bTheme").onclick = e => { e.stopPropagation(); $("#tmenu").classList.toggle("hidden"); };
 $("#tmenu").addEventListener("click", e => {
