@@ -1,0 +1,298 @@
+/* Игровые темы Юнитки для Склеек и Конкурентов (29.10.2026, Андрей: «соник, пасьянс, энгри и фаркрай на всех 3 должны быть такими же»).
+   Перенесено из Код\unitka\site\index.html: живые фоны, карточки-баннеры с играми на обороте, баннер Far Cry. Картинки — относительно
+   этого файла (/unitka/), поэтому лежат один раз. Подключает igry.js (IGRY.apply); тему на странице видно по html[data-igra="…"].
+   Вид остальной страницы (шапка, панели, кнопки) — в CSS самой страницы, под её разметку. */
+
+/* ── токены тем ── */
+html[data-igra="sonic"]{
+  --igr:18px;
+  --ol:-2px -2px 0 #0a1a4a,2px -2px 0 #0a1a4a,-2px 2px 0 #0a1a4a,2px 2px 0 #0a1a4a,0 -2px 0 #0a1a4a,0 2px 0 #0a1a4a,-2px 0 0 #0a1a4a,2px 0 0 #0a1a4a;
+  --ol3:-3px -3px 0 #0a1a4a,3px -3px 0 #0a1a4a,-3px 3px 0 #0a1a4a,3px 3px 0 #0a1a4a,0 -3px 0 #0a1a4a,0 3px 0 #0a1a4a,-3px 0 0 #0a1a4a,3px 0 0 #0a1a4a;
+  --ringi:radial-gradient(circle closest-side,transparent 0 56%,#a35f00 58%,#ffcf26 67%,#fff3a6 76%,#ffc81e 86%,#b86d00 97%,transparent 100%);
+  --chk:conic-gradient(#853409 25%,#cf6b16 0 50%,#853409 0 75%,#cf6b16 0) 0 0/14px 14px;
+  --sbh:clamp(200px,30vw,380px); --st:clamp(44px,7vw,100px); --sp:min(2.6vw,30px); --sl:min(3.6vw,42px);
+}
+html[data-igra="solitaire"]{
+  --igr:14px;
+  --lamp:radial-gradient(ellipse 70% 45% at 50% -6%,rgba(255,205,120,.2),rgba(255,205,120,0) 70%);
+  --gold:linear-gradient(180deg,#fff4c8 0%,#f2cf6e 40%,#c18f2c 68%,#f5dc8f 100%);
+  --goldbtn:linear-gradient(180deg,#fbe6a2,#e2b553 48%,#b98a2e);
+  --sp-g:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath fill='%23e8c260' d='M50 4C62 16 100 38 98 62 96 88 64 92 55 74L63 96H37L45 74C36 92 4 88 2 62 0 38 38 16 50 4Z'/%3E%3C/svg%3E");
+  --he-g:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath fill='%23e8c260' d='M50 94C38 82-2 60 0 34 2 4 38 0 50 26 62 0 98 4 100 34 102 60 62 82 50 94Z'/%3E%3C/svg%3E");
+  --di-g:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath fill='%23e8c260' d='M50 2Q65 30 86 50 65 70 50 98 35 70 14 50 35 30 50 2Z'/%3E%3C/svg%3E");
+  --cl-g:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='%23e8c260'%3E%3Ccircle cx='50' cy='29' r='20'/%3E%3Ccircle cx='29' cy='59' r='20'/%3E%3Ccircle cx='71' cy='59' r='20'/%3E%3Cpath d='M45 62 37 96H63L55 62Z'/%3E%3C/svg%3E");
+  --pbh:clamp(220px,34vw,430px); --pbh-play:min(640px,calc(100vh - var(--igh,60px) - 40px)); --pt:clamp(40px,6.2vw,92px); --pp:min(2.8vw,32px); --pl:min(3.8vw,44px);
+  --hall:url("pasyans-hall.webp");
+}
+html[data-igra="birds"]{
+  --igr:18px;
+  --ol:-2px -2px 0 #2b1405,2px -2px 0 #2b1405,-2px 2px 0 #2b1405,2px 2px 0 #2b1405,0 -2px 0 #2b1405,0 2px 0 #2b1405,-2px 0 0 #2b1405,2px 0 0 #2b1405;
+  --ol3:-3px -3px 0 #2b1405,3px -3px 0 #2b1405,-3px 3px 0 #2b1405,3px 3px 0 #2b1405,0 -3px 0 #2b1405,0 3px 0 #2b1405,-3px 0 0 #2b1405,3px 0 0 #2b1405;
+  --wood:url("ab-wood.webp") 50% 50%/100% 100% no-repeat;
+  --grass:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='16' viewBox='0 0 64 16'%3E%3Cpath fill='%233f8a0c' d='M0 0h64v8l-3 5-3-5-4 7-3-6-3 4-4-6-3 7-3-5-3 5-4-7-3 6-3-4-4 6-3-7-3 5-3-5-4 7-2-5L0 8Z'/%3E%3Cpath fill='%2389d12a' transform='translate(0 -2.6)' d='M0 0h64v8l-3 5-3-5-4 7-3-6-3 4-4-6-3 7-3-5-3 5-4-7-3 6-3-4-4 6-3-7-3 5-3-5-4 7-2-5L0 8Z'/%3E%3Crect width='64' height='3.2' fill='%23b6ee48'/%3E%3C/svg%3E");
+  --pig:url("ab-i-pig.webp"); --red:url("ab-i-red.webp");
+  --abh:clamp(220px,32vw,400px); --abt:clamp(46px,7.6vw,108px); --abp:min(2.4vw,28px); --abl:min(3.2vw,38px);
+}
+html[data-igra="farcry"]{
+  --igr:3px;
+  --rough:polygon(0 7%,4% 0,52% 4%,97% 0,100% 14%,99% 58%,100% 93%,95% 100%,48% 96%,3% 100%,0 86%,1% 40%);
+  --paper:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .42 0 0 0 0 .28 0 0 0 0 .1 0 0 0 .2 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  --burn:inset 0 0 0 1px rgba(70,40,10,.25),inset 0 0 38px rgba(110,62,18,.45);
+  --aim:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Cg fill='none' stroke='%23fff' stroke-width='4' opacity='.85'%3E%3Ccircle cx='16' cy='16' r='9'/%3E%3Cpath d='M16 2v8M16 22v8M2 16h8M22 16h8'/%3E%3C/g%3E%3Cg fill='none' stroke='%23c8241d' stroke-width='2'%3E%3Ccircle cx='16' cy='16' r='9'/%3E%3Cpath d='M16 2v8M16 22v8M2 16h8M22 16h8'/%3E%3C/g%3E%3Ccircle cx='16' cy='16' r='1.6' fill='%23c8241d'/%3E%3C/svg%3E") 16 16,crosshair;
+  --tatau:url("fc3-tatau-red.png"); --skull:url("fc3-skull-red.png"); --skullw:url("fc3-skull.png");
+  --fct:clamp(42px,6.8vw,96px); --fcp:min(2.6vw,30px); --fcl:min(3.6vw,42px);
+}
+
+/* ── фон страницы (в Юнитке — body::before) ── */
+#igBg{position:fixed;inset:0;z-index:-2;pointer-events:none}
+html[data-igra="sonic"] #igBg{background:linear-gradient(180deg,#0046e0 0%,#0f6efa 42%,#5fb0ff 78%,#a8dcff 100%)}
+html[data-igra="solitaire"] #igBg{background:var(--lamp),linear-gradient(rgba(3,10,6,.42),rgba(3,10,6,.7)),var(--hall) 50% 30%/cover no-repeat,#04150d}
+html[data-igra="birds"] #igBg{background:#52c1ec}
+html[data-igra="farcry"] #igBg{background:radial-gradient(ellipse at 50% 42%,transparent 42%,rgba(0,0,0,.6) 100%),url("fc3-wall.webp") center/cover,#1d140c}
+html[data-igra="farcry"] body{cursor:var(--aim)}
+html[data-igra="farcry"] :is(input,textarea){cursor:text}
+
+/* ── «Соник»: облака, холмы, кольца; карточка #sxCard — на лице бегает Соник, на обороте игра ── */
+#sxDeco{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+#sxDeco .sxp{position:absolute;inset:0}
+#sxDeco .sxc{position:absolute;left:0;will-change:transform}
+#sxDeco .far{top:4vh;height:156px;width:calc(100% + 960px);background:url("sonic-clouds.svg") 0 0/960px 156px repeat-x;opacity:.6;animation:sx-far 150s linear infinite}
+#sxDeco .near{top:15vh;height:260px;width:calc(100% + 1600px);background:url("sonic-clouds.svg") 0 0/1600px 260px repeat-x;animation:sx-near 80s linear infinite}
+@keyframes sx-far{to{transform:translateX(-960px)}}
+@keyframes sx-near{to{transform:translateX(-1600px)}}
+#sxDeco .sxh{position:absolute;left:0;right:0;bottom:0;height:clamp(170px,30vh,300px);background:url("sonic-hills.svg") 0 100%/auto 100% repeat-x}
+#sxDeco .sl{position:absolute;width:36px;height:36px;animation:sx-bob 3.4s ease-in-out infinite}
+@keyframes sx-bob{50%{transform:translateY(-14px)}}
+#sxDeco .rg{display:block;width:100%;height:100%;background:var(--ringi);animation:sx-spin 1.5s linear infinite}
+#sxDeco .sl::after{content:"";position:absolute;top:-10%;right:-10%;width:48%;height:48%;background:#fff;opacity:0;
+  clip-path:polygon(50% 0,61% 39%,100% 50%,61% 61%,50% 100%,39% 61%,0 50%,39% 39%);animation:sx-tw 2.6s ease-in-out infinite;animation-delay:inherit}
+@keyframes sx-spin{0%,100%{transform:scaleX(1)}25%,75%{transform:scaleX(.14)}50%{transform:scaleX(-1)}}
+@keyframes sx-tw{0%,62%,100%{opacity:0;transform:scale(.3) rotate(0)}78%{opacity:1;transform:scale(1) rotate(45deg)}}
+#sxCard{position:relative;height:var(--sbh);margin:0 0 28px}
+#sxCard .sxin{position:absolute;inset:0}
+#sxCard .sxf{position:absolute;inset:0;border:3px solid #0a1a4a;border-radius:var(--igr);box-shadow:0 6px 0 #0a1a4a;overflow:hidden;background:#1d5fe6}
+#sxCard .sxfr{background:linear-gradient(100deg,rgba(0,40,170,.42),rgba(0,40,170,0) 42%),url("sonic-hill.webp") 50% 42%/cover}
+#sxCard:not(.anim).flip .sxfr,#sxCard:not(.anim):not(.flip) .sxbk{visibility:hidden}
+#sxCard.flip .sxfr,#sxCard:not(.flip) .sxbk{pointer-events:none}
+#sxCard.anim{perspective:1800px}
+#sxCard.anim .sxin{transform-style:preserve-3d}
+#sxCard.anim.tr .sxin{transition:transform .9s cubic-bezier(.3,.1,.2,1)}
+#sxCard.anim.flip .sxin{transform:rotateY(180deg)}
+#sxCard.anim .sxf{-webkit-backface-visibility:hidden;backface-visibility:hidden}
+#sxCard.anim .sxbk{transform:rotateY(180deg)}
+#sxCard canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+#sxCard .sxrun{pointer-events:none}
+#sxCard .sxgame{touch-action:none;cursor:pointer;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+#sxCard .sp{position:absolute;left:100%;height:3px;border-radius:2px;background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.95));opacity:0;animation:sx-dash 3.4s linear infinite;pointer-events:none}
+@keyframes sx-dash{0%{transform:translateX(0);opacity:0}4%{opacity:1}34%{transform:translateX(-2200px);opacity:1}35%,100%{transform:translateX(-2200px);opacity:0}}
+#sxCard .sxtitle{position:absolute;z-index:3;left:var(--sl);top:var(--sp);margin:0;padding:0;border:0;background:none;cursor:pointer;transition:transform .15s ease;-webkit-tap-highlight-color:transparent}
+#sxCard .sxt{position:relative;display:block;overflow:hidden;padding:.04em .26em .14em .18em;border:3px solid #ffd21f;border-radius:.24em;background:rgba(10,26,74,.34);
+  box-shadow:0 0 0 3px #0a1a4a,0 7px 0 3px #0a1a4a,0 0 26px rgba(255,210,31,.5);font:italic 900 calc(var(--st) * var(--tk,1))/1 "Exo 2",system-ui,sans-serif;letter-spacing:.01em;color:#ffd21f;text-shadow:var(--ol3),0 7px 0 #0a1a4a}
+#sxCard .sxt::before{content:"";position:absolute;inset:0;background:radial-gradient(closest-side,rgba(255,226,90,.55),rgba(255,226,90,0));opacity:0;animation:sx-glow 1.8s ease-in-out infinite;z-index:-1}
+#sxCard .sxt::after{content:"";position:absolute;top:-10%;bottom:-10%;left:0;width:34%;pointer-events:none;background:linear-gradient(100deg,rgba(255,255,255,0),rgba(255,255,255,.6),rgba(255,255,255,0));
+  transform:translateX(-170%) skewX(-16deg);animation:sx-shine 3.4s ease-in-out .8s infinite}
+@keyframes sx-glow{50%{opacity:1}}
+@keyframes sx-shine{0%,55%{transform:translateX(-170%) skewX(-16deg)}85%,100%{transform:translateX(420%) skewX(-16deg)}}
+#sxCard .sxtitle:hover,#sxCard .sxtitle:focus-visible{transform:translateY(-3px) scale(1.03)}
+#sxCard .sxtitle:active{transform:translateY(2px) scale(.98)}
+#sxCard .sxtitle:focus-visible{outline:3px solid #fff;outline-offset:8px;border-radius:.3em}
+#sxCard .sxgo{position:absolute;right:-.7em;bottom:-.75em;font:italic 900 clamp(11px,1.3vw,16px)/1 "Exo 2",system-ui,sans-serif;letter-spacing:.03em;color:#fff;background:#e8262b;
+  border:2.5px solid #0a1a4a;border-radius:999px;padding:.4em .85em;box-shadow:0 3px 0 #0a1a4a;transform:rotate(-5deg);white-space:nowrap;animation:sx-blink 1.1s steps(1) infinite}
+@keyframes sx-blink{50%{opacity:.4}}
+#sxCard .sxsub{position:absolute;z-index:2;pointer-events:none;left:calc(var(--sl) + 10px);top:calc(var(--sp) + var(--st) * var(--tk,1) * 1.25 + 26px);
+  font:italic 800 clamp(12px,1.6vw,21px)/1.1 "Exo 2",system-ui,sans-serif;color:#fff;text-shadow:var(--ol);transform:rotate(-3deg)}
+#sxCard .sxprize{pointer-events:auto;cursor:pointer;border:2.5px solid #0a1a4a;border-radius:999px;padding:.38em .85em;background:linear-gradient(#ffe86a,#ffb000);
+  color:#0a1a4a;text-shadow:none;box-shadow:0 3px 0 #0a1a4a,0 0 16px rgba(255,210,31,.65);animation:sx-prize 1.6s ease-in-out infinite}
+#sxCard .sxprize:focus-visible{outline:3px solid #fff;outline-offset:3px}
+@keyframes sx-prize{0%,100%{transform:rotate(-3deg) scale(1)}50%{transform:rotate(-3deg) scale(1.07)}}
+#sxCard .sxbtns{position:absolute;z-index:3;top:8px;right:8px;display:flex;gap:6px}
+#sxCard .sxbtns button{width:34px;height:34px;border-radius:50%;border:2px solid #ffd21f;background:rgba(10,26,74,.62);color:#fff;display:grid;place-items:center;padding:0;box-shadow:0 2px 0 #0a1a4a;cursor:pointer}
+#sxCard .sxbtns svg{width:18px;height:18px;display:block}
+#sxCard .sxbtns [data-sx="mute"] .off,#sxCard .sxbtns [data-sx="mute"][aria-pressed="true"] .on{display:none}
+#sxCard .sxbtns [data-sx="mute"][aria-pressed="true"] .off{display:block}
+#sxCard.big{position:fixed;inset:0;z-index:300;height:auto;margin:0}
+#sxCard.big .sxf{border-radius:0;border:0;box-shadow:none}
+#sxCard.big .sxfr{visibility:hidden}
+html.sx-big{overflow:hidden}
+html.sx-play #sxDeco,html.sx-play #sxDeco *,html.sx-play #sxDeco *::after{animation-play-state:paused!important}
+@media (orientation: portrait){
+  #sxCard.big .sxbk{background:#0a1a4a}
+  #sxCard.big .sxgame{inset:auto 0;top:50%;height:min(100%,calc(100vw / 1.6));transform:translateY(-50%)}
+  #sxCard.big .sxbk::after{content:"Поверните телефон — будет крупнее";position:absolute;left:0;right:0;top:calc(50% + 100vw / 3.2 + 18px);text-align:center;color:#bfe3ff;font:italic 800 14px/1.2 "Exo 2",sans-serif}
+}
+@supports (animation-timeline: scroll()){
+  #sxDeco .sxp.cl{animation:sx-up linear both;animation-timeline:scroll(root)}
+  #sxDeco .sxp.rn{animation:sx-up2 linear both;animation-timeline:scroll(root)}
+  @keyframes sx-up{to{transform:translateY(-90px)}}
+  @keyframes sx-up2{to{transform:translateY(-240px)}}
+}
+
+/* ── «Пасьянс»: плывущие фишки; карточка #ptCard — живая ведущая и лампочки, на обороте «Косынка» ── */
+#ptDeco{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+#ptDeco i{position:absolute;width:var(--z);height:var(--z);background:url("pasyans-chips.webp") var(--c) 0/600% 100% no-repeat;opacity:var(--o);filter:drop-shadow(0 10px 14px rgba(0,0,0,.55));
+  animation:pt-drift var(--d) ease-in-out infinite alternate;will-change:transform}
+@keyframes pt-drift{from{transform:translate(0,0) rotate(-25deg)}to{transform:translate(var(--dx),var(--dy)) rotate(40deg)}}
+#ptCard{position:relative;height:var(--pbh);margin:0 0 28px;transition:height .45s cubic-bezier(.2,.8,.2,1)}
+#ptCard.tall{height:var(--pbh-play)}
+#ptCard .ptin{position:absolute;inset:0}
+#ptCard .ptf{position:absolute;inset:0;border-radius:16px;overflow:hidden;box-shadow:0 0 0 1px #e8c260,0 0 0 5px #2a1d0a,0 0 0 6px #b9903a,0 18px 40px rgba(0,0,0,.6)}
+#ptCard .ptfr{background:#050b07}
+#ptCard .ptbk{display:flex;flex-direction:column;background:var(--lamp),radial-gradient(ellipse 85% 75% at 50% 42%,transparent 55%,rgba(0,0,0,.42)),url("pasyans-felt.webp") 50% 50%/cover,#0b3a24}
+#ptCard .ptvid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 0;display:block;pointer-events:none;background:#050b07}
+#ptCard .ptshade{position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,rgba(3,8,5,.84) 0%,rgba(3,8,5,.55) 30%,rgba(3,8,5,0) 56%),linear-gradient(0deg,rgba(3,8,5,.5),rgba(3,8,5,0) 32%)}
+#ptCard .ptbulbs{position:absolute;inset:0;z-index:2;pointer-events:none}
+#ptCard .ptbulbs canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+#ptCard .ptbulbs .b2{animation:pt-chase .9s steps(1) infinite}
+@keyframes pt-chase{50%{opacity:0}}
+#ptCard:not(.anim).flip .ptfr,#ptCard:not(.anim):not(.flip) .ptbk{visibility:hidden}
+#ptCard.flip .ptfr,#ptCard:not(.flip) .ptbk{pointer-events:none}
+#ptCard.anim{perspective:1800px}
+#ptCard.anim .ptin{transform-style:preserve-3d}
+#ptCard.anim.tr .ptin{transition:transform .75s cubic-bezier(.3,.1,.2,1)}
+#ptCard.anim.flip .ptin{transform:rotateY(180deg)}
+#ptCard.anim .ptf{-webkit-backface-visibility:hidden;backface-visibility:hidden}
+#ptCard.anim .ptbk{transform:rotateY(180deg)}
+#ptCard .pttitle{position:absolute;z-index:3;left:var(--pl);top:var(--pp);margin:0;padding:0;border:0;background:none;cursor:pointer;text-align:left;transition:transform .2s ease;-webkit-tap-highlight-color:transparent}
+#ptCard .ptt{display:block;font:400 calc(var(--pt) * var(--tk,1))/1 "Forum",Georgia,serif;letter-spacing:.06em;background:var(--gold);-webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 2px 0 #3a2706) drop-shadow(0 0 18px rgba(240,200,110,.35))}
+#ptCard .ptgo{display:inline-flex;align-items:center;gap:.5em;margin-top:.55em;font:700 clamp(11px,1.3vw,15px)/1 "Montserrat",system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#1b1306;
+  background:var(--goldbtn);border:1px solid #f7df95;border-radius:999px;padding:.75em 1.2em;box-shadow:0 3px 0 #6b4a12,0 8px 22px rgba(0,0,0,.5),0 0 18px rgba(232,194,96,.3);animation:pt-pulse 2.2s ease-in-out infinite}
+@keyframes pt-pulse{50%{transform:scale(1.05)}}
+#ptCard .pttitle:hover,#ptCard .pttitle:focus-visible{transform:translateY(-3px)}
+#ptCard .pttitle:active{transform:translateY(1px)}
+#ptCard .pttitle:focus-visible{outline:2px solid #f0c96a;outline-offset:6px;border-radius:8px}
+#ptCard .ptsub{position:absolute;z-index:2;left:var(--pl);bottom:var(--pp);font:400 clamp(13px,1.5vw,19px)/1.2 "Forum",Georgia,serif;letter-spacing:.04em;color:#e9d39a;text-shadow:0 1px 3px rgba(0,0,0,.7);pointer-events:none}
+#ptCard .pthost{position:absolute;z-index:2;right:0;top:0;bottom:0;width:46%;padding:0;border:0;background:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
+#ptCard .ptbub{position:absolute;z-index:3;right:32%;top:14%;padding:.55em .9em;border-radius:14px 14px 4px 14px;background:#fff8e6;color:#3a1020;
+  font:700 clamp(11px,1.25vw,15px)/1.15 "Montserrat",system-ui,sans-serif;box-shadow:0 6px 18px rgba(0,0,0,.45);pointer-events:none;transform-origin:100% 100%;animation:pt-bub 5.2s ease-in-out infinite}
+@keyframes pt-bub{0%,8%{opacity:0;transform:scale(.6)}14%,70%{opacity:1;transform:scale(1)}78%,100%{opacity:0;transform:scale(.8)}}
+#ptCard .ptbar{display:flex;align-items:center;gap:6px;padding:8px 10px;padding-top:max(8px,env(safe-area-inset-top));background:linear-gradient(180deg,rgba(0,0,0,.55),rgba(0,0,0,.18));border-bottom:1px solid rgba(232,194,96,.25);flex:none}
+#ptCard .ptbar button{height:36px;min-width:36px;border-radius:10px;border:1px solid rgba(232,194,96,.6);background:rgba(255,255,255,.04);color:#f0dca0;font:600 13px/1 "Montserrat",system-ui,sans-serif;
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:0 11px;cursor:pointer;transition:background .15s,transform .08s}
+#ptCard .ptbar button:hover{background:rgba(232,194,96,.14)} #ptCard .ptbar button:active{transform:translateY(1px)}
+#ptCard .ptbar button[disabled]{opacity:.35;cursor:default}
+#ptCard .ptbar svg{width:18px;height:18px;flex:none;display:block}
+#ptCard .ptbar .pri{background:var(--goldbtn);color:#1b1306;border-color:#f7df95}
+#ptCard .ptbar .hidden{display:none}
+#ptCard .ptbar :is([data-pt="mute"],[data-pt="music"]) .off,#ptCard .ptbar :is([data-pt="mute"],[data-pt="music"])[aria-pressed="true"] .on{display:none}
+#ptCard .ptbar :is([data-pt="mute"],[data-pt="music"])[aria-pressed="true"] .off{display:block}
+#ptCard .ptbar [data-pt="new"].ask{background:var(--goldbtn);color:#1b1306;border-color:#f7df95}
+#ptCard .ptstat{margin-left:auto;font:600 13px/1 "Montserrat",system-ui,sans-serif;color:#e9d39a;white-space:nowrap;font-variant-numeric:tabular-nums}
+#ptCard .ptgame{display:block;flex:1;min-height:0;width:100%;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+@media (max-width: 560px){ #ptCard .ptbar .lbl{display:none} #ptCard .ptbar [data-pt="new"].ask .lbl{display:inline} #ptCard .ptbar{gap:4px;padding-left:6px;padding-right:6px}
+  #ptCard .ptbar button{padding:0 7px;min-width:34px} #ptCard .ptstat{font-size:11.5px} #ptCard .ptstat .w{display:none} }
+#ptCard.big{position:fixed;inset:0;z-index:300;height:auto;margin:0;transition:none}
+#ptCard.big .ptf{border-radius:0;box-shadow:none}
+#ptCard.big .ptfr{visibility:hidden}
+html.pt-big{overflow:hidden}
+html.pt-play #ptDeco i,html.pt-play #ptCard :is(.ptgo,.ptbub,.b2){animation-play-state:paused}
+
+/* ── «Angry Birds»: остров свиней с параллаксом, птицы, перья; карточка #abCard — объёмная диорама, на обороте игра ── */
+#abDeco{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+#abDeco .abscw{position:absolute;inset:-50px}
+#abDeco .absc{position:absolute;inset:0;background:url("ab-scene.webp") 50% 62%/cover no-repeat;transform:translate3d(calc(var(--bx,0) * -18px),calc(var(--by,0) * -12px),0) scale(1.03);will-change:transform}
+#abDeco .abfly{position:absolute;left:0;top:0;width:var(--z);height:var(--z);background:url("ab-chars.webp") var(--c)/400% 300% no-repeat;filter:drop-shadow(0 10px 8px rgba(10,40,70,.28));will-change:transform}
+#abDeco .abft{position:absolute;top:-30px;width:var(--z);height:calc(var(--z) * .36);border-radius:50%;background:var(--c);box-shadow:inset 0 -2px 0 rgba(0,0,0,.12);opacity:.9;
+  animation:ab-fall var(--d) linear var(--dl) infinite}
+#abDeco .abft::after{content:"";position:absolute;left:8%;right:8%;top:47%;height:1px;background:rgba(0,0,0,.22)}
+@keyframes ab-fall{0%{transform:translate(0,0) rotate(0)}25%{transform:translate(28px,26vh) rotate(70deg)}50%{transform:translate(-14px,52vh) rotate(-30deg)}75%{transform:translate(24px,78vh) rotate(60deg)}100%{transform:translate(-6px,108vh) rotate(-20deg)}}
+@supports (animation-timeline: scroll()){
+  #abDeco .abscw{animation:ab-up linear both;animation-timeline:scroll(root)}
+  @keyframes ab-up{to{transform:translateY(-80px)}}
+}
+html.ab-play #abDeco *{animation-play-state:paused!important}
+#abCard{position:relative;height:var(--abh);margin:0 0 32px;--tx:0;--ty:0}
+#abCard .abin{position:absolute;inset:0}
+#abCard .abf{position:absolute;inset:0;border:3px solid #3b220e;border-radius:var(--igr);box-shadow:0 7px 0 #3b220e,0 18px 34px rgba(16,45,80,.35);overflow:hidden;background:#52c1ec}
+#abCard .abfr{perspective:900px}
+#abCard .abfr::after{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;border-radius:inherit;box-shadow:inset 0 0 0 2px rgba(255,255,255,.35),inset 0 -40px 50px -30px rgba(40,20,0,.35)}
+#abCard .ab3d{position:absolute;inset:0;transform-style:preserve-3d;transform:rotateY(calc(var(--tx) * 5deg)) rotateX(calc(var(--ty) * -3.5deg))}
+#abCard :is(.absky,.abrun){position:absolute;left:-4%;top:-4%;width:108%;height:108%;display:block}
+#abCard .absky{background:url("ab-land.webp") 50% 78%/cover no-repeat;transform:translateZ(-90px) scale(1.1)}
+#abCard .abrun{pointer-events:none}
+#abCard:not(.anim).flip .abfr,#abCard:not(.anim):not(.flip) .abbk{visibility:hidden}
+#abCard.flip .abfr,#abCard:not(.flip) .abbk{pointer-events:none}
+#abCard.anim{perspective:1800px}
+#abCard.anim .abin{transform-style:preserve-3d}
+#abCard.anim.tr .abin{transition:transform .9s cubic-bezier(.3,.1,.2,1)}
+#abCard.anim.flip .abin{transform:rotateY(180deg)}
+#abCard.anim .abf{-webkit-backface-visibility:hidden;backface-visibility:hidden}
+#abCard.anim .abbk{transform:rotateY(180deg)}
+#abCard .abbk{background:#52c1ec}
+#abCard .abgame{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;outline:0}
+#abCard .abtitle{position:absolute;z-index:3;left:var(--abl);top:var(--abp);margin:0;padding:0;border:0;background:none;cursor:pointer;-webkit-tap-highlight-color:transparent;
+  transform:translate(calc(var(--tx) * -8px),calc(var(--ty) * -6px))}
+#abCard .abt{display:flex;font:900 calc(var(--abt) * var(--tk,1))/1.05 "Rubik",system-ui,sans-serif;letter-spacing:.01em;padding:0 .05em .12em 0}
+#abCard .abt b{position:relative;display:inline-block;font-weight:900;color:#c4170f;text-shadow:var(--ol3),0 5px 0 #6b1006,0 8px 0 #2b1405,0 14px 16px rgba(0,0,0,.35);
+  transform:rotate(var(--r)) translateY(var(--y));transition:transform .3s cubic-bezier(.3,1.7,.5,1)}
+#abCard .abt b::after{content:attr(data-l);position:absolute;left:0;top:0;text-shadow:none;background:linear-gradient(180deg,#ffb79c 0%,#ff5a3a 30%,#e3211a 58%,#a8100a 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+#abCard .abtitle:hover .abt b,#abCard .abtitle:focus-visible .abt b{transform:rotate(calc(var(--r) * -1)) translateY(calc(var(--y) - 5px))}
+#abCard .abtitle:active .abt b{transform:rotate(var(--r)) translateY(calc(var(--y) + 2px)) scale(.97)}
+#abCard .abtitle:focus-visible{outline:3px solid #fff;outline-offset:8px;border-radius:.3em}
+#abCard .abgo{position:absolute;right:-.5em;bottom:-.7em;font:900 clamp(12px,1.35vw,17px)/1 "Rubik",system-ui,sans-serif;letter-spacing:.03em;color:#fff;text-shadow:0 2px 0 #173d04;white-space:nowrap;
+  background:linear-gradient(#c4f56a,#5cb51c 55%,#2f7a0a);border:3px solid #173d04;border-radius:999px;padding:.45em .95em;box-shadow:0 4px 0 #173d04,inset 0 2px 0 rgba(255,255,255,.55);transform:rotate(-4deg);animation:ab-go 1.4s ease-in-out infinite}
+@keyframes ab-go{0%,100%{transform:rotate(-4deg) scale(1)}50%{transform:rotate(-4deg) scale(1.08)}}
+#abCard .abprize{position:absolute;z-index:3;left:calc(var(--abl) + 6px);bottom:2.4%;cursor:pointer;font:800 clamp(12px,1.35vw,17px)/1.15 "Rubik",system-ui,sans-serif;color:#3b220e;
+  white-space:nowrap;background:linear-gradient(#fff07a,#ffc21a);border:2.5px solid #3b220e;border-radius:999px;padding:.42em .9em;box-shadow:0 3px 0 #3b220e,inset 0 2px 0 rgba(255,255,255,.6);transform:rotate(-2deg);-webkit-tap-highlight-color:transparent}
+#abCard .abprize:focus-visible{outline:3px solid #fff;outline-offset:3px}
+#abCard .abprize .sm{display:none}
+#abCard .abpop{position:absolute;z-index:4;right:2%;top:-15%;width:clamp(76px,10.5vw,140px);aspect-ratio:1;pointer-events:none;background:url("ab-chars.webp") 100% 0/400% 300% no-repeat;
+  filter:drop-shadow(0 16px 12px rgba(10,30,60,.35));transform:translate(calc(var(--tx) * 20px),calc(var(--ty) * 14px)) rotate(-14deg);transition:opacity .3s}
+#abCard .abpop::after{content:"";position:absolute;right:88%;top:46%;width:120%;height:6%;border-radius:4px;background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.85));box-shadow:0 -14px 0 -1px rgba(255,255,255,.6),0 14px 0 -1px rgba(255,255,255,.5)}
+#abCard.flip .abpop,#abCard.anim .abpop{opacity:0}
+#abCard .abbtns{position:absolute;z-index:3;top:8px;right:8px;display:flex;gap:6px}
+#abCard .abbtns button{width:36px;height:36px;border-radius:50%;border:2.5px solid #3b220e;background:linear-gradient(#fffdf6,#f1e2c2);color:#3b220e;display:grid;place-items:center;padding:0;box-shadow:0 3px 0 #3b220e,inset 0 2px 0 #fff;cursor:pointer}
+#abCard .abbtns button:active{transform:translateY(3px);box-shadow:none}
+#abCard .abbtns svg{width:18px;height:18px;display:block}
+#abCard .abbtns [data-ab="mute"] .off,#abCard .abbtns [data-ab="mute"][aria-pressed="true"] .on{display:none}
+#abCard .abbtns [data-ab="mute"][aria-pressed="true"] .off{display:block}
+#abCard.big{position:fixed;inset:0;z-index:300;height:auto;margin:0}
+#abCard.big .abf{border-radius:0;border:0;box-shadow:none}
+#abCard.big .abfr{visibility:hidden}
+html.ab-big{overflow:hidden}
+@media (orientation: portrait){
+  #abCard.big .abbk{background:#1d4f7a}
+  #abCard.big .abgame{inset:auto 0;top:50%;height:min(100%,calc(100vw / 1.6));transform:translateY(-50%)}
+  #abCard.big .abbk::after{content:"Поверните телефон — будет крупнее";position:absolute;left:0;right:0;top:calc(50% + 100vw / 3.2 + 18px);text-align:center;color:#fff;font:800 14px/1.2 "Rubik",sans-serif;text-shadow:0 2px 0 #0c2f5c}
+}
+
+/* ── «Far Cry 3»: баннер-обложка (в Юнитке — main::before / ::after): лагерь на пляже, название и вопрос Вааса, лента татау снизу ── */
+#fcCard{position:relative;box-sizing:border-box;height:clamp(190px,30vw,380px);margin:0 0 30px;padding:var(--fcp) 0 0 var(--fcl);border-radius:var(--igr);overflow:hidden;
+  background:url("fc3-tatau-red.png") 0 100%/auto 18px repeat-x,linear-gradient(180deg,rgba(0,0,0,.3),transparent 38%),url("fc3-hero.webp") 60% 32%/cover;
+  box-shadow:0 14px 34px rgba(0,0,0,.6),0 0 0 2px #0e0905}
+#fcCard b{display:block;font:400 calc(var(--fct) * var(--tk,1))/1 "Rubik Dirt","Roboto Condensed",system-ui,sans-serif;letter-spacing:.02em;color:#f4efe4;text-shadow:0 4px 0 rgba(0,0,0,.45),0 0 26px rgba(0,0,0,.55)}
+#fcCard i{display:block;margin:10px 0 0 4px;max-width:46%;font:italic 700 clamp(14px,1.7vw,22px)/1.2 "Roboto Condensed",system-ui,sans-serif;color:#f4efe4;text-shadow:0 2px 0 rgba(0,0,0,.6),0 0 14px rgba(0,0,0,.7)}
+
+/* ── телефон ── */
+@media (max-width: 860px){
+  html[data-igra="solitaire"]{--pbh:56vw;--pbh-play:min(100vw,calc(100vh - var(--igh,60px) - var(--ign,64px) - 24px));--pt:9.4vw;--pp:4vw;--pl:4.4vw;--hall:url("pasyans-hall-m.webp")}
+  #ptCard{margin:0 0 22px}
+  #ptCard .ptsub,#ptCard .ptgo2{display:none}
+  #ptCard .ptvid{object-position:50% 50%}
+  #ptCard .ptshade{background:linear-gradient(90deg,rgba(3,8,5,.86) 0%,rgba(3,8,5,.5) 36%,rgba(3,8,5,0) 60%)}
+  #ptCard .pthost{width:48%}
+  #ptCard .ptbub{right:auto;left:var(--pl);top:auto;bottom:13%;font-size:11px;border-radius:12px 12px 4px 12px}
+  html[data-igra="sonic"]{--sbh:50vw;--st:9.5vw}
+  #sxCard{margin:0 0 22px}
+  #sxCard .sxfr{background:linear-gradient(100deg,rgba(0,40,170,.42),rgba(0,40,170,0) 55%),url("sonic-hill-m.webp") 55% 42%/cover}
+  #sxCard .sxsub{top:calc(var(--sp) + var(--st) * var(--tk,1) * 1.25 + 18px);font-size:11px;max-width:58%}
+  #sxCard .sxgo{font-size:10px;right:-1em;bottom:-.95em}
+  #sxCard .sxt{border-width:2.5px;box-shadow:0 0 0 2.5px #0a1a4a,0 5px 0 2.5px #0a1a4a,0 0 18px rgba(255,210,31,.5)}
+  #sxDeco .sl{display:none}
+  #sxDeco .near{top:10vh}
+  #abDeco .absc{background-image:url("ab-scene-m.webp");background-position:50% 50%}
+  html[data-igra="birds"]{--abh:50vw;--abt:9.8vw;--abp:3vw;--abl:3.6vw}
+  #abCard{margin:0 0 24px}
+  #abCard .abprize{bottom:1.6%;font-size:10.5px;padding:.36em .8em;max-width:64%}
+  #abCard .abgo{font-size:10.5px;right:-1em;bottom:-.95em;border-width:2.5px}
+  #abCard .abt b{text-shadow:var(--ol),0 3px 0 #6b1006,0 5px 0 #2b1405,0 8px 10px rgba(0,0,0,.3)}
+  #abCard .abpop{width:19vw;top:-11%;right:1%}
+  #abCard .abbtns{top:6px;right:6px;gap:5px}
+  #abCard .abbtns button{width:31px;height:31px;border-width:2px}
+  #abCard .abbtns svg{width:16px;height:16px}
+  #abCard .abprize .lg{display:none} #abCard .abprize .sm{display:inline}
+  html[data-igra="farcry"] #igBg{background-image:radial-gradient(ellipse at 50% 42%,transparent 42%,rgba(0,0,0,.6) 100%),url("fc3-wall-m.webp")}
+  #fcCard{height:48vw;margin:0 0 22px;background:url("fc3-tatau-red.png") 0 100%/auto 14px repeat-x,linear-gradient(180deg,rgba(0,0,0,.3),transparent 40%),url("fc3-hero-m.webp") center/cover}
+  #fcCard b{font-size:calc(8vw * var(--tk,1))}
+  #fcCard i{margin-top:6px;max-width:40%;font-size:12px}
+}
