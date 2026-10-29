@@ -1167,15 +1167,19 @@ window.svcPicker=o=>{
   return {set(k){cur=k;draw()},close(){show(false)}};
 };
 /* «назад» на телефоне не выкидывает с сайта (Андрей 29.10: «назад сначала закрывает всплывающее, потом в начало раздела, потом на главную,
-   а на главной — наверх; с сайта не выкидывать, и так везде надо»). Над страницей — запись-«страж»; «назад» снимает её: делаем один шаг
-   и ставим стража снова. Стража ставим при первом касании: записи, добавленные раньше, Chrome кнопкой «назад» пропускает.
+   а на главной — наверх; с сайта не выкидывать, и так везде надо»). Над страницей — запас записей-«стражей» {svg:1…20}; каждое «назад»
+   тратит одну и делает один шаг. Записи ставим только из касания (отпустил палец, клик, клавиша): добавленные без него Chrome кнопкой
+   «назад» пропускает — поэтому не «поставить стража заново после назад», а запас, который доливается при следующем касании.
    svcBack({pop:[шаги страницы: вернуть true, если что-то закрыли], main: перейти в главный раздел (true, если перешли), home: «это главная»}) */
 window.svcBack=o=>{
-  const q=s=>document.querySelector(s),rs=history.replaceState.bind(history);
-  let gu=location.href;   // адрес записи-стража: страницы меняют в нём раздел (#skleyki и т.п.) — после «назад» ставим стража с ним же
-  history.replaceState=function(s,t,u){if(history.state&&history.state.svg&&!(s&&s.svg))s=Object.assign({},s,{svg:1});rs(s,t,u);if(history.state&&history.state.svg)gu=location.href};
-  const arm=()=>{try{if(!(history.state&&history.state.svg)){rs(Object.assign({},history.state,{svb:1}),'');history.pushState({svg:1},'')}gu=location.href}catch(e){}};
-  ['pointerdown','keydown'].forEach(k=>document.addEventListener(k,arm,{capture:true,once:true}));
+  const q=s=>document.querySelector(s),rs=history.replaceState.bind(history),ps=history.pushState.bind(history),N=20;
+  const n=()=>{const s=history.state;return s&&s.svg||0};   // номер стража; 0 — не страж (основа страницы или своя запись страницы)
+  let last=n(),gu=location.href;   // gu — адрес текущей записи: страницы меняют в нём раздел (#skleyki) — после «назад» оставляем его
+  history.replaceState=function(s,t,u){const k=n();if(k&&!(s&&s.svg))s=Object.assign({},s,{svg:k});rs(s,t,u);if(n())gu=location.href};
+  const fill=()=>{try{let k=n();const s=history.state;
+    if(!k){if(s&&!s.svb&&Object.keys(s).length)return;rs(Object.assign({},s,{svb:1}),'')}   // своя запись страницы (карточка Юнитки) — не доливаем
+    for(k++;k<=N;k++)ps({svg:k},'',location.href);last=n();gu=location.href}catch(e){}};
+  ['click','touchend','keydown'].forEach(k=>document.addEventListener(k,fill,{capture:true,passive:true}));
   const step=()=>{
     for(const f of o.pop||[])if(f())return;                                   // всплывающее страницы: фишки, листы, окна
     if(m.classList.contains('on')){open(false);return}                       // выбор сервиса
@@ -1186,9 +1190,11 @@ window.svcBack=o=>{
     if(o.main&&o.main())return;                                               // на главный раздел
     if(o.home)o.home();                                                       // уже на главной, наверху
   };
-  addEventListener('popstate',e=>{if(e.state&&e.state.svg){gu=location.href;return}
-    const was=location.href;step();const u=location.href!==was?location.href:gu;   // шаг сам сменил раздел — его адрес, иначе — адрес, с которого ушли
-    try{history.pushState({svg:1},'',u);gu=u}catch(x){}});
+  addEventListener('popstate',()=>{const k=n(),s=history.state;
+    // «назад» — номер стража стал меньше (с записи страницы на стража того же номера — это её собственный «назад», не наш);
+    // основа страницы — запас кончился, шаг всё равно делаем
+    if(k?k<last:!!(s&&s.svb)){const was=location.href;step();if(location.href===was)try{rs(history.state,'',gu)}catch(x){}}   // шаг не сменил раздел — адрес оставляем прежний
+    last=k;gu=location.href});
 };
 })();
 /*/SVC:JS*/</script>
