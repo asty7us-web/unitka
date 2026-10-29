@@ -13,6 +13,8 @@
    BirdsGame.mute(off); BirdsGame.stars() → [набрано, всего]. */
 (function () {
 "use strict";
+// картинки и звуки — рядом с этим файлом (/unitka/), а не со страницей: игру подключают и Склейки с Конкурентами (29.10)
+const BASE = ((document.currentScript && document.currentScript.src) || "").replace(/[^/]*$/, "");
 const pl = window.planck, V2 = pl.Vec2;
 const TAU = Math.PI * 2;
 const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
@@ -27,7 +29,7 @@ const GRAV = 10, STEP = 1 / 60, MAXP = 1.7, VMAX = 18.5, T = 0.26;      // T —
 
 /* ═════════ картинки: кадры листов (make_assets.py) ═════════ */
 const IMG = {};
-function pic(src) { if (!IMG[src]) { const im = new Image(); im.decoding = "async"; im.src = src; IMG[src] = im; } return IMG[src]; }
+function pic(src) { if (!IMG[src]) { const im = new Image(); im.decoding = "async"; im.src = BASE + src; IMG[src] = im; } return IMG[src]; }
 const ready = im => im && im.complete && im.naturalWidth > 0;
 // персонажи: [x, y, w, h] в ab-chars.webp; тело — [cx, cy доли кадра, r — доля ширины кадра] (круг, который совпадает с физикой)
 const CH = { red: [4, 5, 352, 349], red_fly: [364, 8, 352, 343], chuck: [724, 14, 352, 332], chuck_fly: [1084, 15, 352, 330],
@@ -113,7 +115,7 @@ function ac() {
 }
 function loadSfx() {
   if (AU.buf || AU.busy) return; const a = ac(); if (!a) return; AU.busy = true;
-  fetch("ab-sfx.mp3").then(r => r.arrayBuffer()).then(b => new Promise((ok, no) => a.decodeAudioData(b, ok, no)))
+  fetch(BASE + "ab-sfx.mp3").then(r => r.arrayBuffer()).then(b => new Promise((ok, no) => a.decodeAudioData(b, ok, no)))
     .then(x => { AU.buf = x; }).catch(() => { AU.busy = false; });
 }
 function smp(name, vol, rate) {                              // запись из спрайта; не чаще 14 штук за 0,1 с
