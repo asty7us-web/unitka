@@ -16,6 +16,8 @@
    API: SonicGame.mount(canvas) → {resume, pause, destroy, dbg}; SonicGame.runner(canvas, {map}) → {pause, destroy}. */
 (function () {
 "use strict";
+// картинки — рядом с этим файлом (/unitka/), а не со страницей: игру подключают и Склейки с Конкурентами (29.10)
+const BASE = ((document.currentScript && document.currentScript.src) || "").replace(/[^/]*$/, "");
 const TAU = Math.PI * 2, PI = Math.PI;
 const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
 const lerp = (a, b, t) => a + (b - a) * t;
@@ -34,7 +36,7 @@ const DPR = () => Math.min(2, window.devicePixelRatio || 1);
 const reduced = () => false;   // игра двигается всегда, «меньше анимации» Windows не глушит (Андрей 24.10)
 const FONT = '"Exo 2","Russo One",system-ui,sans-serif';
 const IMG = {};
-function pic(k, src) { if (!IMG[k]) { IMG[k] = new Image(); IMG[k].src = src; } return IMG[k]; }
+function pic(k, src) { if (!IMG[k]) { IMG[k] = new Image(); IMG[k].src = BASE + src; } return IMG[k]; }
 
 /* ═════════ звук: короткие синтезированные эффекты (WebAudio, без файлов), включаются после первого касания ═════════ */
 const AU = { a: null, on: (() => { try { return localStorage.getItem("unitka.sxMute") !== "1"; } catch (e) { return true; } })() };
