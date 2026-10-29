@@ -1670,6 +1670,7 @@ function spaceDeco(on) {
       `<button class="spnav prev" type="button" aria-label="Предыдущая">${SP_ICO.prev}</button><button class="spnav next" type="button" aria-label="Следующая">${SP_ICO.next}</button>` +
       '<div class="spbar">' + SP_AFF.map((_, k) => `<button type="button" aria-label="Аффирмация ${k + 1}"><i><b></b></i></button>`).join("") + "</div>" +
       `<div class="spbtns"><button type="button" data-sp="mute" aria-label="Музыка" aria-pressed="${LS.get("spMute", 0) == 1}">${SX_ICO.mute}</button>` +
+      `<button type="button" data-sp="next" aria-label="Сменить музыку" title="Музыка: ${SP_TRACKS[SPU.t][1]} — сменить" style="font-size:18px;line-height:1">♫</button>` +
       `<button type="button" data-sp="play" aria-label="Пауза / дальше сами">${SP_ICO.play}</button><button type="button" data-sp="big" aria-label="Во весь экран">${SX_ICO.big}</button></div>`;
     $("main").prepend(el);
     const go = d => spShow(el, el._i + d, d);
@@ -1681,6 +1682,7 @@ function spaceDeco(on) {
       const b = e.target.closest("[data-sp]"); if (!b) return;
       if (b.dataset.sp === "play") el.classList.toggle("stop");
       else if (b.dataset.sp === "mute") { const off = b.getAttribute("aria-pressed") !== "true"; if (!off) tmCtx(); SND.space.set(off); syncSound(); tmSync(); }
+      else if (b.dataset.sp === "next") spuNext();
       else spBig(el, !el.classList.contains("big"));
     });
     el.addEventListener("keydown", e => {
@@ -1762,6 +1764,31 @@ function tmWant() {
   if (!TMV[THEME] || SND[THEME].off()) return null;
   return THEME;
 }
+const SP_TRACKS = [["space-music.mp3", "Космос 1"], ["space-music-2.mp3", "Космос 2"], ["space-music-3.mp3", "Космос 3"], ["space-music-4.mp3", "Космос 4"]], SP_XF = 5;
+const SPU = { el: [], g: [], m: null, cur: 0, t: (+LS.get("spTrack", 0) || 0) % SP_TRACKS.length };
+function spuEl(i) {
+  if (!SPU.el[i]) {
+    const a = TMU.a, el = new Audio(); el.preload = "auto";
+    const g = SPU.g[i] = a.createGain(); g.gain.value = 0.0001; a.createMediaElementSource(el).connect(g); g.connect(SPU.m || a.destination);
+    el.addEventListener("timeupdate", () => { if (TMU.cur === "space" && i === SPU.cur && el.duration && !el._xf && el.duration - el.currentTime < SP_XF) spuNext(SP_XF); });
+    el.addEventListener("ended", () => { if (TMU.cur === "space" && i === SPU.cur && !el._xf) spuNext(SP_XF); });
+    SPU.el[i] = el;
+  }
+  return SPU.el[i];
+}
+function spuRamp(i, to, s) { const g = SPU.g[i].gain, t = TMU.a.currentTime; g.cancelScheduledValues(t); g.setValueAtTime(Math.max(g.value, 0.0001), t); g.exponentialRampToValueAtTime(Math.max(to, 0.0001), t + s); }
+function spuStart(s) {                                    // трек SPU.t с начала на втором плеере, текущий плавно гаснет
+  const o = SPU.el[SPU.cur] ? SPU.cur : -1; SPU.cur = o < 0 ? 0 : 1 - SPU.cur;
+  if (o >= 0 && o !== SPU.cur && !SPU.el[o].paused) { const oe = SPU.el[o]; oe._xf = true; spuRamp(o, 0, s); setTimeout(() => { if (oe._xf) { oe.pause(); oe._xf = false; } }, s * 1000 + 150); }
+  const i = SPU.cur, el = spuEl(i), f = SP_TRACKS[SPU.t][0];
+  if (!el.src.endsWith(f)) el.src = f; try { el.currentTime = 0; } catch (e) {}
+  el._xf = false; SPU.g[i].gain.setValueAtTime(0.0001, TMU.a.currentTime); spuRamp(i, 1, s); el.play().catch(() => {});
+}
+function spuNext(s) {
+  SPU.t = (SPU.t + 1) % SP_TRACKS.length; LS.set("spTrack", SPU.t);
+  document.querySelectorAll('[data-sp="next"]').forEach(b => b.title = "Музыка: " + SP_TRACKS[SPU.t][1] + " — сменить");
+  if (TMU.cur === "space") spuStart(s || 3);
+}
 function tmSync() {
   const name = TMU.want = tmWant(), a = TMU.a; if (!a) return;
   if (TMU.cur && TMU.cur !== name) {                      // другая тема или тишина — плавно гасим
@@ -1770,11 +1797,14 @@ function tmSync() {
   }
   if (!name || TMU.cur === name) return;
   /* Андрей 28.10: «Космос» — полная мелодия 6,5 мин (стык сведён в самом файле). Целиком в память телефон не тянет (~150 МБ) — играем потоком */
+  /* Андрей 29.10: четыре мелодии по 3,3–3,5 мин идут по очереди; два плеера, за SP_XF с до конца следующая нарастает, текущая затихает; ♫ — следующая */
   if (name === "space") {
-    let el = TMU.el; if (!el) { el = TMU.el = new Audio("space-music.mp3"); el.loop = true; el.preload = "auto"; TMU.es = a.createMediaElementSource(el); }
-    const g = a.createGain(), t = a.currentTime; TMU.es.disconnect(); TMU.es.connect(g); g.connect(a.destination);
+    const g = a.createGain(), t = a.currentTime; g.connect(a.destination); SPU.g.forEach(x => { x.disconnect(); x.connect(g); }); SPU.m = g;
     g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(TMV[name], t + 1.6);
-    el.play().catch(() => {}); TMU.src = { stop: () => setTimeout(() => { if (TMU.cur !== "space") el.pause(); }, 600) }; TMU.g = g; TMU.cur = name; return;
+    TMU.src = { stop: () => setTimeout(() => { if (TMU.cur !== "space") SPU.el.forEach(e => e && e.pause()); }, 600) }; TMU.g = g; TMU.cur = name;
+    const el = SPU.el[SPU.cur];
+    if (el && el.src && el.currentTime > 0 && el.duration - el.currentTime > SP_XF) el.play().catch(() => {}); else spuStart(1.5);
+    return;
   }
   const b = TMU.b[name];
   if (!b) {
@@ -1798,7 +1828,7 @@ function tmWake() {
   if (!TMU.a || document.hidden) return;
   if (tmWant() && TMU.a.state !== "running") TMU.a.resume().then(() => tmSync()).catch(() => {});
   else if (tmWant() && !TMU.cur) tmSync();
-  else if (TMU.cur === "space" && TMU.el && TMU.el.paused) TMU.el.play().catch(() => {});
+  else if (TMU.cur === "space" && SPU.el[SPU.cur] && SPU.el[SPU.cur].paused) SPU.el[SPU.cur].play().catch(() => {});
 }
 setInterval(tmWake, 2000); window.addEventListener("focus", tmWake); window.addEventListener("pageshow", tmWake);
 let sndMem = null;                       // браузер не даёт хранить (инкогнито) — помним до перезагрузки
