@@ -10,6 +10,8 @@
         Solitaire.fan(canvas, {map}) → {pause, destroy}. */
 (function () {
 "use strict";
+// звуки и картинки — рядом с этим файлом (/unitka/), а не со страницей: игру подключают и Склейки с Конкурентами (29.10)
+const BASE = ((document.currentScript && document.currentScript.src) || "").replace(/[^/]*$/, "");
 const TAU = Math.PI * 2, PI = Math.PI;
 const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
 const DPR = () => Math.min(2, window.devicePixelRatio || 1);
@@ -38,7 +40,7 @@ function ac() {
   if (AU.a && !AU.ld) { AU.ld = true; buf("pasyans-sfx.mp3", b => { AU.sfx = b; }); }
   return AU.a;
 }
-function buf(url, cb) { fetch(url).then(r => r.arrayBuffer()).then(d => new Promise((ok, no) => AU.a.decodeAudioData(d, ok, no))).then(cb).catch(() => {}); }
+function buf(url, cb) { fetch(BASE + url).then(r => r.arrayBuffer()).then(d => new Promise((ok, no) => AU.a.decodeAudioData(d, ok, no))).then(cb).catch(() => {}); }
 function seg(name, vol, at, dur) {                        // случайный отрезок из SFX[name]
   const a = AU.a, list = SFX[name]; if (!a || !AU.sfx || !list) return false;
   const [o, d] = list[Math.floor(Math.random() * list.length)], s = a.createBufferSource(), g = a.createGain(), t = a.currentTime + (at || 0), len = Math.min(d, dur || d);
@@ -118,7 +120,7 @@ const PIPS = {
    три кадра K, Q, J); пока не загрузились — корона и буква кодом */
 const COURT = { im: null, cb: [] };
 function court() {
-  if (!COURT.im) { COURT.im = new Image(); COURT.im.onload = () => COURT.cb.forEach(f => f()); COURT.im.src = "pasyans-court.webp"; }
+  if (!COURT.im) { COURT.im = new Image(); COURT.im.onload = () => COURT.cb.forEach(f => f()); COURT.im.src = BASE + "pasyans-court.webp"; }
   return COURT.im.complete && COURT.im.naturalWidth ? COURT.im : null;
 }
 const IDX = 'Arial,"Helvetica Neue",Helvetica,sans-serif';
