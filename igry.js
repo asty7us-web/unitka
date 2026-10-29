@@ -296,7 +296,7 @@ function soliDeco(on) {
     el.innerHTML = '<div class="ptin"><div class="ptf ptfr">' +
       `<video class="ptvid" src="${BASE}pasyans-live${ph}.mp4?v=3" poster="${BASE}pasyans-live${ph}.webp?v=3" muted playsinline loop autoplay disablepictureinpicture aria-hidden="true"></video>` +
       '<div class="ptshade" aria-hidden="true"></div><div class="ptbulbs" aria-hidden="true"><canvas class="b1"></canvas><canvas class="b2"></canvas></div>' +
-      `<button class="pttitle" type="button" aria-label="Сыграть в пасьянс" style="--tk:${tk(nm.length + 1)}"><span class="ptt">${esc(nm)}</span><span class="ptgo">♠ Сыграть<span class="ptgo2">&nbsp;в пасьянс</span></span></button>` +
+      `<button class="pttitle" type="button" aria-label="Сыграть в пасьянс" style="--tk:${tk(nm.length)}"><span class="ptt">${esc(nm)}</span><span class="ptgo">♠ Сыграть<span class="ptgo2">&nbsp;в пасьянс</span></span></button>` +
       `<div class="ptsub" aria-hidden="true">«Косынка» · казино «${esc(OPT.name || "")}» открыто</div>` +
       '<button class="pthost" type="button" aria-label="Ведущая казино приглашает сыграть в пасьянс"></button><div class="ptbub" aria-hidden="true">Сыграем партию? 😉</div></div>' +
       '<div class="ptf ptbk"><div class="ptbar">' +
@@ -492,6 +492,7 @@ window.IGRY = {
   },
   hasSound: t => !!SND[t],
   soundOff: () => (SND[CUR] ? SND[CUR].off() : false),
-  setSound(off) { const s = SND[CUR]; if (!s) return; if (!off) tmCtx(); s.set(off); syncBtns(); tmSync(); }
+  setSound(off) { const s = SND[CUR]; if (!s) return; if (!off) tmCtx(); s.set(off); syncBtns(); tmSync(); },
+  sync() { syncBtns(); if (tmWant()) tmCtx(); tmSync(); }   // звук переключили снаружи (кнопка в шапке Юнитки гасит все игры сразу)
 };
 })();
