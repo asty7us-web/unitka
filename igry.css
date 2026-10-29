@@ -22,15 +22,15 @@ html[data-igra="solitaire"]{
   --di-g:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath fill='%23e8c260' d='M50 2Q65 30 86 50 65 70 50 98 35 70 14 50 35 30 50 2Z'/%3E%3C/svg%3E");
   --cl-g:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='%23e8c260'%3E%3Ccircle cx='50' cy='29' r='20'/%3E%3Ccircle cx='29' cy='59' r='20'/%3E%3Ccircle cx='71' cy='59' r='20'/%3E%3Cpath d='M45 62 37 96H63L55 62Z'/%3E%3C/svg%3E");
   --pbh:clamp(220px,34vw,430px); --pbh-play:min(640px,calc(100vh - var(--igh,60px) - 40px)); --pt:clamp(40px,6.2vw,92px); --pp:min(2.8vw,32px); --pl:min(3.8vw,44px);
-  --hall:url("pasyans-hall.webp");
+  --hall:url("/unitka/pasyans-hall.webp");
 }
 html[data-igra="birds"]{
   --igr:18px;
   --ol:-2px -2px 0 #2b1405,2px -2px 0 #2b1405,-2px 2px 0 #2b1405,2px 2px 0 #2b1405,0 -2px 0 #2b1405,0 2px 0 #2b1405,-2px 0 0 #2b1405,2px 0 0 #2b1405;
   --ol3:-3px -3px 0 #2b1405,3px -3px 0 #2b1405,-3px 3px 0 #2b1405,3px 3px 0 #2b1405,0 -3px 0 #2b1405,0 3px 0 #2b1405,-3px 0 0 #2b1405,3px 0 0 #2b1405;
-  --wood:url("ab-wood.webp") 50% 50%/100% 100% no-repeat;
+  --wood:url("/unitka/ab-wood.webp") 50% 50%/100% 100% no-repeat;
   --grass:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='16' viewBox='0 0 64 16'%3E%3Cpath fill='%233f8a0c' d='M0 0h64v8l-3 5-3-5-4 7-3-6-3 4-4-6-3 7-3-5-3 5-4-7-3 6-3-4-4 6-3-7-3 5-3-5-4 7-2-5L0 8Z'/%3E%3Cpath fill='%2389d12a' transform='translate(0 -2.6)' d='M0 0h64v8l-3 5-3-5-4 7-3-6-3 4-4-6-3 7-3-5-3 5-4-7-3 6-3-4-4 6-3-7-3 5-3-5-4 7-2-5L0 8Z'/%3E%3Crect width='64' height='3.2' fill='%23b6ee48'/%3E%3C/svg%3E");
-  --pig:url("ab-i-pig.webp"); --red:url("ab-i-red.webp");
+  --pig:url("/unitka/ab-i-pig.webp"); --red:url("/unitka/ab-i-red.webp");
   --abh:clamp(220px,32vw,400px); --abt:clamp(46px,7.6vw,108px); --abp:min(2.4vw,28px); --abl:min(3.2vw,38px);
 }
 html[data-igra="farcry"]{
@@ -39,7 +39,7 @@ html[data-igra="farcry"]{
   --paper:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .42 0 0 0 0 .28 0 0 0 0 .1 0 0 0 .2 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
   --burn:inset 0 0 0 1px rgba(70,40,10,.25),inset 0 0 38px rgba(110,62,18,.45);
   --aim:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Cg fill='none' stroke='%23fff' stroke-width='4' opacity='.85'%3E%3Ccircle cx='16' cy='16' r='9'/%3E%3Cpath d='M16 2v8M16 22v8M2 16h8M22 16h8'/%3E%3C/g%3E%3Cg fill='none' stroke='%23c8241d' stroke-width='2'%3E%3Ccircle cx='16' cy='16' r='9'/%3E%3Cpath d='M16 2v8M16 22v8M2 16h8M22 16h8'/%3E%3C/g%3E%3Ccircle cx='16' cy='16' r='1.6' fill='%23c8241d'/%3E%3C/svg%3E") 16 16,crosshair;
-  --tatau:url("fc3-tatau-red.png"); --skull:url("fc3-skull-red.png"); --skullw:url("fc3-skull.png");
+  --tatau:url("/unitka/fc3-tatau-red.png"); --skull:url("/unitka/fc3-skull-red.png"); --skullw:url("/unitka/fc3-skull.png");
   --fct:clamp(42px,6.8vw,96px); --fcp:min(2.6vw,30px); --fcl:min(3.6vw,42px);
 }
 
@@ -265,7 +265,7 @@ html.ab-big{overflow:hidden}
 
 /* ── телефон ── */
 @media (max-width: 860px){
-  html[data-igra="solitaire"]{--pbh:56vw;--pbh-play:min(100vw,calc(100vh - var(--igh,60px) - var(--ign,64px) - 24px));--pt:9.4vw;--pp:4vw;--pl:4.4vw;--hall:url("pasyans-hall-m.webp")}
+  html[data-igra="solitaire"]{--pbh:56vw;--pbh-play:min(100vw,calc(100vh - var(--igh,60px) - var(--ign,64px) - 24px));--pt:9.4vw;--pp:4vw;--pl:4.4vw;--hall:url("/unitka/pasyans-hall-m.webp")}
   #ptCard{margin:0 0 22px}
   #ptCard .ptsub,#ptCard .ptgo2{display:none}
   #ptCard .ptvid{object-position:50% 50%}
