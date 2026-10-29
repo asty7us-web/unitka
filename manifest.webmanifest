@@ -7,7 +7,8 @@
  "scope": "/",
  "shortcuts": [
   {"name": "Склейки", "url": "/shov/"},
-  {"name": "Конкуренты", "url": "/shov/konkurenty/"}
+  {"name": "Конкуренты", "url": "/shov/konkurenty/"},
+  {"name": "Закупки", "url": "/shov/zakupki/"}
  ],
  "display": "standalone",
  "background_color": "#f4f4f1",
