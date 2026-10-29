@@ -836,15 +836,67 @@ body{padding-top:var(--hdr,57px)}
 .seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
 .seg.sm button{padding:4px 10px;font-size:13px;min-width:0}
 nav.tabs{display:flex;gap:4px;margin-left:auto}
-/* «Сервисы»: всплывающий список «значок + название» — Юнитка / Склейки / Конкуренты (Андрей 26.10: «всплывающими кнопками в столбик») */
-.apw{flex:none} .apw .themeb svg{width:17px;height:17px}
-.tmenu.apmenu{left:0;right:auto;min-width:210px}
-.apmenu a,.apmenu .apon{display:flex;align-items:center;gap:11px;padding:9px 10px;border-radius:8px;font-weight:650;font-size:15px;color:var(--ink);text-decoration:none}
-.apmenu a:hover{background:var(--surface-2)} .apmenu a:active{transform:scale(.98)}
-.apmenu .apon{background:var(--accent-wash);color:var(--accent)}
-.apic{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:var(--surface-2);color:var(--ink-2);flex:none;font-style:normal}
-.apic svg{width:17px;height:17px} .apic.ju{background:var(--accent);color:#fff;font-weight:800;font-size:15px}
-@media (max-width:820px){.apw .tl-full{display:none}}
+/* «Сервисы» — общий выбор сервиса Юнитка / Склейки / Конкуренты: название сервиса в шапке = кнопка, под ней список столбиком (Андрей 26.10 «всплывающими кнопками в столбик», 28.10 «красиво, приятно, без ощущения, что заходишь в другое») */
+:root{--svc-card:var(--surface);--svc-ink:var(--ink);--svc-ink2:var(--ink-2);--svc-ink3:var(--muted);--svc-line:var(--ring);--svc-hover:var(--surface-2);--svc-acc:var(--accent);--svc-acc-soft:var(--accent-wash)}
+:root[data-theme="dusk"]{--svc-card:#1f2c30} :root[data-theme="space"]{--svc-card:#11152e}   /* у этих тем карточки полупрозрачные — список сервисов сливался с картинкой */
+/*SVC:CSS*/
+/* выбор сервиса (servisy\svc.py — править там): кнопка «значок + название ⌄», под ней список трёх сервисов */
+.svc{position:relative;flex:none;min-width:0}
+/* шрифт задаю обёртке, кнопка его наследует (button{font:inherit} страниц) — так темы Юнитки (.brand) и Склеек (.brand b) по-прежнему перекрашивают название */
+:where(.svc){font:700 18px/1 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;letter-spacing:-.01em}
+.svc-btn{display:inline-flex;align-items:center;gap:9px;height:40px;margin:0 0 0 -6px;padding:0 9px 0 5px;border:0;border-radius:13px;background:transparent;color:inherit;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;white-space:nowrap;transition:background-color .2s ease,transform .4s cubic-bezier(.34,1.56,.64,1)}
+.svc-btn .svc-nm{font:inherit;letter-spacing:inherit}
+@media (hover:hover){.svc-btn:hover{background:var(--svc-hover)}}
+.svc-btn:active{transform:scale(.95);transition-duration:.12s}
+.svc-btn[aria-expanded="true"]{background:var(--svc-hover)}
+.svc-btn .svc-ic{width:30px;height:30px;border-radius:9px;font-size:15px}
+.svc-chev{width:16px;height:16px;flex:none;opacity:.55;margin-left:-3px;transition:transform .45s cubic-bezier(.34,1.56,.64,1)}
+.svc-btn[aria-expanded="true"] .svc-chev{transform:rotate(180deg)}
+.svc-ic{display:grid;place-items:center;flex:none;color:#fff;font-style:normal;font-weight:800;line-height:1;
+  box-shadow:inset 0 0 0 .5px rgba(255,255,255,.28),inset 0 1px 0 rgba(255,255,255,.22),0 1px 2px rgba(0,0,0,.16)}
+.svc-ic svg{width:62%;height:62%}
+.svc-ic.u{background:linear-gradient(145deg,#5aa2ff,#1f62e8)}
+.svc-ic.s{background:linear-gradient(145deg,#4d63ff,#13b3a5)}
+.svc-ic.k{background:linear-gradient(145deg,#2f7dff,#7b45f5)}
+.svc-menu{position:absolute;z-index:300;top:calc(100% + 8px);left:-6px;width:min(318px,calc(100vw - 20px));padding:6px;border-radius:20px;
+  background:var(--svc-card);color:var(--svc-ink);box-shadow:0 0 0 .5px var(--svc-line),0 18px 50px -12px rgba(0,0,0,.34),0 4px 12px -4px rgba(0,0,0,.12);
+  transform-origin:24px -6px;opacity:0;visibility:hidden;transform:translateY(-6px) scale(.92);pointer-events:none;
+  transition:opacity .16s ease,transform .26s cubic-bezier(.4,0,.6,1),visibility 0s linear .26s}
+.svc-menu.on{opacity:1;visibility:visible;transform:none;pointer-events:auto;transition:opacity .2s ease,transform .5s cubic-bezier(.22,1.3,.36,1),visibility 0s}
+.svc-menu.gone{transition:none!important;opacity:0!important;visibility:hidden!important}
+.svc-cap{padding:9px 12px 6px;font:700 11px/1.2 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;letter-spacing:.07em;text-transform:uppercase;color:var(--svc-ink3)}
+.svc-it{position:relative;display:flex;align-items:center;gap:12px;padding:9px 10px;border-radius:14px;color:inherit;text-decoration:none;
+  -webkit-tap-highlight-color:transparent;transition:background-color .2s ease,transform .35s cubic-bezier(.34,1.56,.64,1)}
+.svc-it .svc-ic{width:42px;height:42px;border-radius:12px;font-size:19px}
+.svc-tx{min-width:0;flex:1;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.svc-tx b{display:block;font-size:15.5px;font-weight:650;line-height:1.2;letter-spacing:-.005em}
+.svc-tx small{display:block;margin-top:2px;font-size:12.5px;line-height:1.3;color:var(--svc-ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (hover:hover){.svc-it:hover{background:var(--svc-hover)}}
+.svc-it:active{transform:scale(.97);background:var(--svc-hover);transition-duration:.1s}
+.svc-it[aria-current]{background:var(--svc-acc-soft)}
+.svc-it[aria-current] b{color:var(--svc-acc)}
+.svc-ok{width:20px;height:20px;flex:none;color:var(--svc-acc)}
+.svc-sp{width:18px;height:18px;flex:none;border-radius:50%;border:2.2px solid var(--svc-line);border-top-color:var(--svc-acc);opacity:0;transition:opacity .2s}
+.svc-it.go .svc-sp{opacity:1;animation:svc-spin .7s linear infinite}
+@keyframes svc-spin{to{transform:rotate(360deg)}}
+.svc-menu.on .svc-it{animation:svc-row .5s cubic-bezier(.22,1.2,.36,1) both}
+.svc-menu.on .svc-it:nth-child(3){animation-delay:.035s}.svc-menu.on .svc-it:nth-child(4){animation-delay:.07s}
+@keyframes svc-row{from{opacity:0;transform:translateY(-6px)}}
+/* переход между сервисами: шапка и кнопка сервиса остаются на месте, остальное мягко проявляется */
+@view-transition{navigation:auto}
+.svc-hdr{view-transition-name:svc-hdr}
+#svcBtn{view-transition-name:svc-btn}
+::view-transition-group(svc-hdr),::view-transition-group(svc-btn){animation-duration:.42s;animation-timing-function:cubic-bezier(.22,1,.36,1)}
+::view-transition-group(svc-hdr){overflow:clip}
+::view-transition-old(svc-hdr),::view-transition-new(svc-hdr){animation-duration:.3s}
+::view-transition-old(svc-btn),::view-transition-new(svc-btn){animation-duration:.32s;width:auto;height:auto}   /* название не растягивается, просто сменяется */
+::view-transition-old(root){animation:svc-out .2s cubic-bezier(.4,0,1,1) both}
+::view-transition-new(root){animation:svc-in .42s cubic-bezier(.16,1,.3,1) both}
+@keyframes svc-out{to{opacity:0}}
+@keyframes svc-in{from{opacity:0;transform:translateY(14px)}}
+@media (prefers-reduced-motion:reduce){@keyframes svc-in{from{opacity:0}}}
+/*/SVC:CSS*/
 nav.tabs button{border:0;background:transparent;padding:8px 12px;border-radius:9px;color:var(--ink-2);font-weight:600;display:flex;align-items:center;gap:6px}
 nav.tabs button[aria-current="page"]{background:var(--accent-wash);color:var(--accent)}
 nav.tabs svg{width:20px;height:20px}
@@ -1245,15 +1297,9 @@ a.btn{text-decoration:none;color:inherit}
 </style>
 </head>
 <body>
-<header>
+<header class="svc-hdr">
   <div class="bar">
-    <div class="brand"><i>Ю</i><span>Юнитка</span></div>
-    <div class="tw apw"><button class="themeb" id="bApps" aria-haspopup="true" aria-expanded="false" title="Перейти в Склейки или Конкуренты"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="4" y="4" width="6.5" height="6.5" rx="1.8"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.8"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.8"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.8"/></svg><span class="tl-full">Сервисы</span></button>
-      <div class="tmenu apmenu hidden" id="apMenu" role="menu">
-        <span class="apon" aria-current="page"><i class="apic ju">Ю</i>Юнитка</span>
-        <a href="../shov/" role="menuitem"><i class="apic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="6" width="9" height="13" rx="2.4" transform="rotate(-8 7.5 12.5)"/><rect x="11" y="4" width="9" height="13" rx="2.4" transform="rotate(7 15.5 10.5)"/></svg></i>Склейки</a>
-        <a href="https://asty7us-web.github.io/shov/konkurenty/" id="toKonk" role="menuitem"><i class="apic"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="12" width="4.5" height="9" rx="1.5"/><rect x="9.75" y="7" width="4.5" height="14" rx="1.5"/><rect x="16.5" y="3" width="4.5" height="18" rx="1.5"/></svg></i>Конкуренты</a>
-      </div></div>
+    <!--SVC:HTML--><div class="svc"><button class="brand svc-btn" id="svcBtn" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="svcMenu" title="Сервисы: Юнитка, Склейки, Конкуренты"><i class="svc-ic u">Ю</i><span class="svc-nm">Юнитка</span><svg class="svc-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg></button><div class="svc-menu" id="svcMenu" role="menu" aria-label="Сервисы"><div class="svc-cap">Сервисы</div><a class="svc-it" href="/unitka/" aria-current="page" role="menuitem"><span class="svc-ic u">Ю</span><span class="svc-tx"><b>Юнитка</b><small>маржа, цены и СПП</small></span><svg class="svc-ok" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></a><a class="svc-it" href="/shov/" id="toShov" role="menuitem"><span class="svc-ic s"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="9" height="13" rx="2.4" transform="rotate(-8 7.5 12.5)" fill="currentColor" fill-opacity=".28"/><rect x="11" y="4" width="9" height="13" rx="2.4" transform="rotate(7 15.5 10.5)"/></svg></span><span class="svc-tx"><b>Склейки</b><small>склейки WB, Ozon, Маркета</small></span><i class="svc-sp" aria-hidden="true"></i></a><a class="svc-it" href="/shov/konkurenty/" id="toKonk" role="menuitem"><span class="svc-ic k"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="3.5" y="12" width="4.4" height="8.5" rx="1.5"/><rect x="9.8" y="7.5" width="4.4" height="13" rx="1.5"/><rect x="16.1" y="3.5" width="4.4" height="17" rx="1.5"/></svg></span><span class="svc-tx"><b>Конкуренты</b><small>топ-5 на Озоне, ключи, склады</small></span><i class="svc-sp" aria-hidden="true"></i></a></div></div><!--/SVC:HTML-->
     <nav class="tabs" id="tabs">
       <button data-tab="sum"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg>Сводка</button>
       <button data-tab="calc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="5" y="3" width="14" height="18" rx="2.5"/><path d="M8.5 7.5h7M8.5 12h.01M12 12h.01M15.5 12h.01M8.5 16h.01M12 16h.01M15.5 16h.01"/></svg>Расчёт</button>
@@ -1267,6 +1313,32 @@ a.btn{text-decoration:none;color:inherit}
       <div class="tmenu hidden" id="tmenu" role="menu"></div></div>
   </div>
 </header>
+<script>/*SVC:JS*/
+(()=>{   // выбор сервиса (servisy\svc.py — править там)
+const b=document.getElementById('svcBtn'),m=document.getElementById('svcMenu');if(!b||!m)return;
+let pre=false;
+const prerender=()=>{   // пока выбирают — соседние сервисы уже открываются в фоне (Chrome), переход мгновенный
+  if(pre)return;pre=true;
+  try{if(!(HTMLScriptElement.supports&&HTMLScriptElement.supports('speculationrules')))return;
+    const s=document.createElement('script');s.type='speculationrules';
+    s.textContent=JSON.stringify({prerender:[{source:'list',urls:[...m.querySelectorAll('a.svc-it:not([aria-current])')].map(a=>a.href),eagerness:'immediate'}]});
+    document.head.appendChild(s)}catch(e){}};
+const open=on=>{m.classList.toggle('on',on);m.classList.remove('gone');b.setAttribute('aria-expanded',on?'true':'false');if(on)prerender()};
+b.addEventListener('pointerdown',prerender,{passive:true});
+b.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();open(!m.classList.contains('on'))});
+document.addEventListener('pointerdown',e=>{if(m.classList.contains('on')&&!e.target.closest('.svc'))open(false)},true);
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&m.classList.contains('on')){open(false);b.focus()}});
+m.addEventListener('click',e=>{const a=e.target.closest('a.svc-it');if(!a)return;e.stopPropagation();
+  if(a.hasAttribute('aria-current')){e.preventDefault();open(false);return}
+  a.classList.add('go');if(!('onpageswap' in window))setTimeout(()=>m.classList.add('gone'),60)});
+addEventListener('pageswap',()=>m.classList.add('gone'));   // снимок для перехода — без открытого списка
+addEventListener('pageshow',e=>{if(!e.persisted)return;open(false);m.querySelectorAll('.go').forEach(x=>x.classList.remove('go'))});
+/* общая тема: выбрали тему, у которой есть пара в других сервисах, — она и там (Юнитка, Склейки, Конкуренты) */
+const TH=[['auto','auto','auto'],['light','porcelain','light'],['dark','graphite','dark'],['space','space','space'],['jim','jim',null]],
+  KEYS=['unitka.theme','shov.skin','konk.theme'];
+window.svcTheme=(i,v)=>{const r=TH.find(x=>x[i]===v);if(!r)return;r.forEach((t,j)=>{if(j!==i&&t)try{localStorage.setItem(KEYS[j],JSON.stringify(t))}catch(e){}})};
+})();
+/*/SVC:JS*/</script>
 
 <main>
 <!-- ═════════ СВОДКА ═════════ -->
@@ -2298,12 +2370,9 @@ $("#bTheme").onclick = e => { e.stopPropagation(); $("#tmenu").classList.toggle(
 $("#tmenu").addEventListener("click", e => {
   const b = e.target.closest("[data-theme-set]"); if (!b) return;
   THEME = b.dataset.themeSet; LS.set("theme", THEME); applyTheme(); $("#tmenu").classList.add("hidden");
+  if (window.svcTheme) svcTheme(0, THEME);   // та же тема в Склейках и Конкурентах, если там есть такая
 });
 document.addEventListener("click", e => { if (!e.target.closest(".tw")) $("#tmenu").classList.add("hidden"); });
-/* «Сервисы» — список Юнитка / Склейки / Конкуренты; закрывается нажатием мимо и Esc */
-$("#bApps").onclick = e => { e.stopPropagation(); const m = $("#apMenu"), on = m.classList.toggle("hidden"); $("#bApps").setAttribute("aria-expanded", String(!on)); $("#tmenu").classList.add("hidden"); };
-document.addEventListener("click", e => { if (!e.target.closest(".apw")) { $("#apMenu").classList.add("hidden"); $("#bApps").setAttribute("aria-expanded", "false"); } });
-document.addEventListener("keydown", e => { if (e.key === "Escape") $("#apMenu").classList.add("hidden"); });
 
 /* ═════════ площадки и налоги ═════════ */
 const OZX = { proc: 0, lastPct: 0, lastMax: 0, nonloc: 0, xdock: 0 };
@@ -2963,7 +3032,10 @@ $("#importFile").addEventListener("change", async e => {
 
 /* ═════════ сводка: цены сейчас + факт панелей ═════════ */
 let FACT = null, FSEL = null, FQ = "", FSORT = LS.get("sumSort2", "sales"), SUMF = LS.get("sumMp", "all"), FADS = "pct", FPRICE = null, SHOWALL = false, SUMP = LS.get("sumPer", "month");
-const b64u8 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+const b64u8 = s => {   // встроенный fromBase64, иначе простой цикл: Uint8Array.from с функцией на каждый знак в разы медленнее (28.10)
+  if (Uint8Array.fromBase64) return Uint8Array.fromBase64(s);
+  const b = atob(s), n = b.length, u = new Uint8Array(n); for (let i = 0; i < n; i++) u[i] = b.charCodeAt(i); return u;
+};
 async function deriveKey(pass, saltB64, iter) {
   const base = await crypto.subtle.importKey("raw", new TextEncoder().encode(pass), "PBKDF2", false, ["deriveKey"]);
   return crypto.subtle.deriveKey({ name: "PBKDF2", hash: "SHA-256", salt: b64u8(saltB64), iterations: iter }, base, { name: "AES-GCM", length: 256 }, true, ["decrypt"]);
