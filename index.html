@@ -826,6 +826,7 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
 .chips{display:flex;gap:6px;flex-wrap:wrap}
 .chip{border:1px solid var(--ring);background:var(--surface-2);border-radius:999px;padding:5px 11px;font-size:13px;font-weight:600}
 .chip.on{background:var(--accent);color:#fff;border-color:transparent}
+.ozh{display:flex;flex-direction:column;gap:6px}.ozh .chip{text-align:left;font-weight:500;border-radius:14px;line-height:1.35}.ozh .chip b{font-weight:700}
 details.how{font-size:13px;color:var(--ink-2)}
 details.how summary{cursor:pointer;color:var(--accent);font-weight:600}
 details.how ul{padding-left:18px;margin:6px 0}
@@ -2080,7 +2081,9 @@ function calc(s, mp, p0) {
   const P0 = p0 == null ? num(s.price0) : p0;
   const disc = Math.min(99.9, Math.max(0, num(s.disc))) / 100;
   const P = P0 * (1 - disc);
-  const Pb = P * (1 - num(f.spp) / 100);
+  // Ozon: при цене до 300 ₽ СПП не больше ставки комиссии ступени (порог СПП, Андрей 31.10)
+  const sppP = mp === "ozon" && f.scheme !== "rFBS" ? OZS(P, num(f.spp) / 100) * 100 : num(f.spp);
+  const Pb = P * (1 - sppP / 100);
   const qty = num(s.lotQty);
   const cost = num(s.buy) * (1 + num(s.agent) / 100) + (qty > 0 ? num(s.lotShip) / qty : 0) + num(s.ff) + num(s.costOther);
   // Ozon FBO/FBS: при цене до 100 / 300 ₽ — ставка ступени (17% / 23%), выше — комиссия из поля (ставка категории)
@@ -2355,6 +2358,7 @@ function render() {
       <li>Схема работы меняет комиссию, логистику, обработку, возврат, выкуп, хранение и приёмку на тариф этой схемы: для своего товара — его тарифы (WB — предмет и объём карточки, Ozon — тариф и средняя логистика его отправлений этой схемы, ЯМ — калькулятор тарифов Маркета), без товара — типовые разницы. «По панели» — факт, как продавали. Что вы поправили на схеме, сохраняется и возвращается вместе с ней.</li>
       <li>«Доходы − расходы» — ставка с прибыли до налога, не меньше минимального (УСН 1%, АУСН 3% от доходов).</li>
       <li>Соинвест — доля цены, с которой налог не платится (как в таблице Вики для Ozon).</li>
+      <li>Ozon, цена до 300 ₽: скидка площадки (СПП) не больше комиссии — Ozon платит её из своей комиссии (до 100 ₽ — до 16,8%, 101–300 ₽ — до 22,8%). Выше 300 ₽ — СПП из поля.</li>
       <li>Маржа = прибыль ÷ цена продажи. ROI = прибыль ÷ себестоимость. Цвет: зелёный — от цели, жёлтый — от 0 до цели, красный — минус.</li></ul></details>`;
   const upd = p0 => {
     const x = calc(S, S.mp, p0), d = x.profit - r.profit;
@@ -2634,6 +2638,20 @@ function unit(row, mp) {
 /* Ozon: вознаграждение зависит от нашей цены (Бондарев 31.10: «чтобы комиссия при смене порога цены менялась на ту, которая будет»):
    до 100 ₽ — 17%, 101–300 ₽ — 23% (FBO/FBS, таблица Ozon 07.10); выше 300 ₽ — ставка категории товара; null — выше 300 */
 const OZT = p => (p <= 100 ? 0.17 : p <= 300 ? 0.23 : null);
+/* подсказка у ползунка (Бондарев 31.10: «рядом с окном, где цену регулируем, — сколько прибавить или убрать до изменения комиссии»):
+   ближайшие пороги Ozon вниз и вверх от цены; нажатие ставит эту цену (attr — data-setp «Сводки» / data-ssetp «СПП») */
+function ozHint(x, price, attr) {
+  if (!x || !x.oz || !(price > 0)) return "";
+  const p = Math.round(price), opts = p > 300 ? [300] : p > 100 ? [100, 301] : [101];
+  const li = opts.map(q => {
+    const d = q - p, r = at(x, q, FADS);
+    return `<button class="chip" ${attr}="${q}">${d > 0 ? "Прибавить" : "Убрать"} <b>${rub(Math.abs(d))}</b> → цена ${rub(q)}: комиссия станет <b>${pct(x.cAt(q), 0)}</b>, прибыль/шт ${rub(r.profit)}</button>`;
+  }).join("");
+  return `<div class="ozh"><div class="h">До смены комиссии Ozon <span>сейчас ${pct(x.cAt(p), 0)} при ${rub(p)}</span></div>${li}</div>`;
+}
+/* Ozon: соинвест (СПП) при нашей цене до 300 ₽ (Андрей 31.10: «чтобы учёт был порога спп 300»): скидка Ozon списывается из его комиссии,
+   с комиссии остаётся минимум 1% от неё (справка Ozon с 01.12) — потолок СПП = ставка ступени × 0,99 (≈22,8% / 16,8%); выше 300 ₽ — наш СПП как есть */
+const OZS = (p, s) => { const t = OZT(p); return t != null && s > t * 0.99 ? t * 0.99 : s; };
 function at(x, p, adsMode) {
   const comm = x.cAt(p) * p, acq = x.aR * p, tax = x.tR * p, ads = adsMode === "pct" ? x.drr * p : x.ads;
   const fixed = x.logi + x.stor + x.ff + x.dop + x.loyal + x.resid + x.cost;
@@ -2861,6 +2879,7 @@ function paintDetail() {
   }).join("");
   const { row } = curFact();
   out.innerHTML = `
+    ${ozHint(x, price, "data-setp")}
     ${priceTrio(mp, row, x, base, price)}
     ${buyerBlock(mp, row, base, price)}
     <div class="rows">
@@ -2898,6 +2917,7 @@ $("#detail").addEventListener("click", e => {
   const b = e.target.closest("button"); if (!b) return;
   const { mp, row, x, now } = curFact();
   if (b.id === "bBack") { history.back(); return; }
+  if (b.dataset.setp != null && x) { FPRICE = num(b.dataset.setp); $("#fP").value = inField(FPRICE); $("#fR").value = FPRICE; keepScroll(paintDetail); return; }
   if (b.dataset.step != null && x) {
     const base = now || x.price, d = b.dataset.step;
     FPRICE = d === "now" ? null : Math.round(base * (1 + num(d) / 100));
@@ -3030,7 +3050,9 @@ function buyerBlock(mp, row, base, price, spp, noChart) {
   if (spp == null) spp = sppOf(row);
   const tops = topsOf(row), sig = kcSig(mp, row), wait = (row && row.kc && row.kc.wait) || 0;
   const now = row && num(row.vit) > 0 ? num(row.vit) : spp != null && base ? base * (1 - spp) : null;
-  const moved = Math.abs(price - base) >= 0.5, pb = spp != null ? price * (1 - spp) : null, ours = moved ? pb : now;
+  const moved = Math.abs(price - base) >= 0.5;
+  const sp2 = spp != null && mp === "ozon" && moved ? OZS(price, spp) : spp, cut = sp2 != null && sp2 < spp - 1e-9;   // порог СПП Ozon 300 ₽
+  const pb = sp2 != null ? price * (1 - sp2) : null, ours = moved ? pb : now;
   const last = row && row.sh && row.sh.length ? row.sh[row.sh.length - 1][0] : null;
   // плашка топа — нажимается целиком (Андрей 26.10: «кликабельными сами квадраты, а не слова со ссылкой»); href — куда ведёт
   const tile = (cl, lbl, val, sub, href, blank) => href
@@ -3040,7 +3062,8 @@ function buyerBlock(mp, row, base, price, spp, noChart) {
   const choose = `выбрать в «Конкурентах»`;
   let t = spp == null ? tile("me", "Мы для покупателя", "—", "СПП не снят — товара нет на витрине")
     : tile("me", moved ? "Мы при " + rub(price) : "Мы сейчас", rub(ours),
-      moved && now ? `сейчас ${rub(now)} <span class="${cls(now - pb)}">${rub(pb - now, true)}</span>` : `наш СПП ${pct(spp, 0)}${last ? " · " + dTxt(last) : ""}`);
+      (moved && now ? `сейчас ${rub(now)} <span class="${cls(now - pb)}">${rub(pb - now, true)}</span>` : `наш СПП ${pct(spp, 0)}${last ? " · " + dTxt(last) : ""}`) +
+      (cut ? `<br>СПП ${pct(spp, 0)} → ${pct(sp2, 0)}: до ${price <= 100 ? 100 : 300} ₽ Ozon даёт не больше комиссии` : ""));
   tops.forEach((k, i) => {
     const d = ours != null && k.v ? ours - k.v : null;
     t += tile("tp", `Топ ${i + 1}`, k.v ? rub(k.v) : "нет в наличии",
@@ -3180,7 +3203,7 @@ function paintSppOut() {
   if (!x) { out.innerHTML = buyerBlock(mp, row, base, price, null, true) + `<div class="note">Продаж не было — прибыль по юнитке посчитать не из чего, посчитайте во вкладке «Расчёт».</div>`; return; }
   // сначала три квадрата в ряд (прибыль/шт, маржа по юнитке, чистая по панели за срок), потом цена для покупателя — всё на одном экране с ползунком
   const be = factPrice(x, FADS, 0), ptg = factPrice(x, FADS, t), mon = p && p.month ? String(p.month).toLowerCase() : "месяц";
-  out.innerHTML = priceTrio(mp, row, x, base, price) + buyerBlock(mp, row, base, price, null, true) + `
+  out.innerHTML = ozHint(x, price, "data-ssetp") + priceTrio(mp, row, x, base, price) + buyerBlock(mp, row, base, price, null, true) + `
     <div class="rows"><span>Безубыточная цена</span><span class="r">${be ? rub(be) : "—"}</span>
       <span>Цена под маржу ${NF1.format(t * 100)}%</span><span class="r">${ptg ? rub(ptg) : "недостижимо"}</span></div>
     <div class="note">По юнитке — расходы на 1 шт из панели за ${esc(x.src || mon)}; чистая по панели — прибыль панели по товару за выбранный срок, как если бы стояла эта цена: комиссия, эквайринг, налог и реклама — в % от цены, остальное — те же рубли.</div>`;
@@ -3204,6 +3227,7 @@ $("#sppDet").addEventListener("input", e => {
 $("#sppDet").addEventListener("click", e => {
   const b = e.target.closest("button"); if (!b) return;
   if (b.id === "sppBack") { history.back(); return; }
+  if (b.dataset.ssetp != null) { SPPPRICE = num(b.dataset.ssetp); $("#sP").value = inField(SPPPRICE); $("#sR").value = SPPPRICE; paintSppOut(); return; }
   if (b.dataset.sstep != null) {
     const { x, now } = curSpp(), base = now || (x && x.price); if (!base) return;
     SPPPRICE = b.dataset.sstep === "now" ? null : Math.round(base * (1 + num(b.dataset.sstep) / 100));
