@@ -2042,7 +2042,7 @@ function drrMp(mp) { const dd = (LS.get("defaults", {}).common || {}).drr; retur
 function mpCommon(s, mp) {
   const o = { drr: drrMp(mp) };
   try {                                   // зовётся и при старте страницы, когда панели ещё не загружены
-    const tr = s.tar ? (s.tar.mp === mp ? s.tar : s.tars && s.tars[mp]) : null, row = tr && FACT ? rowOf(mp, tr.a) : null, x = row && unit(row);
+    const tr = s.tar ? (s.tar.mp === mp ? s.tar : s.tars && s.tars[mp]) : null, row = tr && FACT ? rowOf(mp, tr.a) : null, x = row && unit(row, mp);
     if (x) { if (s.adsMode !== "rub") o.drr = Math.round(x.drr * 1e6) / 1e4; if (s.tax === "ausn_d") o.taxRate = Math.round(x.tR * 1e6) / 1e4; }
     else { const t = s.tax === "ausn_d" && FACT ? mpTax(mp) : null; if (t) o.taxRate = t; }
   } catch (e) {}
@@ -2083,7 +2083,9 @@ function calc(s, mp, p0) {
   const Pb = P * (1 - num(f.spp) / 100);
   const qty = num(s.lotQty);
   const cost = num(s.buy) * (1 + num(s.agent) / 100) + (qty > 0 ? num(s.lotShip) / qty : 0) + num(s.ff) + num(s.costOther);
-  const comm = P * num(f.comm) / 100;
+  // Ozon FBO/FBS: при цене до 100 / 300 ₽ — ставка ступени (17% / 23%), выше — комиссия из поля (ставка категории)
+  const cT = mp === "ozon" && f.scheme !== "rFBS" ? OZT(P) : null, cP = cT != null ? cT * 100 : num(f.comm);
+  const comm = P * cP / 100;
   const acq = Pb * num(f.acq) / 100;
   const b = Math.min(100, Math.max(1, num(f.buyout) || 100)) / 100;
   const lastV = P * num(f.lastPct) / 100, last = num(f.lastMax) > 0 ? Math.min(lastV, num(f.lastMax)) : lastV;
@@ -2105,7 +2107,7 @@ function calc(s, mp, p0) {
   const nds = ndsOut - ndsIn;
   const tax = incTax + nds;
   const profit = P - cost - mpSum - ads - tax;
-  return { P0, P, Pb, cost, comm, acq, logi, stor, other, mpSum, ads, incTax, nds, tax, profit, b,
+  return { P0, P, Pb, cost, comm, cP, cT, acq, logi, stor, other, mpSum, ads, incTax, nds, tax, profit, b,
            gross: P - cost - mpSum, expenses: cost + mpSum + ads + tax,
            margin: P > 0 ? profit / P : NaN, roi: cost > 0 ? profit / cost : NaN, payout: P - mpSum };
 }
@@ -2259,7 +2261,7 @@ function schedule() { if (queued) return; queued = true; Promise.resolve().then(
 function segs(r) {
   return [
     { k: "Себестоимость", v: r.cost, c: "var(--s1)" },
-    { k: "Комиссия и эквайринг", v: r.comm + r.acq, c: "var(--s2)", sub: r.acq ? `комиссия ${rub(r.comm)} · эквайринг ${rub(r.acq)}` : "" },
+    { k: "Комиссия и эквайринг", v: r.comm + r.acq, c: "var(--s2)", sub: (r.acq ? `комиссия ${rub(r.comm)} · эквайринг ${rub(r.acq)}` : "") + (r.cT != null ? `${r.acq ? " · " : ""}комиссия Ozon ${NF1.format(r.cP)}% — цена до ${r.P <= 100 ? 100 : 300} ₽` : "") },
     { k: "Логистика, хранение, прочее", v: r.logi + r.stor + r.other, c: "var(--s3)", sub: `логистика ${rub(r.logi)}` + (r.stor ? ` · хранение/приёмка ${rub(r.stor)}` : "") + (r.other ? ` · прочее ${rub(r.other)}` : "") },
     { k: "Реклама", v: r.ads, c: "var(--s4)" },
     { k: "Налоги", v: r.tax, c: "var(--s5)", sub: r.nds ? `налог ${rub(r.incTax)} · НДС ${rub(r.nds)}` : "" },
@@ -2295,7 +2297,7 @@ function render() {
   const priceLine = (lbl, x) => `<span>${lbl}</span><span class="r">${x ? rub(x.p) + (disc ? `<span class="m"> · до скидки ${rub(x.p0)}</span>` : "") : '<span class="m">недостижимо</span>'}</span>`;
   const maxDisc = be && r.P0 > 0 ? 1 - be.p / r.P0 : null;
   const f = S.fees[S.mp];
-  const rates = num(f.comm) + num(f.acq) + (S.adsMode === "pct" ? num(S.drr) : 0) + num(f.otherPct) + num(f.logiPct) + num(f.nonloc);
+  const rates = r.cP + num(f.acq) + (S.adsMode === "pct" ? num(S.drr) : 0) + num(f.otherPct) + num(f.logiPct) + num(f.nonloc);
   const others = Object.keys(MPS).map(k => {
     const x = calc(S, k), y = priceTarget(S, k, t);
     return `<tr class="${k === S.mp ? "cur" : ""}"><td>${MPS[k].short}</td><td class="${tone(x.margin, t)}">${rub(x.profit)}</td><td class="${tone(x.margin, t)}">${pct(x.margin)}</td><td>${y ? rub(y.p) : "—"}</td></tr>`;
@@ -2611,7 +2613,7 @@ $("#bUnlock").onclick = () => { const p = $("#pass").value.trim(); if (p) openFa
 
 /* одна строка панели → рубли на 1 проданную шт. row.h — те же статьи за несколько месяцев, когда в месяце продано меньше 3 шт (baza.py):
    src — за какие месяцы, ub — штук в них, units — в среднем за месяц с продажами */
-function unit(row) {
+function unit(row, mp) {
   const b = row.h || row, u = num(b.units), sales = num(b.sales);
   if (u <= 0 || sales <= 0) return null;
   const per = k => num(b[k]) / u;
@@ -2624,18 +2626,28 @@ function unit(row) {
   if (!(x.ff > 0.004) && num(row.ffs) > 0) { x.ff = num(row.ffs); x.profit -= x.ff; x.ffTab = true; }
   if (!(x.dop > 0.004) && num(row.dops) > 0) { x.dop = num(row.dops); x.profit -= x.dop; x.dopTab = true; }
   x.cR = x.comm / x.price; x.aR = x.acq / x.price; x.tR = x.tax / x.price; x.drr = x.ads / x.price;
+  if (mp === "ozon") { x.oz = true; x.cHi = OZT(x.price) == null ? x.cR : null; }
+  // ставка комиссии при цене p: у Ozon при переходе через 100 / 300 ₽ — ставка новой ступени, в той же ступени — факт панели
+  x.cAt = p => { if (!x.oz) return x.cR; const tp = OZT(p); return tp === OZT(x.price) ? x.cR : tp != null ? tp : x.cHi != null ? x.cHi : x.cR; };
   return x;
 }
+/* Ozon: вознаграждение зависит от нашей цены (Бондарев 31.10: «чтобы комиссия при смене порога цены менялась на ту, которая будет»):
+   до 100 ₽ — 17%, 101–300 ₽ — 23% (FBO/FBS, таблица Ozon 07.10); выше 300 ₽ — ставка категории товара; null — выше 300 */
+const OZT = p => (p <= 100 ? 0.17 : p <= 300 ? 0.23 : null);
 function at(x, p, adsMode) {
-  const comm = x.cR * p, acq = x.aR * p, tax = x.tR * p, ads = adsMode === "pct" ? x.drr * p : x.ads;
+  const comm = x.cAt(p) * p, acq = x.aR * p, tax = x.tR * p, ads = adsMode === "pct" ? x.drr * p : x.ads;
   const fixed = x.logi + x.stor + x.ff + x.dop + x.loyal + x.resid + x.cost;
   const profit = p - comm - acq - tax - ads - fixed;
   return { p, comm, acq, tax, ads, profit, margin: profit / p, roi: x.cost > 0 ? profit / x.cost : NaN };
 }
 function factPrice(x, adsMode, m) {           // цена, при которой маржа = m
-  const rate = x.cR + x.aR + x.tR + (adsMode === "pct" ? x.drr : 0);
   const fixed = x.logi + x.stor + x.ff + x.dop + x.loyal + x.resid + x.cost + (adsMode === "pct" ? 0 : x.ads);
-  return 1 - rate - m > 0 ? fixed / (1 - rate - m) : null;
+  const solve = c => { const rate = c + x.aR + x.tR + (adsMode === "pct" ? x.drr : 0); return 1 - rate - m > 0 ? fixed / (1 - rate - m) : null; };
+  if (!x.oz) return solve(x.cR);
+  // Ozon: своя ставка на каждой ступени цены; сначала ответ в ступени текущей цены, иначе самый низкий из остальных
+  const segs = [[0, 100, 50], [100, 300, 200], [300, Infinity, 1000]].map(([lo, hi, mid]) => { const p = solve(x.cAt(mid)); return p != null && p > lo && p <= hi ? p : null; });
+  const own = x.price <= 100 ? 0 : x.price <= 300 ? 1 : 2;
+  return segs[own] != null ? segs[own] : segs.find(p => p != null) || null;
 }
 const norm = s => String(s || "").toLowerCase().replace(/ё/g, "е");
 const mpIco = (mp, big) => `<span class="mpi ${mp}${big ? " big" : ""}" title="${MPS[mp].name}"></span>`;
@@ -2681,7 +2693,7 @@ function sumItems() {
     const p = FACT && FACT.mp[mp]; if (!p) continue;
     for (const r of p.rows) {
       if (words.length && !hitRow(words, r)) continue;
-      const x = unit(r), now = num(r.now) || null, n = x && now ? at(x, now, FADS) : null, pr = perRow(mp, r);
+      const x = unit(r, mp), now = num(r.now) || null, n = x && now ? at(x, now, FADS) : null, pr = perRow(mp, r);
       out.push({ mp, r, x, now, n, pr, pm: panelM(pr), key: mp + "|" + (r.ip || "") + "|" + r.a });
     }
   }
@@ -2788,7 +2800,7 @@ function curFact() {
   if (!FACT || !FSEL) return {};
   const [mp, ip, ...rest] = FSEL.split("|"), a = rest.join("|");
   const p = FACT.mp[mp], row = p && p.rows.find(r => r.a === a && (r.ip || "") === ip);
-  return { mp, p, row, x: row && unit(row), now: row && num(row.now) || null };
+  return { mp, p, row, x: row && unit(row, mp), now: row && num(row.now) || null };
 }
 function renderDetail() {
   const box = $("#detail");
@@ -2830,7 +2842,7 @@ function renderDetail() {
       <div class="chips" style="margin-top:6px">${[-10, -5, 5, 10].map(d => `<button class="chip" data-step="${d}">${d > 0 ? "+" : MINUS}${Math.abs(d)}%</button>`).join("")}<button class="chip" data-step="now">↺ цена сейчас</button></div></div>
     <div id="dOut" style="display:flex;flex-direction:column;gap:14px"></div>
     <button class="btn" id="bToCalc">Посчитать подробно во вкладке «Расчёт»</button>
-    <div class="note">Юнитка берёт расходы на 1 шт из панели за ${x.src ? esc(x.src) + " — за " + esc(mon) + " продаж мало, поэтому добраны прошлые месяцы" : esc(mon)}: комиссия, эквайринг, налог и реклама меняются вместе с ценой (в % от цены), логистика, ФФ, доукомплектовка, хранение и себестоимость — те же рубли.</div>`;
+    <div class="note">Юнитка берёт расходы на 1 шт из панели за ${x.src ? esc(x.src) + " — за " + esc(mon) + " продаж мало, поэтому добраны прошлые месяцы" : esc(mon)}: комиссия, эквайринг, налог и реклама меняются вместе с ценой (в % от цены; у Ozon при цене до 100 ₽ комиссия 17%, 101–300 ₽ — 23%), логистика, ФФ, доукомплектовка, хранение и себестоимость — те же рубли.</div>`;
   paintDetail();
 }
 function paintDetail() {
@@ -2858,7 +2870,7 @@ function paintDetail() {
     <div><div class="h">На 1 шт <span>цена сейчас → новая</span></div>
       <table class="t"><thead><tr><th>Статья</th><th>Сейчас</th><th>Новая</th><th>Δ</th></tr></thead><tbody>
         ${line("Цена продажи", base, price, true)}
-        ${line("Комиссия · " + pct(x.cR), b.comm, n.comm)}
+        ${line("Комиссия · " + pct(x.cAt(base)) + (x.cAt(price) !== x.cAt(base) ? " → " + pct(x.cAt(price)) + (OZT(price) != null ? " (Ozon при цене до " + (price <= 100 ? 100 : 300) + " ₽)" : " (Ozon выше 300 ₽" + (x.cHi == null ? " — ставки категории в панели нет, проверьте" : "") + ")") : ""), b.comm, n.comm)}
         ${Math.abs(x.acq) >= 0.05 ? line("Эквайринг · " + pct(x.aR), b.acq, n.acq) : ""}
         ${line("Логистика", fixed.logi, fixed.logi)}
         ${Math.abs(fixed.stor) >= 0.05 ? line("Хранение", fixed.stor, fixed.stor) : ""}
@@ -3068,7 +3080,7 @@ function priceTrio(mp, row, x, base, price) {
     const pr = perRowOf(mp, row, per);
     if (pr && num(pr.units) > 0 && num(pr.sales) > 0) {
       const u = num(pr.units), P0 = num(pr.sales) / u, pr0 = num(pr.profit) / u, adR = (num(pr.ads) + num(pr.ads2)) / num(pr.sales);
-      const rate = x.cR + x.aR + x.tR + (FADS === "pct" ? adR : 0), p1 = price * (1 - rate) - (P0 * (1 - rate) - pr0), m1 = p1 / price;
+      const r0 = x.aR + x.tR + (FADS === "pct" ? adR : 0), p1 = price * (1 - r0 - x.cAt(price)) - (P0 * (1 - r0 - x.cAt(P0)) - pr0), m1 = p1 / price;
       sq = `<div class="kpi pk"><b class="${tone(m1, t)}">${pct(m1)}</b><span>чистая по панели<br>${rub(p1)}/шт</span>${pick}</div>`;
     } else sq = `<div class="kpi pk"><b>—</b><span>чистая по панели: за этот срок продаж не было</span>${pick}</div>`;
   }
@@ -3140,7 +3152,7 @@ function setKonkLink(mp, row) { const a = $("#toKonk"); if (a) a.href = KURL + (
 function curSpp() {
   if (!FACT || !SPPSEL) return {};
   const [mp, ip, ...rest] = SPPSEL.split("|"), a = rest.join("|"), row = FACT.mp[mp] && FACT.mp[mp].rows.find(r => r.a === a && (r.ip || "") === ip);
-  return { mp, p: FACT.mp[mp], row, x: row && unit(row), now: row && num(row.now) || null };
+  return { mp, p: FACT.mp[mp], row, x: row && unit(row, mp), now: row && num(row.now) || null };
 }
 function renderSppDet() {
   const box = $("#sppDet"), { mp, row, x, now } = curSpp();
@@ -3298,7 +3310,7 @@ function acItems(q) {
   const words = qWords(q); if (!words.length || !FACT) return [];
   const out = [];
   for (const mp of ["wb", "ozon", "ym"]) for (const r of (FACT.mp[mp] || { rows: [] }).rows)
-    if (hitRow(words, r)) { const x = unit(r), now = num(r.now) || null; out.push({ mp, r, x, now, n: x && now ? at(x, now, FADS) : null }); }
+    if (hitRow(words, r)) { const x = unit(r, mp), now = num(r.now) || null; out.push({ mp, r, x, now, n: x && now ? at(x, now, FADS) : null }); }
   // сначала выбранная площадка (Бондарев 26.10: выбрал ЯМ — поиск подсовывал WB/Ozon), потом с продажами, по выручке
   out.sort((a, b) => ((a.mp === S.mp) !== (b.mp === S.mp) ? (a.mp === S.mp ? -1 : 1) : !a.x !== !b.x ? (a.x ? -1 : 1) : num(b.r.sales) - num(a.r.sales)));
   return out.slice(0, 12);
