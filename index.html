@@ -1582,7 +1582,9 @@ function igry(t) {
   igryP.then(() => { IGRY.apply(IGRY_T.includes(THEME) ? THEME : null, { name: "Юнитка", wrap: $("main"), onSound: () => syncSound() }); syncSound(); });
 }
 /* «Космос»: аффирмации — с магнитов Андрея (Избранное, 25.10: по фразе на слайд, без «Благодарю») + мои (с 7-й; ещё три — по «добавь ещё 3») */
-const SP_AFF = [
+/* 01.11 Андрей: «микс расположений раз в пару дней, на всех, чтобы естественно» — порядок аффирмаций меняется раз в 2 дня (с полуночи МСК), одинаково во всех сервисах; «Благодарю» по-прежнему после каждых трёх */
+const affMix=a=>{let s=Math.floor((Date.now()+108e5)/1728e5)%2147483646+1;const r=()=>(s=s*16807%2147483647)/2147483647;for(let k=0;k<8;k++)r();a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const SP_AFF = affMix([
   "Всё складывается наилучшим образом для моего высшего блага",
   "Из этой ситуации выйдет только хорошее для меня",
   "Я в безопасности",
@@ -1595,7 +1597,7 @@ const SP_AFF = [
   "Удача улыбается мне каждый день",
   "Мир полон возможностей, и они сами находят меня",
   "Я выбираю радость и спокойствие"
-].flatMap((s, i) => i % 3 === 2 ? [s, "Благодарю"] : [s]);   // Андрей 28.10: «через каждые 3 аффирмации — одну «Благодарю»»
+]).flatMap((s, i) => i % 3 === 2 ? [s, "Благодарю"] : [s]);   // Андрей 28.10: «через каждые 3 аффирмации — одну «Благодарю»»
 const SP_ICO = {
   prev: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
   next: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>',
