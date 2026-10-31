@@ -72,7 +72,7 @@ try { var t = JSON.parse(localStorage.getItem("unitka.theme")); if (/^(light|dar
 }
 [data-theme="comic"] body{background-image:radial-gradient(rgba(17,17,17,.16) 1.3px,transparent 1.6px);background-size:16px 16px}
 [data-theme="comic"] header{border-bottom:3px solid #111}
-[data-theme="comic"] :is(.card,details.sec,.search,.sumtot,.btn,.themeb,.tmenu,.ac,.namebar input,.lock input){border:2.5px solid #111}
+[data-theme="comic"] :is(.card,details.sec,.search,.sumtot,.btn,.themeb,.tmenu,.pickb,.lock input){border:2.5px solid #111}
 [data-theme="comic"] :is(.btn,.themeb,.chip,.seg){box-shadow:3px 3px 0 #111;transition:transform .08s,box-shadow .08s}
 [data-theme="comic"] :is(.btn,.themeb,.chip):active{transform:translate(3px,3px);box-shadow:0 0 0 #111}
 [data-theme="comic"] .chip{border:2px solid #111;background:#fff}
@@ -123,7 +123,7 @@ try { var t = JSON.parse(localStorage.getItem("unitka.theme")); if (/^(light|dar
 /* баннер-обложка сверху вкладки + вопрос Вааса */
 [data-theme="farcry"] main{position:relative;padding-top:32px}
 /* листы дневника */
-[data-theme="farcry"] :is(.card,details.sec,.search,.sumtot,.tmenu,.ac,.tour-tip,.seg,.inp,select.sel,.btn,.chip,.themeb,.namebar input,.lock input,.shurl){background-color:var(--surface);background-image:var(--paper)}
+[data-theme="farcry"] :is(.card,details.sec,.search,.sumtot,.tmenu,.tour-tip,.seg,.inp,select.sel,.btn,.chip,.themeb,.pickb,.lock input,.shurl){background-color:var(--surface);background-image:var(--paper)}
 [data-theme="farcry"] :is(.card,details.sec,.search,.sumtot){border:0;box-shadow:var(--burn),var(--shadow)}
 [data-theme="farcry"] :is(.btn,.chip,.themeb,.seg,.inp,select.sel){border:1px solid rgba(60,38,12,.38)}
 [data-theme="farcry"] :is(.btn.pri,.chip.on,.seg button[aria-pressed="true"]){background:var(--accent);color:#fff;border-color:transparent;clip-path:var(--rough);box-shadow:none;font-weight:700}
@@ -196,7 +196,7 @@ try { var t = JSON.parse(localStorage.getItem("unitka.theme")); if (/^(light|dar
   font:400 clamp(12px,1.5vw,20px)/1 var(--pix);color:#ffc21a;text-shadow:var(--outline);transform:rotate(-4deg)}
 /* мультяшные панели */
 [data-theme="jim"] :is(.card,details.sec,.search,.sumtot){border:3px solid #1a1022;box-shadow:var(--shadow)}
-[data-theme="jim"] :is(.btn,.chip,.themeb,.seg,.inp,select.sel,.namebar input,.lock input,.shurl,.tmenu,.ac){border:2px solid #1a1022}
+[data-theme="jim"] :is(.btn,.chip,.themeb,.seg,.inp,select.sel,.pickb,.lock input,.shurl,.tmenu){border:2px solid #1a1022}
 [data-theme="jim"] :is(.btn,.chip,.themeb){box-shadow:3px 3px 0 #1a1022;transition:transform .08s,box-shadow .08s}
 [data-theme="jim"] :is(.btn,.chip,.themeb):active{transform:translate(3px,3px);box-shadow:0 0 0 #1a1022}
 [data-theme="jim"] :is(.btn.pri,.chip.on){background:var(--slime);color:#1a1022;font-weight:700}
@@ -262,7 +262,7 @@ try { var t = JSON.parse(localStorage.getItem("unitka.theme")); if (/^(light|dar
 [data-theme="sonic"] main{position:relative;padding-top:34px}
 /* игровые панели */
 [data-theme="sonic"] :is(.card,details.sec,.search,.sumtot){border:3px solid #0a1a4a;box-shadow:var(--shadow)}
-[data-theme="sonic"] :is(.btn,.chip,.seg,.inp,select.sel,.namebar input,.lock input,.shurl,.tmenu,.ac){border:2px solid #0a1a4a}
+[data-theme="sonic"] :is(.btn,.chip,.seg,.inp,select.sel,.pickb,.lock input,.shurl,.tmenu){border:2px solid #0a1a4a}
 [data-theme="sonic"] :is(.btn,.chip){box-shadow:0 3px 0 #0a1a4a;transition:transform .08s,box-shadow .08s}
 [data-theme="sonic"] :is(.btn,.chip,.themeb):active{transform:translateY(3px);box-shadow:0 0 0 #0a1a4a}
 [data-theme="sonic"] :is(.btn.pri,.chip.on){background:linear-gradient(#ffe066,#ffc81e 55%,#ffab08);color:#0a1a4a;font-weight:800}
@@ -337,7 +337,7 @@ try { var t = JSON.parse(localStorage.getItem("unitka.theme")); if (/^(light|dar
 [data-theme="solitaire"] details.sec{background:var(--he-g) right 13px top 16px/10px 10px no-repeat,linear-gradient(170deg,#13372a,#0b2219)}
 [data-theme="solitaire"] details.sec>summary .sum{margin-right:16px}
 [data-theme="solitaire"] :is(.search,.sumtot){background:linear-gradient(170deg,#13372a,#0b2219)}
-[data-theme="solitaire"] :is(.tmenu,.ac,.tour-tip,.modal .sheet){background:var(--solid);border:1px solid rgba(232,194,96,.45)}
+[data-theme="solitaire"] :is(.tmenu,.tour-tip,.modal .sheet){background:var(--solid);border:1px solid rgba(232,194,96,.45)}
 [data-theme="solitaire"] .btn{border:1px solid rgba(232,194,96,.45);background:rgba(255,255,255,.04);color:var(--ink);transition:background .15s,transform .08s}
 [data-theme="solitaire"] .btn:hover{background:rgba(232,194,96,.1)}
 [data-theme="solitaire"] :is(.btn.pri,.chip.on){background:var(--goldbtn);color:#1b1306;border:1px solid #f7df95;box-shadow:0 2px 0 #6b4a12,0 0 16px rgba(232,194,96,.25);font-weight:700}
@@ -346,7 +346,7 @@ try { var t = JSON.parse(localStorage.getItem("unitka.theme")); if (/^(light|dar
 [data-theme="solitaire"] .seg button{color:var(--ink-2)}
 [data-theme="solitaire"] .seg button[aria-pressed="true"]{background:var(--goldbtn);color:#1b1306;box-shadow:0 2px 6px rgba(0,0,0,.4)}
 [data-theme="solitaire"] :is(.inp,select.sel){background:rgba(0,0,0,.3);border:1px solid rgba(232,194,96,.22)}
-[data-theme="solitaire"] :is(.namebar input,.lock input,.shurl){background:rgba(0,0,0,.3);border-color:rgba(232,194,96,.3);color:var(--ink)}
+[data-theme="solitaire"] :is(.pickb,.lock input,.shurl){background:rgba(0,0,0,.3);border-color:rgba(232,194,96,.3);color:var(--ink)}
 [data-theme="solitaire"] .kpi{background:rgba(0,0,0,.24);border:1px solid rgba(232,194,96,.18)}
 [data-theme="solitaire"] .detail .title{font:400 24px/1.15 var(--font-h);letter-spacing:.02em}
 [data-theme="solitaire"] .lhead{background:#08180f;color:#f0c96a;border-bottom:1px solid rgba(232,194,96,.5)} [data-theme="solitaire"] .lhead span small{color:#a9c4b0}
@@ -405,15 +405,15 @@ try { var t = JSON.parse(localStorage.getItem("unitka.theme")); if (/^(light|dar
 [data-theme="birds"] main{position:relative;padding-top:38px}
 /* панели — кремовые плашки с толстой обводкой и объёмным краем */
 [data-theme="birds"] :is(.card,details.sec,.search,.sumtot){background:linear-gradient(180deg,#fffdf7,#fff4dc);border:3px solid #3b220e;box-shadow:var(--shadow),inset 0 2px 0 #fff}
-[data-theme="birds"] :is(.btn,.chip,.seg,.inp,select.sel,.namebar input,.lock input,.shurl,.tmenu,.ac){border:2px solid #3b220e}
-[data-theme="birds"] :is(.tmenu,.ac,.tour-tip){background:#fffaf0;box-shadow:0 5px 0 #3b220e,0 14px 30px rgba(0,0,0,.25)}
+[data-theme="birds"] :is(.btn,.chip,.seg,.inp,select.sel,.pickb,.lock input,.shurl,.tmenu){border:2px solid #3b220e}
+[data-theme="birds"] :is(.tmenu,.tour-tip){background:#fffaf0;box-shadow:0 5px 0 #3b220e,0 14px 30px rgba(0,0,0,.25)}
 [data-theme="birds"] .btn{background:linear-gradient(#ffffff,#f3e6c8)}
 [data-theme="birds"] :is(.btn,.chip){box-shadow:0 3px 0 #3b220e,inset 0 2px 0 rgba(255,255,255,.7);font-weight:700;transition:transform .08s,box-shadow .08s}
 [data-theme="birds"] :is(.btn,.chip):active{transform:translateY(3px);box-shadow:0 0 0 #3b220e}
 [data-theme="birds"] :is(.btn.pri,.chip.on){background:linear-gradient(#ff7a5c,#e0241c 55%,#ad150e);color:#fff;border-color:#3b0d06;box-shadow:0 3px 0 #3b0d06,inset 0 2px 0 rgba(255,255,255,.45);text-shadow:0 1px 0 #6e0d06}
 [data-theme="birds"] .seg{background:#f3e6c8}
 [data-theme="birds"] .seg button[aria-pressed="true"]{background:linear-gradient(#8fdcff,#2f8fd6 60%,#1d63a8);color:#fff;text-shadow:0 1px 0 #0c3a66;box-shadow:inset 0 -3px 0 rgba(0,0,0,.2),inset 0 2px 0 rgba(255,255,255,.45)}
-[data-theme="birds"] :is(.inp,select.sel,.namebar input,.lock input,.shurl){background:#fff}
+[data-theme="birds"] :is(.inp,select.sel,.pickb,.lock input,.shurl){background:#fff}
 [data-theme="birds"] .lhead{background:linear-gradient(rgba(40,15,0,.22),rgba(40,15,0,.32)),var(--wood);color:#fff;border-bottom:3px solid #3b220e;text-shadow:0 1px 0 #2b1405,0 0 4px rgba(43,20,5,.6);top:calc(var(--hdr,57px) + 18px)}
 [data-theme="birds"] .lhead span small{color:#ffe7a8}
 [data-theme="birds"] :is(.detail,.res){top:calc(var(--hdr,57px) + 28px)}
@@ -478,7 +478,7 @@ try { var t = JSON.parse(localStorage.getItem("unitka.theme")); if (/^(light|dar
   [data-theme="dusk"] header{background:rgba(19,27,30,.72);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
 }
 [data-theme="dusk"] :is(.card,details.sec,.search,.sumtot){backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
-[data-theme="dusk"] :is(.tmenu,.ac,.tour-tip,.lhead,.modal .sheet){background:var(--solid)}
+[data-theme="dusk"] :is(.tmenu,.tour-tip,.lhead,.modal .sheet){background:var(--solid)}
 [data-theme="dusk"] .brand i{background:linear-gradient(135deg,#7fc8b4,#8fa8d8);color:#13201f;border-radius:50%}
 [data-theme="dusk"] :is(.btn.pri,.chip.on){background:var(--accent);color:#13201f}
 [data-theme="dusk"] .seg{border-radius:14px} [data-theme="dusk"] .seg button{border-radius:11px}
@@ -514,7 +514,7 @@ try { var t = JSON.parse(localStorage.getItem("unitka.theme")); if (/^(light|dar
   [data-theme="space"] header{background:rgba(7,9,26,.66);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
 }
 [data-theme="space"] :is(.card,details.sec,.search,.sumtot){backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-color:rgba(200,190,255,.12)}
-[data-theme="space"] :is(.tmenu,.ac,.tour-tip,.lhead,.modal .sheet){background:var(--solid)}
+[data-theme="space"] :is(.tmenu,.tour-tip,.lhead,.modal .sheet){background:var(--solid)}
 [data-theme="space"] .brand i{background:radial-gradient(circle at 35% 30%,#fff 0,#cfc6ff 18%,#7a64ff 55%,#2c1f80 100%);color:#fff;border-radius:50%;box-shadow:0 0 14px rgba(164,147,255,.6)}
 [data-theme="space"] .brand span{font-family:var(--font-h);font-weight:700;letter-spacing:.04em}
 [data-theme="space"] :is(.btn.pri,.chip.on){background:linear-gradient(135deg,#c2b6ff,#806cff);color:#0b0a26;border-color:transparent}
@@ -760,15 +760,36 @@ select.sel{height:38px;border-radius:9px;border:1px solid transparent;background
 .linkbtn{border:0;background:none;color:var(--accent);padding:6px 0;font-weight:600;font-size:13.5px}
 .namebar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .acwrap{position:relative;flex:1 1 260px;min-width:0}
-.namebar input{width:100%;height:46px;border-radius:12px;border:2px solid var(--ring);background:var(--surface);padding:0 12px;font-size:16px;font-weight:600;min-width:0}
-.namebar input:focus{border-color:var(--accent);outline:0}
-.ac{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:45;background:var(--surface);border:1px solid var(--ring);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.18);max-height:min(60vh,430px);overflow:auto;padding:4px}
-.ac button{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px;width:100%;text-align:left;border:0;background:none;padding:10px 10px;border-radius:9px;color:var(--ink)}
-.ac button[aria-selected="true"],.ac button:hover{background:var(--accent-wash)}
-.ac .n{font-weight:650;overflow-wrap:anywhere}
-.ac .s{grid-column:1/3;color:var(--ink-2);font-size:12.5px}
-.ac .r{font-weight:700;font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
-.ac .tip{padding:12px;color:var(--ink-2);font-size:13.5px}
+/* товар расчёта — плашка; нажал → лист «Товары» с поиском (как в «Конкурентах», 01.11) */
+.pickb{width:100%;min-height:46px;border-radius:12px;border:2px solid var(--ring);background:var(--surface);padding:6px 12px;display:flex;align-items:center;gap:10px;text-align:left;color:var(--ink);min-width:0}
+.pickb:focus-visible{border-color:var(--accent);outline:0}
+.pickb>svg{width:20px;height:20px;flex:none;color:var(--muted)}
+.pickb .t{flex:1;min-width:0;display:flex;flex-direction:column}
+.pickb b{font-weight:650;font-size:16px;line-height:1.25;overflow-wrap:anywhere}
+.pickb i{font-style:normal;color:var(--ink-2);font-size:12.5px;margin-top:1px}
+.pickb .ph{color:var(--muted);font-size:16px}
+.pickb .dn{width:18px;height:18px}
+.modal .sheet.pks{width:min(620px,100%);height:min(720px,86vh);gap:10px;overflow:hidden}
+@media (max-width:860px){.modal .sheet.pks{height:92vh;height:92dvh}}   /* высота не скачет, пока список сжимается */
+.pks .search{height:46px;flex:none}
+.pks .seg{align-self:flex-start;flex:none}
+.pks .seg em{font-style:normal;font-weight:500;opacity:.6;margin-left:5px}
+.pkc{color:var(--muted);font-weight:500;margin-left:6px;margin-right:auto}
+.pkl{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;gap:6px;margin:0 -4px;padding:2px 4px 8px}
+.pki{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px;width:100%;text-align:left;border:0;border-radius:12px;background:var(--surface-2);padding:11px 12px;color:var(--ink);flex:none}
+.pki.cur{background:var(--accent-wash)}
+.pki.kb{box-shadow:inset 0 0 0 2px var(--accent)}
+.pki .n{font-weight:650;line-height:1.3;overflow-wrap:anywhere}
+.pki .r{font-weight:700;font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+.pki .s{grid-column:1/3;color:var(--ink-2);font-size:12.5px}
+.pki .now{display:inline-block;font-size:11px;font-weight:700;padding:1px 6px;border-radius:5px;background:var(--accent);color:#fff;margin-left:6px;vertical-align:1px}
+.pki.own{background:none;border:1.5px dashed var(--ring)}
+.pkl .empty{padding:14px 4px;color:var(--ink-2);font-size:13.5px;text-align:center}
+.pkl .empty button{margin-top:8px}
+.sfn{font-size:12.5px;color:var(--muted);margin:6px 2px 0}
+.sfn:empty{display:none}
+mark.hit{background:var(--accent-wash);color:inherit;border-radius:4px;padding:0 1px}
+.search input::-webkit-search-cancel-button{display:none}   /* крестик — свой, второй браузерный не нужен */
 .mprow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;color:var(--ink-2);font-weight:600}
 .btn{height:42px;border-radius:11px;border:1px solid var(--ring);background:var(--surface);padding:0 14px;font-weight:600;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
 .btn.pri{background:var(--accent);color:#fff;border-color:transparent}
@@ -911,7 +932,7 @@ a.bt>span{color:var(--accent);font-weight:700}
 .press:active,.press.down{transform:scale(.95);filter:brightness(.92);box-shadow:inset 0 0 0 2px var(--accent)}
 :where(button,a,.item,.chip,.pill,.persel,summary,label.f){-webkit-tap-highlight-color:transparent;transition:transform .14s cubic-bezier(.2,.8,.3,1),filter .14s}
 :where(button,a,.chip,.pill,.persel,summary):where(:active,.down){transform:scale(.94);filter:brightness(.9)}
-:where(.item):where(:active,.down){transform:scale(.985);filter:brightness(.95)}
+:where(.item,.pki,.pickb):where(:active,.down){transform:scale(.985);filter:brightness(.95)}
 :where(nav.tabs button):where(:active,.down){transform:scale(.9)}
 .bt.nok.press:active,.bt.nok.press.down{box-shadow:inset 0 0 0 3px var(--bad)}
 .tcard{background:var(--surface-2);border-radius:12px;padding:10px 12px;margin-top:8px}
@@ -1215,7 +1236,8 @@ window.svcBack=o=>{
   </div>
   <div id="factBox" class="hidden">
     <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-      <input id="fq" type="search" placeholder="Найти товар — начните печатать" autocomplete="off" enterkeyhint="search"><button id="fqClear" class="hidden" aria-label="Очистить">✕</button></div>
+      <input id="fq" type="search" placeholder="Найти товар — начните печатать" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="search"><button id="fqClear" class="hidden" aria-label="Очистить">✕</button></div>
+    <div class="sfn" id="fqn"></div>
     <div class="sumbar">
       <div class="seg" id="sumMp"><button data-sf="all">Все</button><button data-sf="wb"><span class="mpi wb"></span>WB</button><button data-sf="ozon"><span class="mpi ozon"></span>Ozon</button><button data-sf="ym"><span class="mpi ym"></span>ЯМ</button></div>
       <select class="sel" id="fsort" aria-label="Порядок"><option value="sales">по выручке за месяц</option><option value="unit">по юнитке: сначала низкая маржа</option><option value="panel">по панели: сначала низкая маржа</option><option value="drr">по ДРР: сначала высокий</option><option value="name">по алфавиту</option></select>
@@ -1234,6 +1256,9 @@ window.svcBack=o=>{
 
 <!-- ═════════ СПП НАШИХ ТОВАРОВ (Андрей 26.10) ═════════ -->
 <section class="page" id="p-spp">
+  <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    <input id="sq" type="search" placeholder="Найти товар — начните печатать" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="search"><button id="sqClear" class="hidden" aria-label="Очистить">✕</button></div>
+  <div class="sfn" id="sqn"></div>
   <div class="sumbar">
     <div class="seg" id="sppMp"><button data-sf="all">Все</button><button data-sf="wb"><span class="mpi wb"></span>WB</button><button data-sf="ozon"><span class="mpi ozon"></span>Ozon</button><button data-sf="ym"><span class="mpi ym"></span>ЯМ</button></div>
     <select class="sel" id="sppSort" aria-label="Порядок"><option value="sales">по выручке за месяц</option><option value="spp">по СПП: сначала больше</option><option value="d14">по изменению за 2 недели</option><option value="name">по алфавиту</option></select>
@@ -1251,8 +1276,7 @@ window.svcBack=o=>{
     <div class="col" id="form">
       <div class="mprow">Площадка <div class="seg" id="mpSeg" role="group" aria-label="Площадка"><button data-mp="wb"><span class="mpi wb"></span>WB</button><button data-mp="ozon"><span class="mpi ozon"></span>Ozon</button><button data-mp="ym"><span class="mpi ym"></span>ЯМ</button></div></div>
       <div class="namebar">
-        <div class="acwrap"><input id="name" placeholder="Найдите товар по артикулу или впишите название" autocomplete="off" enterkeyhint="search" role="combobox" aria-expanded="false" aria-controls="ac">
-          <div class="ac hidden" id="ac" role="listbox"></div></div>
+        <div class="acwrap"><button type="button" class="pickb" id="pickB" aria-haspopup="dialog" aria-controls="pickBox"></button></div>
         <button class="btn pri" id="bSave" title="Сохранить этот расчёт во вкладку «Мои расчёты» на этом устройстве">В мои расчёты</button>
         <button class="btn" id="bShare" title="Ссылка, по которой этот расчёт откроется на другом телефоне или компьютере">Поделиться</button>
         <button class="btn" id="bNew">Новый</button>
@@ -1357,6 +1381,16 @@ window.svcBack=o=>{
   <div class="note">Откроется на любом телефоне или компьютере с теми же цифрами — пароль не нужен, цифры только этого расчёта.</div>
   <input id="shareUrl" class="shurl" readonly>
   <div class="chips"><button class="btn pri" id="shCopy">Скопировать</button><a class="btn tg" id="shTg" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="12" fill="#229ed9"/><path fill="#fff" d="M5.3 11.7 16.9 7.2c.6-.2 1.1.1.9.9l-2 9.3c-.1.7-.5.8-1.1.5l-3-2.2-1.5 1.4c-.2.2-.3.3-.6.3l.2-3.1 5.6-5.1c.2-.2 0-.3-.4-.1L8.1 13.4l-3-.9c-.6-.2-.6-.6.2-.8Z"/></svg>Отправить в Telegram</a><button class="btn hidden" id="shMore">Ещё…</button></div>
+</div></div>
+
+<!-- ═════════ товар в «Расчёт» — лист «Товары», как в «Конкурентах» (Андрей 01.11: «поиск не даёт выбрать») ═════════ -->
+<div class="modal hidden" id="pickBox" role="dialog" aria-label="Выбор товара"><div class="card sheet pks">
+  <div class="h" style="font-size:17px">Товары <span class="pkc" id="pkCnt"></span><button class="tour-x" id="pkClose" aria-label="Закрыть" style="position:static">✕</button></div>
+  <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    <input id="pkq" type="search" placeholder="Артикул или название" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="search"><button id="pkx" class="hidden" aria-label="Очистить">✕</button></div>
+  <div class="seg sm" id="pkMp" role="group" aria-label="Площадка"></div>
+  <div class="sfn" id="pkn"></div>
+  <div class="pkl" id="pkl" role="listbox"></div>
 </div></div>
 
 <!-- ═════════ как поставить расширение (ссылка на окно: …/unitka/#ext) ═════════ -->
@@ -1526,6 +1560,27 @@ const hit = (words, text) => { const t = canon(text); return words.every(w => t.
 /* товар панели: слова — по артикулу продавца; номер WB (nmID) — только если в запросе одни цифры от 5 знаков */
 const hitRow = (words, r) => { const t = canon(r.a + " " + (r.cat || "")), nm = r.nm ? String(Math.round(r.nm)) : "";
   return words.every(w => t.includes(w) || (nm && /^\d{5,}$/.test(w) && nm.includes(w))); };
+/* как в «Конкурентах»: ничего не нашлось, а набрано латиницей — та же строка в русской раскладке («ntgkjktynf» → «теплолента») */
+const KB_EN = "`qwertyuiop[]asdfghjkl;'zxcvbnm,.", KB_RU = "ёйцукенгшщзхъфывапролджэячсмитьбю";
+const kbSwap = s => s.replace(/[a-z`\[\];',.]/gi, ch => { const i = KB_EN.indexOf(ch.toLowerCase()); return i < 0 ? ch : KB_RU[i]; });
+function qFind(q, rows) {
+  const w = qWords(q);
+  if (!w.length || !/[a-z]/i.test(q) || rows.some(r => hitRow(w, r))) return { w, kb: null };
+  const k = kbSwap(q), w2 = qWords(k);
+  return rows.some(r => hitRow(w2, r)) ? { w: w2, kb: k } : { w, kb: null };
+}
+/* подсветка найденного в артикуле — сравнение то же, что у поиска (регистр, ё, латиница-двойник, разделители не важны) */
+function hl(s, words) {
+  s = String(s == null ? "" : s); if (!words || !words.length) return esc(s);
+  let c = ""; const ix = [], m = new Uint8Array(s.length);
+  for (let i = 0; i < s.length; i++) { const k = canon(s[i]); if (k.length === 1) { c += k; ix.push(i); } }
+  words.forEach(w => { let i = c.indexOf(w); while (i >= 0) { m.fill(1, ix[i], ix[i + w.length - 1] + 1); i = c.indexOf(w, i + w.length); } });
+  let h = "", on = 0;
+  for (let i = 0; i < s.length; i++) { if (m[i] !== on) { h += m[i] ? '<mark class="hit">' : "</mark>"; on = m[i]; } h += esc(s[i]); }
+  return h + (on ? "</mark>" : "");
+}
+/* строка под поиском: «Найдено N из M» или «была английская раскладка» */
+const findLine = (kb, n, of, act) => kb ? `Искали «${esc(kb)}» — была английская раскладка` : act ? (n ? `Найдено ${n} из ${of}` : "") : "";
 
 /* ═════════ тема ═════════ */
 let THEME = LS.get("theme", "auto");
@@ -2141,7 +2196,7 @@ function saveDraft() { LS.set("draft", S); }
 $("#taxSel").innerHTML = Object.entries(TAX).map(([k, t]) => `<option value="${k}">${t.name}</option>`).join("");
 function writeForm() {
   SCHMSG = null;
-  $("#name").value = S.name || "";
+  paintPick();
   $$("[data-k]").forEach(el => {
     const v = S[el.dataset.k];
     if (el.type === "checkbox") el.checked = !!v;
@@ -2184,7 +2239,6 @@ const isPick = el => el.tagName === "SELECT" || el.type === "checkbox";
 $("#form").addEventListener("input", e => { if (!isPick(e.target)) onField(e.target); });
 $("#form").addEventListener("change", e => { if (isPick(e.target)) onField(e.target); });
 function onField(el) {
-  if (el.id === "name") { S.name = el.value; saveDraft(); return; }
   if (el.id === "pSale") {
     const d = Math.min(99.9, num(S.disc)) / 100;
     S.price0 = Math.round(num(el.value) / (1 - d) * 100) / 100;
@@ -2457,7 +2511,7 @@ document.addEventListener("click", e => {
 $("#bNew").onclick = () => { S = newState(S.mp); saveDraft(); writeForm(); render(); window.scrollTo(0, 0); toast("Новый расчёт"); };
 $("#bSave").onclick = () => {
   const list = LS.get("saved", []);
-  if (!S.name.trim()) { S.name = "Расчёт " + new Date().toLocaleDateString("ru-RU"); $("#name").value = S.name; }
+  if (!S.name.trim()) { S.name = "Расчёт " + new Date().toLocaleDateString("ru-RU"); paintPick(); }
   if (!S.id) S.id = Date.now().toString(36);
   const i = list.findIndex(x => x.id === S.id);
   const item = { id: S.id, at: Date.now(), s: clone(S) };
@@ -2706,12 +2760,14 @@ function panelKpi(pr, k, t, lbl) {
   if (q.m == null) return `<div class="kpi"><b>—</b><span>${lbl} — продаж не было</span></div>`;
   return `<div class="kpi"><b class="${tone(q.m, t)}">${pct(q.m)}</b><span>${lbl}${moved ? " — прогноз" : ""}<br>без ДРР ${pct(q.nd)} · ДРР ${pct(q.drr)}${moved ? `<br>факт ${pct(f.m)} · <span class="${cls(q.m - f.m)}">${ppTxt(q.m - f.m)} п.п.</span>` : ""}</span></div>`;
 }
+let FFIND = { w: [], kb: null, of: 0 };
 function sumItems() {
-  const words = qWords(FQ), out = [];
-  for (const mp of ["wb", "ozon", "ym"]) {
-    if (SUMF !== "all" && SUMF !== mp) continue;
-    const p = FACT && FACT.mp[mp]; if (!p) continue;
-    for (const r of p.rows) {
+  const out = [], mps = ["wb", "ozon", "ym"].filter(mp => (SUMF === "all" || SUMF === mp) && FACT && FACT.mp[mp]);
+  const rows = mps.flatMap(mp => FACT.mp[mp].rows);
+  FFIND = Object.assign(qFind(FQ, rows), { of: rows.length });
+  const words = FFIND.w;
+  for (const mp of mps) {
+    for (const r of FACT.mp[mp].rows) {
       if (words.length && !hitRow(words, r)) continue;
       const x = unit(r, mp), now = num(r.now) || null, n = x && now ? at(x, now, FADS) : null, pr = perRow(mp, r);
       out.push({ mp, r, x, now, n, pr, pm: panelM(pr), key: mp + "|" + (r.ip || "") + "|" + r.a });
@@ -2747,6 +2803,7 @@ function renderFact(keepDetail) {
   $("#fsort").value = FSORT;
   renderPer();
   const items = sumItems(), t = num(S.target) / 100 || 0.1;
+  $("#fqn").innerHTML = findLine(FFIND.kb, items.length, FFIND.of, !!FQ);
   const sold = items.filter(o => o.x), rest = items.filter(o => !o.x);
   const withP = sold.filter(o => o.pm.m != null);
   const S1 = withP.reduce((a, o) => a + num(o.pr.sales), 0), P1 = withP.reduce((a, o) => a + num(o.pr.profit), 0);
@@ -2760,7 +2817,7 @@ function renderFact(keepDetail) {
   const upd = new Date(FACT.updated);
   const cell = (v, cl) => `<span class="c ${cl == null ? (v != null ? tone(v, t) : "") : cl}">${v != null ? pct(v) : "—"}</span>`;
   const row = o => `<button class="item ${FSEL === o.key ? "sel" : ""} ${o.x ? "" : "dim"}" data-key="${esc(o.key)}">
-      <span class="n">${esc(o.r.a)}<span class="s">${mpTag(o.mp)}<b class="pr">${o.now ? rub(o.now) : "цены нет"}</b>${o.now ? " наша до СПП" : ""} · ${soldTxt(o.r, o.x)}${cab(o.mp, o.r.ip) ? " · " + cab(o.mp, o.r.ip) : ""}</span></span>
+      <span class="n">${hl(o.r.a, FFIND.w)}<span class="s">${mpTag(o.mp)}<b class="pr">${o.now ? rub(o.now) : "цены нет"}</b>${o.now ? " наша до СПП" : ""} · ${soldTxt(o.r, o.x)}${cab(o.mp, o.r.ip) ? " · " + cab(o.mp, o.r.ip) : ""}</span></span>
       ${cell(o.n ? o.n.margin : null)}${cell(o.pm.m)}${cell(o.pm.drr, "drr")}</button>`;
   $("#factList").innerHTML = `
     <div class="lhead"><span>Товар · наша цена до СПП</span><span>По юнитке<small>при нашей цене</small></span><span>По панели<small>${esc(PER[SUMP])}</small></span><span>ДРР<small>панель</small></span></div>
@@ -3123,7 +3180,7 @@ document.addEventListener("click", e => {
   if (b.closest("#sOut")) paintSppOut(); else if (b.closest("#dOut")) keepScroll(paintDetail);
 });
 /* ═════════ вкладка «СПП»: все товары с гистограммой СПП за 2 недели «на ладони»; нажал на товар — его карточка с начала (Андрей 26.10) ═════════ */
-let SPPF = LS.get("sppMp", "all"), SPPS = LS.get("sppSort", "sales"), SPPBACK = false, SPPSEL = null, SPPPRICE = null, SPPHASH = null;
+let SPPF = LS.get("sppMp", "all"), SPPS = LS.get("sppSort", "sales"), SPPBACK = false, SPPSEL = null, SPPPRICE = null, SPPHASH = null, SPPQ = "";
 function sppItems() {
   const all = [];
   for (const mp of ["wb", "ozon", "ym"]) for (const r of (FACT.mp[mp] || { rows: [] }).rows) {
@@ -3143,11 +3200,13 @@ function renderSpp() {
   if (SPPHASH) {                         // пришли по ссылке на товар — показать все площадки и открыть его карточку
     const [hm, ...ha] = SPPHASH.split(":"), k = canon(ha.join(":")); SPPHASH = null;
     const o = sppItems().find(z => z.mp === hm && canon(z.r.a) === k);
-    if (o) { SPPF = "all"; SPPSEL = o.key; SPPPRICE = null; open = o.key; } else toast("СПП по этому товару нет — нет на витрине");
+    if (o) { SPPF = "all"; SPPQ = ""; $("#sq").value = ""; $("#sqClear").classList.add("hidden"); SPPSEL = o.key; SPPPRICE = null; open = o.key; } else toast("СПП по этому товару нет — нет на витрине");
   }
   $$("#sppMp button").forEach(b => b.setAttribute("aria-pressed", b.dataset.sf === SPPF));
   $("#sppSort").value = SPPS;
-  const all = sppItems(), items = all.filter(o => SPPF === "all" || o.mp === SPPF), mps = ["wb", "ozon", "ym"].filter(mp => SPPF === "all" || SPPF === mp);
+  const all = sppItems(), inMp = all.filter(o => SPPF === "all" || o.mp === SPPF), mps = ["wb", "ozon", "ym"].filter(mp => SPPF === "all" || SPPF === mp);
+  const F = qFind(SPPQ, inMp.map(o => o.r)), items = F.w.length ? inMp.filter(o => hitRow(F.w, o.r)) : inMp;
+  $("#sqn").innerHTML = findLine(F.kb, items.length, inMp.length, !!SPPQ);
   items.sort((a, b) => SPPS === "spp" ? b.s - a.s : SPPS === "d14" ? (a.d == null) - (b.d == null) || num(a.d) - num(b.d) : SPPS === "name" ? a.r.a.localeCompare(b.r.a, "ru") : num(b.r.sales) - num(a.r.sales));
   const avg = L => (L.length ? L.reduce((x, o) => x + o.s, 0) / L.length : null);
   const tile = (lbl, v, sub) => `<div><span>${lbl}</span><b>${v}</b>${sub ? `<span>${sub}</span>` : ""}</div>`;
@@ -3155,12 +3214,12 @@ function renderSpp() {
   $("#sppTot").innerHTML = mps.map(mp => { const L = all.filter(o => o.mp === mp); return tile("СПП " + MPS[mp].short + " в среднем", L.length ? pct(avg(L), 1) : "—", L.length + " товаров"); }).join("") +
     tile("За 2 недели", `<span class="pos">▲ ${up}</span> · <span class="neg">▼ ${dn}</span>`, "вырос · упал");
   const row = o => `<button class="item ${SPPSEL === o.key ? "sel" : ""}" data-key="${esc(o.key)}">
-      <span class="n"><span class="nm">${mpIco(o.mp, true)}<span>${esc(o.r.a)}${cab(o.mp, o.r.ip) ? ` <small class="m">${cab(o.mp, o.r.ip)}</small>` : ""}</span></span></span>
+      <span class="n"><span class="nm">${mpIco(o.mp, true)}<span>${hl(o.r.a, F.w)}${cab(o.mp, o.r.ip) ? ` <small class="m">${cab(o.mp, o.r.ip)}</small>` : ""}</span></span></span>
       <span class="c">${pct(o.s, 1)}</span><span class="c ${o.d == null ? "" : cls(o.d)}">${ppTxt(o.d)}</span>
       ${sppChart(o.r.sh, "row") || '<span class="ch note">истории СПП нет — только снимок витрины</span>'}</button>`;
   const no = mps.map(mp => MPS[mp].short + " — " + ((FACT.mp[mp] ? FACT.mp[mp].rows.length : 0) - all.filter(o => o.mp === mp).length)).join(", ");
   box.innerHTML = `<div class="lhead"><span>Товар · СПП по дням за 2 недели, %</span><span>СПП<small>сейчас</small></span><span>За 2 нед<small>п.п.</small></span></div>
-    <div class="list">${items.map(row).join("") || '<div class="empty">Нет товаров с СПП</div>'}</div>
+    <div class="list">${items.map(row).join("") || `<div class="empty">${SPPQ ? "Ничего не нашлось — проверьте написание" + (SPPF !== "all" ? " или выберите «Все»" : "") : "Нет товаров с СПП"}</div>`}</div>
     <div class="note" style="padding:10px 14px"><b>СПП</b> — доля нашей цены, которую доплатила площадка (WB — СПП, Ozon — соинвест, ЯМ — скидка Маркета). По дням — как дашборд «СПП» панели:
       сплошной столбик — по продажам дня, бледный с курсивом — продаж не было, по цене витрины; черта — данных нет; цвет — от жёлтого (самый низкий СПП товара за 2 недели) к зелёному (самый высокий). «Сейчас» — последний снимок витрины (WB и Ozon — раз в день, ЯМ — раз в 3 часа).
       Нет СПП: ${esc(no)}. Нажмите на товар — его карточка: гистограмма крупно и смена цены с ценой для покупателя и топами.</div>`;
@@ -3211,6 +3270,8 @@ function paintSppOut() {
     <div class="note">По юнитке — расходы на 1 шт из панели за ${esc(x.src || mon)}; чистая по панели — прибыль панели по товару за выбранный срок, как если бы стояла эта цена: комиссия, эквайринг, налог и реклама — в % от цены, остальное — те же рубли.</div>`;
 }$("#sppMp").addEventListener("click", e => { const b = e.target.closest("button"); if (b) { SPPF = b.dataset.sf; LS.set("sppMp", SPPF); keepScroll(renderSpp); } });
 $("#sppSort").addEventListener("change", e => { SPPS = e.target.value; LS.set("sppSort", SPPS); renderSpp(); });
+$("#sq").addEventListener("input", e => { SPPQ = e.target.value.trim(); $("#sqClear").classList.toggle("hidden", !SPPQ); renderSpp(); });
+$("#sqClear").onclick = () => { $("#sq").value = ""; SPPQ = ""; $("#sqClear").classList.add("hidden"); renderSpp(); $("#sq").focus(); };
 $("#sppList").addEventListener("click", e => {
   const b = e.target.closest(".item"); if (!b) return;
   SPPSEL = b.dataset.key; SPPPRICE = null;
@@ -3330,53 +3391,93 @@ $("#tabs").addEventListener("click", e => {
   ["#detail", "#sppDet", "#sppList"].forEach(s => { const el = $(s); if (el) el.scrollTop = 0; });
 });
 
-/* ═════════ поиск товара в «Расчёте»: артикул → список → все цифры факта в расчёт ═════════ */
-let AC = [], ACI = -1, acLoading = false;
-function acItems(q) {
-  const words = qWords(q); if (!words.length || !FACT) return [];
-  const out = [];
-  for (const mp of ["wb", "ozon", "ym"]) for (const r of (FACT.mp[mp] || { rows: [] }).rows)
-    if (hitRow(words, r)) { const x = unit(r, mp), now = num(r.now) || null; out.push({ mp, r, x, now, n: x && now ? at(x, now, FADS) : null }); }
-  // сначала выбранная площадка (Бондарев 26.10: выбрал ЯМ — поиск подсовывал WB/Ozon), потом с продажами, по выручке
-  out.sort((a, b) => ((a.mp === S.mp) !== (b.mp === S.mp) ? (a.mp === S.mp ? -1 : 1) : !a.x !== !b.x ? (a.x ? -1 : 1) : num(b.r.sales) - num(a.r.sales)));
-  return out.slice(0, 12);
+/* ═════════ товар в «Расчёт» — лист «Товары», как в «Конкурентах» (Андрей 01.11: «в юнитке поиск не даёт выбрать»).
+   Раньше под полем был выпадающий список, и товар подставлялся уже при касании — на телефоне список нельзя было пролистать.
+   Теперь плашка товара → лист: поиск, площадки, список листается пальцем, товар — нажатием; Enter — первый, стрелки — по списку.
+   Нет в панелях — «Своё название», считать вручную ═════════ */
+const PK = { q: "", f: "all" }; let PKL = [], PKB = -1, pkLoading = false;
+const IC_FIND = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>';
+const IC_DOWN = '<svg class="dn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>';
+function paintPick() {
+  const nm = (S.name || "").trim(), tar = S.tar && canon(S.tar.a) === canon(nm) ? S.tar : null;
+  $("#pickB").innerHTML = nm
+    ? `${IC_FIND}<span class="t"><b>${tar ? mpTag(tar.mp) : ""}${esc(nm)}</b><i>${tar ? (tar.fact ? "цифры из панели" : "продаж нет — расходы по настройкам") : "свой расчёт"}</i></span>${IC_DOWN}`
+    : `${IC_FIND}<span class="t"><span class="ph">Найти товар — артикул или название</span></span>`;
 }
-function acShow() {
-  const box = $("#ac"), q = $("#name").value.trim(), t = num(S.target) / 100 || 0.1;
-  if (q.length < 2) { box.classList.add("hidden"); $("#name").setAttribute("aria-expanded", "false"); return; }
+function pickOpen() {
+  PK.q = ""; PK.f = "all"; $("#pkq").value = ""; $("#pkx").classList.add("hidden");
+  $("#pickBox").classList.remove("hidden");
+  pkList(); $("#pkl").scrollTop = 0;
+  $("#pkq").focus({ preventScroll: true });
+}
+function pickClose() { $("#pickBox").classList.add("hidden"); $("#pkq").blur(); }
+const pkOwn = () => { const q = PK.q.trim(); return q ? `<button type="button" class="pki own" data-pkown><span class="n">✎ Своё название: «${esc(q)}»</span><span class="s">без товара из панелей — считать вручную</span></button>` : ""; };
+function pkList() {
+  const box = $("#pkl"), q = PK.q.trim(), t = num(S.target) / 100 || 0.1;
   if (!FACT) {
+    $("#pkMp").innerHTML = ""; $("#pkCnt").textContent = ""; $("#pkn").innerHTML = "";
     if (LS.get("pass", "") || LS.get("kc", null)) {
-      box.innerHTML = '<div class="tip">Загружаю ваши товары…</div>';
-      if (!acLoading) { acLoading = true; loadFact().then(d => { FACT = d; acLoading = false; acShow(); }).catch(() => { acLoading = false; box.innerHTML = '<div class="tip">Не получилось загрузить товары — откройте вкладку «Сводка».</div>'; }); }
-    } else box.innerHTML = '<div class="tip">Чтобы искать свои товары, один раз введите пароль во вкладке «Сводка». Без пароля можно просто вписать название и считать вручную.</div>';
-  } else {
-    AC = acItems(q); ACI = AC.length ? 0 : -1;
-    box.innerHTML = AC.length ? AC.map((o, i) => `<button type="button" role="option" aria-selected="${i === ACI}" data-ac="${i}">
-        <span class="n">${mpTag(o.mp)}${esc(o.r.a)}</span>
-        <span class="r ${o.n ? tone(o.n.margin, t) : ""}">${o.n ? pct(o.n.margin) : ""}</span>
-        <span class="s">${o.now ? "наша до СПП " + rub(o.now) : "цены нет"} · ${soldTxt(o.r, o.x)}${cab(o.mp, o.r.ip) ? " · " + cab(o.mp, o.r.ip) : ""}</span></button>`).join("")
-      : '<div class="tip">Такого артикула нет в панелях. Можно вписать название и считать вручную.</div>';
+      box.innerHTML = '<div class="empty">Загружаю ваши товары…</div>' + pkOwn();
+      if (!pkLoading) { pkLoading = true; loadFact().then(d => { FACT = d; pkLoading = false; pkList(); }).catch(() => { pkLoading = false; box.innerHTML = '<div class="empty">Не получилось загрузить товары — откройте вкладку «Сводка».</div>' + pkOwn(); }); }
+    } else box.innerHTML = '<div class="empty">Чтобы искать свои товары, один раз введите пароль во вкладке «Сводка». Без пароля впишите название — посчитаете вручную.</div>' + pkOwn();
+    return;
   }
-  box.classList.remove("hidden"); $("#name").setAttribute("aria-expanded", "true");
+  const all = [];
+  for (const mp of ["wb", "ozon", "ym"]) for (const r of (FACT.mp[mp] || { rows: [] }).rows) all.push({ mp, r });
+  const cnt = k => (k === "all" ? all.length : all.filter(o => o.mp === k).length);
+  if (!cnt(PK.f)) PK.f = "all";
+  $("#pkCnt").textContent = all.length;
+  $("#pkMp").innerHTML = [["all", "Все"], ["wb", "WB"], ["ozon", "Ozon"], ["ym", "ЯМ"]].filter(([k]) => cnt(k))
+    .map(([k, n]) => `<button type="button" data-pkf="${k}" aria-pressed="${PK.f === k}">${k === "all" ? "" : `<span class="mpi ${k}"></span>`}${n}<em>${cnt(k)}</em></button>`).join("");
+  const base = PK.f === "all" ? all : all.filter(o => o.mp === PK.f), F = qFind(q, base.map(o => o.r));
+  PKL = (F.w.length ? base.filter(o => hitRow(F.w, o.r)) : base).map(o => { const x = unit(o.r, o.mp), now = num(o.r.now) || null; return { mp: o.mp, r: o.r, x, now, n: x && now ? at(x, now, FADS) : null }; });
+  // сначала площадка «Расчёта» (Бондарев 26.10: выбрал ЯМ — поиск подсовывал WB/Ozon), потом с продажами, по выручке
+  PKL.sort((a, b) => ((a.mp === S.mp) !== (b.mp === S.mp) ? (a.mp === S.mp ? -1 : 1) : !a.x !== !b.x ? (a.x ? -1 : 1) : num(b.r.sales) - num(a.r.sales)));
+  PKB = q && PKL.length ? 0 : -1;
+  $("#pkn").innerHTML = findLine(F.kb, PKL.length, all.length, !!q || PK.f !== "all");
+  const cur = S.tar ? S.tar.mp + "|" + canon(S.tar.a) : "";
+  box.innerHTML = PKL.length ? PKL.map((o, i) => { const on = cur === o.mp + "|" + canon(o.r.a);
+    return `<button type="button" role="option" class="pki${on ? " cur" : ""}${i === PKB ? " kb" : ""}" data-pk="${i}">
+      <span class="n">${mpTag(o.mp)}${hl(o.r.a, F.w)}${on ? '<span class="now">сейчас</span>' : ""}</span>
+      <span class="r ${o.n ? tone(o.n.margin, t) : ""}">${o.n ? pct(o.n.margin) : ""}</span>
+      <span class="s">${o.now ? "наша до СПП " + rub(o.now) : "цены нет"} · ${soldTxt(o.r, o.x)}${cab(o.mp, o.r.ip) ? " · " + cab(o.mp, o.r.ip) : ""}</span></button>`; }).join("") + pkOwn()
+    : `<div class="empty">Такого товара нет в панелях${PK.f !== "all" ? '<br><button type="button" class="btn sm" data-pkf="all">Искать на всех площадках</button>' : ""}</div>` + pkOwn();
 }
-function acPick(i) {
-  const o = AC[i]; if (!o) return;
-  $("#ac").classList.add("hidden");
+function pkPick(i) {
+  const o = PKL[i]; if (!o) return;
+  pickClose();
   if (o.x) { S = withMeta(factToState(o.mp, o.r, o.x, o.now || o.x.price)); toast("Подставил «" + o.r.a + "»: цена сейчас и расходы из факта — правьте любые цифры"); }
   else { S = withMeta(emptyToState(o.mp, o.r)); toast(emptyTip(o.r, o.mp)); }
   saveDraft(); writeForm(); render();
 }
-$("#name").addEventListener("input", acShow);
-$("#name").addEventListener("focus", () => { if ($("#name").value.trim().length >= 2) acShow(); });
-$("#name").addEventListener("keydown", e => {
-  if ($("#ac").classList.contains("hidden") || !AC.length) return;
-  if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); ACI = (ACI + (e.key === "ArrowDown" ? 1 : -1) + AC.length) % AC.length; $$("#ac button").forEach((b, i) => b.setAttribute("aria-selected", i === ACI)); }
-  else if (e.key === "Enter") { e.preventDefault(); acPick(ACI); }
-  else if (e.key === "Escape") $("#ac").classList.add("hidden");
+function pkOwnSet() { S.name = PK.q.trim(); saveDraft(); paintPick(); pickClose(); toast("Расчёт назван «" + S.name + "» — цифры впишите сами"); }
+$("#pickB").onclick = pickOpen;
+$("#pkClose").onclick = pickClose;
+$("#pickBox").addEventListener("click", e => {
+  if (e.target.id === "pickBox") { pickClose(); return; }
+  const f = e.target.closest("[data-pkf]"); if (f) { PK.f = f.dataset.pkf; pkList(); $("#pkl").scrollTop = 0; return; }
+  const b = e.target.closest("[data-pk]"); if (b) { pkPick(+b.dataset.pk); return; }
+  if (e.target.closest("[data-pkown]")) pkOwnSet();
 });
-$("#ac").addEventListener("pointerdown", e => { const b = e.target.closest("[data-ac]"); if (b) { e.preventDefault(); acPick(+b.dataset.ac); } });
-$("#ac").addEventListener("click", e => { const b = e.target.closest("[data-ac]"); if (b) acPick(+b.dataset.ac); });
-document.addEventListener("pointerdown", e => { if (!e.target.closest(".acwrap")) $("#ac").classList.add("hidden"); });
+$("#pkq").addEventListener("input", e => { PK.q = e.target.value; $("#pkx").classList.toggle("hidden", !PK.q); pkList(); $("#pkl").scrollTop = 0; });
+$("#pkx").onclick = () => { $("#pkq").value = ""; PK.q = ""; $("#pkx").classList.add("hidden"); pkList(); $("#pkq").focus(); };
+$("#pkq").addEventListener("keydown", e => {
+  const bs = $$("#pkl [data-pk]"), n = bs.length;
+  if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+    e.preventDefault(); if (!n) return;
+    const d = e.key === "ArrowDown" ? 1 : -1; PKB = PKB < 0 ? (d > 0 ? 0 : n - 1) : (PKB + d + n) % n;
+    bs.forEach((b, k) => b.classList.toggle("kb", k === PKB)); bs[PKB].scrollIntoView({ block: "nearest" });
+  } else if (e.key === "Enter") { e.preventDefault(); if (n) pkPick(Math.max(0, PKB)); else if (PK.q.trim()) pkOwnSet(); }
+  else if (e.key === "Escape") { e.preventDefault(); if (PK.q) $("#pkx").click(); else pickClose(); }
+});
+addEventListener("keydown", e => {   // «/» или Ctrl+K — поиск товара на компьютере, как в «Конкурентах»
+  if (e.altKey || e.defaultPrevented || TR) return;
+  const t = e.target; if (t && t.closest && t.closest("input,textarea,select,[contenteditable]")) return;
+  if (!((e.code === "Slash" && !e.ctrlKey && !e.metaKey) || ((e.ctrlKey || e.metaKey) && e.code === "KeyK"))) return;
+  e.preventDefault();
+  if (TAB === "calc") { pickOpen(); return; }
+  const i = $({ sum: "#fq", spp: "#sq", saved: "#svq" }[TAB] || "#fq"); if (i && i.offsetParent) i.focus();
+});
 
 /* ═════════ «Показать фишки»: пошаговые подсказки с подсветкой, начиная с открытой вкладки ═════════ */
 const TABN = { sum: "Сводка", calc: "Расчёт", spp: "СПП", saved: "Мои расчёты" }, TABORD = ["sum", "calc", "spp", "saved"];
@@ -3395,7 +3496,7 @@ const TOUR = {
     { sel: "#bTheme", t: "Тема", d: "Светлая, бежевая, тёмная или как в системе телефона.", pre: tourUndetail }
   ],
   calc: [
-    { sel: "#name", t: "Найдите свой товар", d: "Начните печатать артикул — ниже появится список ваших товаров. Нажмите на товар, и подставятся цена сейчас и все расходы из панели. Можно и просто вписать своё название и считать с нуля." },
+    { sel: "#pickB", t: "Найдите свой товар", d: "Нажмите — откроется список ваших товаров с поиском: начните печатать артикул, список сузится. Нажмите на товар — подставятся цена сейчас и все расходы из панели. Товара нет в панелях — «Своё название», и считайте с нуля." },
     { sel: "#mpSeg", t: "Площадка", d: "У каждой площадки свои комиссии и логистика. Переключайте — подставятся расходы этой площадки." },
     { sel: 'details[data-sec="price"] > summary', t: "Цена", d: "Цена до скидки и ваша скидка — или сразу цена продажи, поля связаны." },
     { sel: 'details[data-sec="cost"] > summary', t: "Себестоимость", d: "Закупка, доставка партии, ФФ и упаковка — итог внизу блока." },
