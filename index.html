@@ -3631,7 +3631,13 @@ function setHdr() { document.documentElement.style.setProperty("--hdr", $("heade
   if (h.get("z")) { TAB = "calc"; unpackZ(h.get("z")).then(st => { S = fixState(st); delete S.id; saveDraft(); writeForm(); render(); }).catch(() => toast("Ссылка на расчёт повреждена")); }
   takeView();                                                           // после «потянуть — обновить» — туда же, где был
   if (h.get("spp")) { SPPHASH = h.get("spp"); TAB = "spp"; }           // из «Конкурентов»: #spp=ozon:<артикул> — СПП этого товара
-  if (h.get("k") || h.get("c") || h.get("z") || h.get("spp")) history.replaceState(null, "", location.pathname + location.search);
+  /* #mine=… — готовый набор «Моих расчётов» (Андрей 01.11: «создай по каждому, остальное очистить»): с подтверждением заменяет весь список */
+  if (h.get("mine")) { TAB = "saved"; unpackZ(h.get("mine")).then(list => {
+    if (!Array.isArray(list) || !list.length) throw 0;
+    if (!confirm(`Заменить «Мои расчёты» на ${list.length} новых? Старые расчёты с этого устройства удалятся.`)) return;
+    LS.set("saved", list.map(it => ({ id: it.s.id, at: it.at || Date.now(), s: fixState(it.s) }))); CMP.clear(); renderSaved();
+    toast("В «Моих расчётах» теперь " + list.length); }).catch(() => toast("Ссылка на расчёты повреждена")); }
+  if (h.get("k") || h.get("c") || h.get("z") || h.get("spp") || h.get("mine")) history.replaceState(null, "", location.pathname + location.search);
   if (isPhone()) $$("details.sec").forEach(d => { if (!["price", "cost", "mp"].includes(d.dataset.sec)) d.open = false; });
   writeForm(); render(); setTab(["sum", "calc", "spp", "saved"].includes(TAB) ? TAB : "sum");
   if (location.hash === "#ext") extOpen();
