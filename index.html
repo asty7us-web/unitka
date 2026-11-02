@@ -979,7 +979,10 @@ a.bt>span{color:var(--accent);font-weight:700}
 .live .ring .fg{stroke:var(--accent);stroke-linecap:round;stroke-dasharray:62.8;stroke-dashoffset:47;transform-origin:50% 50%;animation:lvspin 1s linear infinite}
 @keyframes lvspin{to{transform:rotate(360deg)}}
 .live.ok{background:color-mix(in oklab,#1f9d55 10%,var(--surface-2));box-shadow:inset 0 0 0 1px color-mix(in oklab,#1f9d55 35%,transparent)}
-.live.bad{background:color-mix(in oklab,var(--bad,#d23) 8%,var(--surface-2))}
+.live.bad{background:color-mix(in oklab,var(--bad,#d23) 10%,var(--surface-2));box-shadow:inset 0 0 0 1px color-mix(in oklab,var(--bad,#d23) 40%,transparent);animation:lvin .35s ease}
+.live.bad .lt b{color:var(--bad,#d23)}
+.live .bang{width:26px;height:26px;flex:none;border-radius:50%;background:var(--bad,#d23);color:#fff;display:grid;place-items:center;font-size:15px;font-weight:800;animation:lvpop .45s cubic-bezier(.34,1.56,.64,1)}
+@keyframes lvin{from{transform:translateY(4px);opacity:.4}}
 .live .chk{width:26px;height:26px;flex:none;border-radius:50%;background:#1f9d55;color:#fff;display:grid;place-items:center;font-size:15px;font-weight:800;animation:lvpop .45s cubic-bezier(.34,1.56,.64,1)}
 @keyframes lvpop{from{transform:scale(.3);opacity:0}}
 .kpi b.flash{animation:lvflash 1.2s ease}
@@ -1026,6 +1029,16 @@ a.bt>span{color:var(--accent);font-weight:700}
 .empty{padding:28px 16px;text-align:center;color:var(--ink-2)}
 .delta{font-size:12.5px;font-weight:600}
 
+/* подтверждение «В мои расчёты»: окно плавно выезжает, изменения подсвечены */
+#svBox{transition:background .28s ease}
+#svBox.hid{background:rgba(10,10,10,0)}
+#svBox .sheet{transition:transform .34s cubic-bezier(.2,.9,.25,1),opacity .28s ease}
+#svBox.hid .sheet{transform:translateY(24px) scale(.98);opacity:0}
+@media (max-width:860px){#svBox.hid .sheet{transform:translateY(100%);opacity:1}}
+.svq .rows .r s{color:var(--muted);text-decoration:line-through;font-weight:400;margin-right:6px}
+.svq .rows .r.chg{color:var(--accent);font-weight:700}
+.svb{display:flex;gap:8px;justify-content:flex-end;margin-top:4px}
+.svb .btn{flex:1;max-width:200px;justify-content:center}
 /* ── мои расчёты ── */
 .saved{display:flex;flex-direction:column;gap:10px}
 .toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:12px}
@@ -1441,6 +1454,14 @@ window.svcBack=o=>{
   <div class="seg sm" id="pkMp" role="group" aria-label="Площадка"></div>
   <div class="sfn" id="pkn"></div>
   <div class="pkl" id="pkl" role="listbox"></div>
+</div></div>
+
+<!-- ═════════ «В мои расчёты» — сначала показать, что именно сохранится (Андрей 02.11) ═════════ -->
+<div class="modal hidden" id="svBox" role="dialog" aria-label="Сохранить расчёт"><div class="card sheet svq">
+  <div class="h" style="margin:0" id="svT">Сохранить расчёт?</div>
+  <div class="note" id="svN"></div>
+  <div class="rows" id="svR"></div>
+  <div class="svb"><button class="btn" id="svNo">Отмена</button><button class="btn pri" id="svOk">Сохранить</button></div>
 </div></div>
 
 <!-- ═════════ как поставить расширение (ссылка на окно: …/unitka/#ext) ═════════ -->
@@ -2559,16 +2580,53 @@ document.addEventListener("click", e => {
   else if (e.target.closest("[data-ext-dl]")) setTimeout(() => extOpen(2), 400);     // скачал — сразу «что дальше»
 });
 $("#bNew").onclick = () => { S = newState(S.mp); saveDraft(); writeForm(); render(); window.scrollTo(0, 0); toast("Новый расчёт"); };
-$("#bSave").onclick = () => {
+/* «В мои расчёты» → окно: что именно сохранится; если расчёт уже есть — что поменяется (было → станет). Сохраняем только по «Сохранить» (Андрей 02.11) */
+function svFacts(s) {
+  const r = calc(s), f = s.fees[s.mp];
+  return [
+    ["Площадка", MPS[s.mp].name + " · " + schName(f.scheme)],
+    ["Цена продажи", rub(r.P) + (num(s.disc) > 0 ? " · до скидки " + rub(r.P0) : "")],
+    ["СПП", pct(r.P > 0 ? 1 - r.Pb / r.P : 0, 1)],
+    ["Покупатель платит", rub(r.Pb)],
+    ["Себестоимость 1 шт", rub(r.cost)],
+    ["Расходы площадки", rub(r.mpSum)],
+    ["Прибыль с 1 шт", rub(r.profit)],
+    ["Маржа", pct(r.margin)],
+    ["ROI", pct(r.roi, 0)]];
+}
+function svOpen() {
+  const list = LS.get("saved", []), old = S.id && list.find(x => x.id === S.id);
+  const name = S.name.trim() || "Расчёт " + new Date().toLocaleDateString("ru-RU");
+  const now = svFacts(S), was = old ? svFacts(fixState(clone(old.s))) : null;
+  let n = 0;
+  $("#svR").innerHTML = now.map(([k, v], i) => {
+    const w = was && was[i][1]; if (w && w !== v) n++;
+    return `<span>${k}</span><span class="r${w && w !== v ? " chg" : ""}">${w && w !== v ? `<s>${esc(w)}</s>` : ""}${esc(v)}</span>`;
+  }).join("");
+  $("#svT").textContent = old ? "Обновить расчёт «" + name + "»?" : "Сохранить «" + name + "»?";
+  $("#svN").textContent = old ? (n ? `Поменяется ${n} ${n === 1 ? "цифра" : n < 5 ? "цифры" : "цифр"} — выделены цветом, зачёркнуто — как было.` : "Цифры те же, что в сохранённом — обновится только дата.")
+                              : "Расчёт появится во вкладке «Мои расчёты» на этом устройстве.";
+  $("#svOk").textContent = old ? "Обновить" : "Сохранить";
+  const b = $("#svBox"); b.classList.add("hid"); b.classList.remove("hidden");
+  requestAnimationFrame(() => requestAnimationFrame(() => b.classList.remove("hid")));
+}
+function svClose() { const b = $("#svBox"); b.classList.add("hid"); setTimeout(() => b.classList.add("hidden"), 300); }
+function svSave() {
   const list = LS.get("saved", []);
   if (!S.name.trim()) { S.name = "Расчёт " + new Date().toLocaleDateString("ru-RU"); paintPick(); }
   if (!S.id) S.id = Date.now().toString(36);
   const i = list.findIndex(x => x.id === S.id);
   const item = { id: S.id, at: Date.now(), s: clone(S) };
   if (i >= 0) list[i] = item; else list.unshift(item);
-  LS.set("saved", list); saveDraft();
-  toast(i >= 0 ? "Обновлено во вкладке «Мои расчёты»" : "Сохранено во вкладку «Мои расчёты»");
-};
+  LS.set("saved", list); saveDraft(); svClose();
+  try { navigator.vibrate && navigator.vibrate(10); } catch (e) {}
+  toast(i >= 0 ? "✓ Обновлено во вкладке «Мои расчёты»" : "✓ Сохранено во вкладку «Мои расчёты»");
+}
+$("#bSave").onclick = svOpen;
+$("#svOk").onclick = svSave;
+$("#svNo").onclick = svClose;
+$("#svBox").addEventListener("click", e => { if (e.target.id === "svBox") svClose(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("#svBox").classList.contains("hidden")) svClose(); });
 
 /* ═════════ мои расчёты ═════════ */
 let CMP = new Set(), SVQ = "";
@@ -3338,12 +3396,12 @@ function liveApply(d) {
 function liveHtml(mp, row) {
   if (!FACT || !FACT.relay) return "";
   const k = LIVEKEY(mp, row), L = LIVE[k] || {}, mk = MPS[mp].short;
-  const src = row.liveAt ? "обновлён сегодня в " + hm(row.liveAt) : mp === "ym" ? "из снимка витрины, раз в 3 часа" : "из утреннего снимка витрины";
+  const src = row.liveAt ? "с сайта " + mk + ", обновлён сегодня в " + hm(row.liveAt) : mp === "ym" ? "с витрины Маркета, снимок раз в 3 часа" : "с сайта " + mk + ", как видит покупатель — снято утром";
   if (L.st === "wait") return `<div class="live" data-live><svg class="ring" viewBox="0 0 26 26" aria-hidden="true"><circle class="bg" cx="13" cy="13" r="10"/><circle class="fg" cx="13" cy="13" r="10"/></svg>
     <span class="lt"><b>Смотрю витрину ${mk}…</b><span class="st" data-livest>${esc(L.msg || "")}</span></span></div>`;
   if (L.st === "ok") return `<div class="live ok" data-live><span class="chk" aria-hidden="true">✓</span>
     <span class="lt"><b>СПП обновлён — ${pct(row.spp, 1)}</b><span class="st">${L.was != null ? `было ${pct(L.was, 1)} · ` : ""}покупателю ${rub(row.vit)} · в ${hm(row.liveAt)}</span></span><button class="go" data-livego>↻</button></div>`;
-  if (L.st === "err") return `<div class="live bad" data-live><span class="lt"><b>Не обновилось</b><span class="st">${esc(L.msg || "")}</span></span><button class="go" data-livego>Ещё раз</button></div>`;
+  if (L.st === "err") return `<div class="live bad" data-live><span class="bang" aria-hidden="true">!</span><span class="lt"><b>${esc(L.head || "Не обновилось")}</b><span class="st">${esc(L.msg || "")}</span></span><button class="go" data-livego>Ещё раз</button></div>`;
   return `<div class="live" data-live><span class="lt"><b>СПП ${src}</b><span class="st">Нажмите — компьютер посмотрит этот товар на ${mk} прямо сейчас, до минуты</span></span><button class="go" data-livego>↻ Обновить</button></div>`;
 }
 function livePaint(k) {                      // перерисовать только плашку — карточка и прокрутка на месте
@@ -3360,7 +3418,7 @@ function liveGo() {
   const stop = () => { done = true; try { es && es.close(); } catch (e) {} clearInterval(poll); clearTimeout(slow); clearTimeout(dead); };
   const got = m => {
     if (done || !m || m.id !== id) return;
-    if (m.st === "work") { liveMsg(k, "Компьютер взял — открываю карточку товара на витрине"); return; }
+    if (m.st === "work") { liveMsg(k, m.msg || "Компьютер взял — открываю карточку товара на витрине"); return; }
     stop();
     if (m.st === "done") {
       const v = { spp: m.spp, vit: m.vit, now: m.now, at: m.at }, keep = LS.get("sppLive", {}); keep[k] = v; LS.set("sppLive", keep);
@@ -3369,7 +3427,7 @@ function liveGo() {
       renderSpp(); $("#sppWrap").scrollTop = sw; $("#sppDet").scrollTop = sd; window.scrollTo(0, y);
       liveCount(was, m.spp); setTimeout(() => { if (LIVE[k]) LIVE[k].flash = false; }, 1500);
       try { navigator.vibrate && navigator.vibrate([10, 60, 10]); } catch (e) {}
-    } else { LIVE[k] = { st: "err", msg: m.msg || "не получилось" }; livePaint(k); }
+    } else { LIVE[k] = { st: "err", head: m.head, msg: m.msg || "не получилось" }; livePaint(k); try { navigator.vibrate && navigator.vibrate([30, 80, 30]); } catch (e) {} }
   };
   const take = raw => { try { const x = JSON.parse(raw); if (x.event === "message") got(JSON.parse(x.message)); } catch (e) {} };
   const since = Math.floor(t0 / 1000) - 5, R = "https://ntfy.sh/" + FACT.relay + "-r";
