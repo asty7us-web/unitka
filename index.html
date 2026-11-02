@@ -1037,6 +1037,16 @@ a.bt>span{color:var(--accent);font-weight:700}
 @media (max-width:860px){#svBox.hid .sheet{transform:translateY(100%);opacity:1}}
 .svq .rows .r s{color:var(--muted);text-decoration:line-through;font-weight:400;margin-right:6px}
 .svq .rows .r.chg{color:var(--accent);font-weight:700}
+#inBox{transition:background .28s ease}
+#inBox.hid{background:rgba(10,10,10,0)}
+#inBox .sheet{transition:transform .34s cubic-bezier(.2,.9,.25,1),opacity .28s ease}
+#inBox.hid .sheet{transform:translateY(24px) scale(.98);opacity:0}
+@media (max-width:860px){#inBox.hid .sheet{transform:translateY(100%);opacity:1}}
+.inl{display:flex;flex-direction:column;gap:6px;max-height:46vh;overflow:auto}
+.inl .ii{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:9px 11px;border-radius:11px;background:var(--surface-2)}
+.inl .ii .n{font-weight:650;overflow-wrap:anywhere}
+.inl .ii .s{color:var(--ink-2);font-size:12.5px}
+.inl .ii b{text-align:right}
 .svb{display:flex;gap:8px;justify-content:flex-end;margin-top:4px}
 .svb .btn{flex:1;max-width:200px;justify-content:center}
 /* ── мои расчёты ── */
@@ -1440,8 +1450,8 @@ window.svcBack=o=>{
 <div class="toast" id="toast"></div>
 <input type="file" id="importFile" accept="application/json,.json" class="hidden">
 <div class="modal hidden" id="shareBox" role="dialog" aria-label="Поделиться расчётом"><div class="card sheet">
-  <div class="h" style="font-size:16px">Ссылка на этот расчёт <button class="tour-x" id="shClose" aria-label="Закрыть" style="position:static">✕</button></div>
-  <div class="note">Откроется на любом телефоне или компьютере с теми же цифрами — пароль не нужен, цифры только этого расчёта.</div>
+  <div class="h" style="font-size:16px"><span id="shH">Ссылка на этот расчёт</span> <button class="tour-x" id="shClose" aria-label="Закрыть" style="position:static">✕</button></div>
+  <div class="note" id="shN">Откроется на любом телефоне или компьютере с теми же цифрами — пароль не нужен, цифры только этого расчёта.</div>
   <input id="shareUrl" class="shurl" readonly>
   <div class="chips"><button class="btn pri" id="shCopy">Скопировать</button><a class="btn tg" id="shTg" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="12" fill="#229ed9"/><path fill="#fff" d="M5.3 11.7 16.9 7.2c.6-.2 1.1.1.9.9l-2 9.3c-.1.7-.5.8-1.1.5l-3-2.2-1.5 1.4c-.2.2-.3.3-.6.3l.2-3.1 5.6-5.1c.2-.2 0-.3-.4-.1L8.1 13.4l-3-.9c-.6-.2-.6-.6.2-.8Z"/></svg>Отправить в Telegram</a><button class="btn hidden" id="shMore">Ещё…</button></div>
 </div></div>
@@ -1462,6 +1472,14 @@ window.svcBack=o=>{
   <div class="note" id="svN"></div>
   <div class="rows" id="svR"></div>
   <div class="svb"><button class="btn" id="svNo">Отмена</button><button class="btn pri" id="svOk">Сохранить</button></div>
+</div></div>
+
+<!-- ═════════ прислали ссылку с расчётами (#add=…): показать, что придёт, и добавить к своим, ничего не удаляя (Андрей 02.11) ═════════ -->
+<div class="modal hidden" id="inBox" role="dialog" aria-label="Прислали расчёты"><div class="card sheet svq">
+  <div class="h" style="margin:0" id="inT">Вам прислали расчёты</div>
+  <div class="note">Добавятся во вкладку «Мои расчёты» к вашим — ваши расчёты останутся на месте.</div>
+  <div class="inl" id="inL"></div>
+  <div class="svb"><button class="btn" id="inNo">Не надо</button><button class="btn pri" id="inOk">Добавить</button></div>
 </div></div>
 
 <!-- ═════════ как поставить расширение (ссылка на окно: …/unitka/#ext) ═════════ -->
@@ -2539,11 +2557,57 @@ async function unpackZ(t) {
 $("#bShare").onclick = async () => {
   const st = clone(S); delete st.id;
   const url = location.origin + location.pathname + "#" + await packState(st);
+  shOpen(url, "Юнитка: " + (S.name || "расчёт"), "Ссылка на этот расчёт",
+    "Откроется на любом телефоне или компьютере с теми же цифрами — пароль не нужен, цифры только этого расчёта.");
+};
+let SHT = "";
+function shOpen(url, text, head, note) {
+  SHT = text; $("#shH").textContent = head; $("#shN").textContent = note;
   $("#shareUrl").value = url;
-  $("#shTg").href = "https://t.me/share/url?url=" + encodeURIComponent(url) + "&text=" + encodeURIComponent("Юнитка: " + (S.name || "расчёт"));
+  $("#shTg").href = "https://t.me/share/url?url=" + encodeURIComponent(url) + "&text=" + encodeURIComponent(text);
   $("#shMore").classList.toggle("hidden", !navigator.share);
   $("#shareBox").classList.remove("hidden");
-};
+}
+/* «Мои расчёты» → «Отправить выбранные»: одна ссылка #add=… на отмеченные; у получателя они ДОБАВЛЯЮТСЯ к его расчётам (Андрей 02.11) */
+const plural = (n, a, b, c) => n % 10 === 1 && n % 100 !== 11 ? a : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20) ? b : c;
+async function svSend(list) {
+  const pick = list.filter(x => CMP.has(x.id));
+  if (!pick.length) { toast("Отметьте галочкой, какие отправить, или нажмите «Выбрать все»"); return; }
+  const n = pick.length, w = n + " " + plural(n, "расчёт", "расчёта", "расчётов");
+  const url = location.origin + location.pathname + "#" + (await packState(pick.map(x => ({ id: x.id, at: x.at, s: x.s })))).replace(/^[zc]=/, "add=");
+  shOpen(url, "Юнитка: " + w, n === 1 ? "Ссылка на расчёт «" + (pick[0].s.name || "Без названия") + "»" : "Ссылка на " + w,
+    "Получатель откроет ссылку — и " + (n === 1 ? "расчёт добавится" : "расчёты добавятся") + " в его «Мои расчёты». Его старые расчёты не удалятся. Пароль не нужен.");
+}
+/* получили #add=…: показать список и добавить к своим; совпадающие по id — не дублировать (тот же расчёт обновится) */
+let INQ = [];
+function inLink(a) {
+  (window.DecompressionStream ? unpackZ(a) : Promise.reject()).catch(() => decodeState(a)).then(list => {
+    if (!Array.isArray(list) || !list.length) throw 0; inOpen(list); }).catch(() => toast("Ссылка на расчёты повреждена"));
+}
+function inOpen(list) {
+  INQ = list;
+  $("#inT").textContent = "Вам прислали " + list.length + " " + plural(list.length, "расчёт", "расчёта", "расчётов");
+  $("#inL").innerHTML = list.map(it => { const s = fixState(clone(it.s)), r = calc(s), t = num(s.target) / 100;
+    return `<div class="ii"><div class="n">${mpTag(s.mp)}${esc(s.name || "Без названия")}</div><b class="${tone(r.margin, t)} num">${rub(r.profit)}</b>
+      <div class="s">${rub(r.P)}</div><div class="s" style="text-align:right"><span class="${tone(r.margin, t)}">${pct(r.margin)}</span></div></div>`; }).join("");
+  const b = $("#inBox"); b.classList.add("hid"); b.classList.remove("hidden");
+  requestAnimationFrame(() => requestAnimationFrame(() => b.classList.remove("hid")));
+}
+function inClose() { const b = $("#inBox"); b.classList.add("hid"); setTimeout(() => b.classList.add("hidden"), 300); }
+function inAdd() {
+  const mine = LS.get("saved", []); let t = Date.now(), add = 0, upd = 0;
+  INQ.slice().reverse().forEach(it => {
+    const s = fixState(clone(it.s)), id = it.id || s.id || (t++).toString(36); s.id = id;
+    const i = mine.findIndex(x => x.id === id), item = { id, at: it.at || Date.now(), s };
+    if (i >= 0) { mine[i] = item; upd++; } else { mine.unshift(item); add++; }
+  });
+  LS.set("saved", mine); CMP = new Set(INQ.map(it => it.id || it.s.id)); inClose(); setTab("saved"); renderSaved();
+  try { navigator.vibrate && navigator.vibrate(10); } catch (e) {}
+  toast("✓ В «Моих расчётах»: " + (add ? "добавлено " + add : "") + (add && upd ? ", " : "") + (upd ? "обновлено " + upd : ""));
+}
+$("#inOk").onclick = inAdd;
+$("#inNo").onclick = inClose;
+$("#inBox").addEventListener("click", e => { if (e.target.id === "inBox") inClose(); });
 $("#shClose").onclick = () => $("#shareBox").classList.add("hidden");
 $("#shareBox").addEventListener("click", e => { if (e.target.id === "shareBox") $("#shareBox").classList.add("hidden"); });
 $("#shCopy").onclick = async () => {
@@ -2551,7 +2615,7 @@ $("#shCopy").onclick = async () => {
   try { await navigator.clipboard.writeText(url); } catch (e) { el.focus(); el.select(); try { document.execCommand("copy"); } catch (e2) {} }
   toast("Ссылка скопирована"); $("#shareBox").classList.add("hidden");
 };
-$("#shMore").onclick = async () => { try { await navigator.share({ title: "Юнитка: " + (S.name || "расчёт"), url: $("#shareUrl").value }); } catch (e) {} };
+$("#shMore").onclick = async () => { try { await navigator.share({ title: SHT, url: $("#shareUrl").value }); } catch (e) {} };
 
 /* ═════════ как поставить расширение: окно с шагами, браузер угадываем; ссылка …/unitka/#ext открывает сразу ═════════ */
 const XB_ADDR = { chrome: "chrome://extensions", yandex: "browser://extensions", opera: "opera://extensions" };
@@ -2642,7 +2706,9 @@ function renderSaved() {
   const head = `<div class="card toolbar" style="flex-direction:column;align-items:stretch">
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between">
         <div class="h" style="margin:0">Мои расчёты <span>${list.length ? "хранятся на этом устройстве" : ""}</span></div>
-        <div class="chips"><button class="btn sm" data-sv="csv">Скачать в Excel</button></div></div>
+        <div class="chips"><button class="btn sm" data-sv="all">${list.length && list.every(x => CMP.has(x.id)) ? "Снять выбор" : "Выбрать все"}</button>
+          <button class="btn sm${CMP.size ? " pri" : ""}" data-sv="send">${CMP.size ? "Отправить выбранные · " + CMP.size : "Отправить"}</button>
+          <button class="btn sm" data-sv="csv">Скачать в Excel</button></div></div>
       ${list.length > 3 ? `<div class="search" style="height:44px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
         <input id="svq" type="search" placeholder="Найти расчёт" value="${esc(SVQ)}" autocomplete="off"></div>` : ""}</div>`;
   if (!list.length) {
@@ -2652,7 +2718,7 @@ function renderSaved() {
   }
   let rows;
   if (isPhone()) {
-    rows = shown.map(({ it, s, r, t, tr }) => `<div class="card sv"><input type="checkbox" data-cmp="${it.id}" ${CMP.has(it.id) ? "checked" : ""} aria-label="Сравнить">
+    rows = shown.map(({ it, s, r, t, tr }) => `<div class="card sv"><input type="checkbox" data-cmp="${it.id}" ${CMP.has(it.id) ? "checked" : ""} aria-label="Выбрать">
       <div><div class="n">${mpTag(s.mp)}${esc(s.name || "Без названия")}</div>
       <div class="s">${rub(r.P)} · ${new Date(it.at).toLocaleDateString("ru-RU")}</div></div>
       <div style="text-align:right"><b class="${tone(r.margin, t)} num">${rub(r.profit)}</b><div class="s"><span class="${tone(r.margin, t)}">${pct(r.margin)}</span> · ROI <span class="${tone(r.roi, tr)}">${pct(r.roi, 0)}</span></div></div>
@@ -2661,7 +2727,7 @@ function renderSaved() {
     rows = `<div class="card tablewrap" style="padding:6px 10px"><table class="t big"><thead><tr><th></th><th class="l">Товар</th><th>Цена продажи</th><th>Себест.</th>
       <th>Расходы МП</th><th>Реклама</th><th>Налоги</th><th>Прибыль/шт</th><th>Маржа</th><th>ROI</th><th>Безубыт.</th><th>Партия</th><th>ЧП партии</th><th></th></tr></thead><tbody>
       ${shown.map(({ it, s, r, be, t, tr }) => `<tr data-row="${it.id}">
-        <td><input type="checkbox" data-cmp="${it.id}" ${CMP.has(it.id) ? "checked" : ""} aria-label="Сравнить"></td>
+        <td><input type="checkbox" data-cmp="${it.id}" ${CMP.has(it.id) ? "checked" : ""} aria-label="Выбрать"></td>
         <td class="l" style="white-space:normal;min-width:200px">${mpTag(s.mp)}<b>${esc(s.name || "Без названия")}</b></td>
         <td>${rub(r.P)}</td><td>${rub(r.cost)}</td><td>${rub(r.mpSum)}</td><td>${rub(r.ads)}</td><td>${rub(r.tax)}</td>
         <td class="${tone(r.margin, t)}"><b>${rub(r.profit)}</b></td><td class="${tone(r.margin, t)}">${pct(r.margin)}</td><td class="${tone(r.roi, tr)}">${pct(r.roi, 0)}</td>
@@ -2681,7 +2747,7 @@ function renderSaved() {
       ${line("<b>Прибыль/шт</b>", c => `<td class="${tone(c.r.margin, c.t)}"><b>${rub(c.r.profit)}</b></td>`)}${line("Маржа", c => `<td class="${tone(c.r.margin, c.t)}">${pct(c.r.margin)}</td>`)}
       ${line("ROI", c => `<td class="${tone(c.r.roi, c.tr)}">${pct(c.r.roi, 0)}</td>`)}${line("Безубыточность", c => `<td>${c.be ? rub(c.be.p) : "—"}</td>`)}
       </tbody></table></div>`;
-  } else cmp = `<div class="note" style="padding:0 4px">Отметьте два и больше расчёта галочкой — появится сравнение.</div>`;
+  } else cmp = `<div class="note" style="padding:0 4px">Отметьте галочкой, какие нужны: выбранные можно отправить ссылкой, а от двух — появится сравнение.</div>`;
   $("#savedBox").innerHTML = head + cmp + rows;
 }
 function openSaved(id) {
@@ -2710,6 +2776,8 @@ $("#savedBox").addEventListener("click", e => {
   if (!b) { const tr = e.target.closest("tr[data-row]"); if (tr) openSaved(tr.dataset.row); return; }
   const list = LS.get("saved", []);
   if (b.dataset.sv === "csv") exportCsv();
+  else if (b.dataset.sv === "all") { const on = list.every(x => CMP.has(x.id)); CMP = new Set(on ? [] : list.map(x => x.id)); renderSaved(); }
+  else if (b.dataset.sv === "send") svSend(list);
   else if (b.dataset.open) openSaved(b.dataset.open);
   else if (b.dataset.copy) { const it = list.find(x => x.id === b.dataset.copy); if (it) { const s = clone(it.s); s.id = Date.now().toString(36); s.name = (s.name || "") + " (копия)"; list.unshift({ id: s.id, at: Date.now(), s }); LS.set("saved", list); renderSaved(); } }
   else if (b.dataset.del) { if (confirm("Удалить расчёт?")) { LS.set("saved", list.filter(x => x.id !== b.dataset.del)); CMP.delete(b.dataset.del); renderSaved(); } }
@@ -3858,7 +3926,13 @@ function setHdr() { document.documentElement.style.setProperty("--hdr", $("heade
     if (!confirm(`Заменить «Мои расчёты» на ${list.length} новых? Старые расчёты с этого устройства удалятся.`)) return;
     LS.set("saved", list.map(it => ({ id: it.s.id, at: it.at || Date.now(), s: fixState(it.s) }))); CMP.clear(); renderSaved();
     toast("В «Моих расчётах» теперь " + list.length); }).catch(() => toast("Ссылка на расчёты повреждена")); }
-  if (h.get("k") || h.get("c") || h.get("z") || h.get("spp") || h.get("mine")) history.replaceState(null, "", location.pathname + location.search);
+  /* #add=… — прислали расчёты кнопкой «Отправить выбранные»: показать и добавить к своим, свои не трогать */
+  if (h.get("add")) { TAB = "saved"; inLink(h.get("add")); }
+  addEventListener("hashchange", () => {                               // ссылку открыли во вкладке, где Юнитка уже открыта
+    const a = new URLSearchParams(location.hash.slice(1)).get("add");
+    if (a) { history.replaceState(null, "", location.pathname + location.search); inLink(a); }
+  });
+  if (h.get("k") || h.get("c") || h.get("z") || h.get("spp") || h.get("mine") || h.get("add")) history.replaceState(null, "", location.pathname + location.search);
   if (isPhone()) $$("details.sec").forEach(d => { if (!["price", "cost", "mp"].includes(d.dataset.sec)) d.open = false; });
   writeForm(); render(); setTab(["sum", "calc", "spp", "saved"].includes(TAB) ? TAB : "sum");
   if (location.hash === "#ext") extOpen();
