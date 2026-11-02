@@ -924,6 +924,7 @@ details.how ul{padding-left:18px;margin:6px 0}
 .bt.nok b{color:var(--bad);font-size:16px} .bt.nok small a{color:var(--bad);font-weight:700}
 .bt a,.tcard a{color:inherit}
 a.bt{text-decoration:none;color:inherit;cursor:pointer}
+button.bt{border:0;font:inherit;text-align:left;color:inherit;cursor:pointer}
 a.bt>span{color:var(--accent);font-weight:700}
 .bt.nok small{color:var(--bad);font-weight:700}
 /* «нажатие чувствуется» (Андрей 26.10: на плашках топов «ок, распространяй» — теперь на всём, что нажимается): при нажатии и удержании
@@ -947,6 +948,45 @@ a.bt>span{color:var(--accent);font-weight:700}
 .perrow{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px;padding:9px;border-radius:12px;background:var(--accent-wash)}
 .pill{border:0;border-radius:999px;background:var(--accent);color:#fff;font-weight:700;font-size:13.5px;padding:7px 13px;display:inline-flex;flex-direction:column;align-items:flex-start;line-height:1.15;cursor:pointer;opacity:.82}
 .pill small{font-weight:500;font-size:11px;opacity:.9}
+/* ── 02.11 (Андрей: «выбор срока изящнее», «блок % убрать/прибавить — не понял механику», «СПП по товару обновить, ожидание как в Эпл»,
+   «разделы непонятно, где находишься») ── */
+.seg2{position:relative;display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);padding:3px;border-radius:12px;background:var(--surface-2);box-shadow:inset 0 0 0 1px var(--line)}
+.seg2 button{position:relative;z-index:1;border:0;background:none;padding:7px 2px 6px;border-radius:9px;font-weight:600;font-size:13px;color:var(--ink-2);display:flex;flex-direction:column;align-items:center;line-height:1.15;cursor:pointer;min-width:0}
+.seg2 button small{font-size:10.5px;font-weight:500;opacity:.7;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.seg2 button[aria-pressed="true"]{color:var(--ink)}
+.seg2 button[aria-pressed="true"] small{opacity:.85}
+.seg2 .thumb{position:absolute;z-index:0;top:3px;bottom:3px;border-radius:9px;background:var(--surface);box-shadow:0 1px 4px rgba(0,0,0,.14),0 0 0 .5px rgba(0,0,0,.05);transition:left .34s cubic-bezier(.22,1,.36,1)}
+:where(.seg2 button):where(:active,.down){transform:scale(.95);filter:none}
+.seglbl{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:12.5px;color:var(--ink-2);margin:2px 2px 6px}
+.seglbl b{color:var(--ink);font-weight:600}
+.pricetry .seg2 button{font-variant-numeric:tabular-nums}
+.pricetry .seg2 button.now{color:var(--accent)}
+.ozc{border-radius:14px;background:var(--surface-2);padding:11px 12px;display:flex;flex-direction:column;gap:8px;box-shadow:inset 0 0 0 1px var(--line)}
+.ozc .t1{font-weight:700;font-size:14px}
+.ozc .t2{font-size:13px;color:var(--ink-2);line-height:1.4}
+.ozc button{align-self:flex-start;border:0;border-radius:999px;background:var(--accent);color:#fff;font-weight:700;font-size:13.5px;padding:8px 14px;cursor:pointer}
+.ozc button.on{background:var(--surface);color:var(--accent);box-shadow:inset 0 0 0 1.5px var(--accent)}
+.ozc .ozr{font-size:13px}
+/* обновить СПП одного товара: кнопка → кольцо и шаги → цифра перетекает в новую */
+.live{display:flex;align-items:center;gap:10px;border-radius:14px;padding:10px 12px;background:var(--surface-2);box-shadow:inset 0 0 0 1px var(--line);min-height:52px;transition:background .4s,box-shadow .4s}
+.live .lt{flex:1;min-width:0;font-size:13px;line-height:1.35;color:var(--ink-2)}
+.live .lt b{color:var(--ink);font-weight:600;font-size:14px;display:block}
+.live .lt .st{display:block;transition:opacity .25s}
+.live button.go{border:0;border-radius:999px;background:var(--accent);color:#fff;font-weight:700;font-size:13.5px;padding:8px 14px;white-space:nowrap;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.live .ring{width:26px;height:26px;flex:none}
+.live .ring circle{fill:none;stroke-width:3}
+.live .ring .bg{stroke:var(--line)}
+.live .ring .fg{stroke:var(--accent);stroke-linecap:round;stroke-dasharray:62.8;stroke-dashoffset:47;transform-origin:50% 50%;animation:lvspin 1s linear infinite}
+@keyframes lvspin{to{transform:rotate(360deg)}}
+.live.ok{background:color-mix(in oklab,#1f9d55 10%,var(--surface-2));box-shadow:inset 0 0 0 1px color-mix(in oklab,#1f9d55 35%,transparent)}
+.live.bad{background:color-mix(in oklab,var(--bad,#d23) 8%,var(--surface-2))}
+.live .chk{width:26px;height:26px;flex:none;border-radius:50%;background:#1f9d55;color:#fff;display:grid;place-items:center;font-size:15px;font-weight:800;animation:lvpop .45s cubic-bezier(.34,1.56,.64,1)}
+@keyframes lvpop{from{transform:scale(.3);opacity:0}}
+.kpi b.flash{animation:lvflash 1.2s ease}
+@keyframes lvflash{0%{color:#1f9d55;transform:scale(1.08)}100%{transform:none}}
+.ptitle{display:none}
+.kgo{display:flex;flex-direction:column;gap:8px;margin-top:8px;padding:11px 12px;border-radius:14px;background:var(--surface-2);font-size:13px;line-height:1.4}
+.kgo a{align-self:flex-start;border-radius:999px;background:var(--accent);color:#fff;font-weight:700;padding:8px 14px;text-decoration:none}
 .pill.on{opacity:1;box-shadow:0 0 0 2px var(--surface),0 0 0 4px var(--accent)}
 .sig{font-size:13.5px;color:var(--bad);margin-top:6px;font-weight:700;background:color-mix(in srgb,var(--bad) 10%,transparent);border-radius:8px;padding:6px 9px}
 .sig a{color:inherit}
@@ -1037,6 +1077,12 @@ a.btn{text-decoration:none;color:inherit}
     padding:4px 8px calc(4px + env(safe-area-inset-bottom));justify-content:space-around;gap:0}
   nav.tabs button{flex-direction:column;gap:2px;font-size:11.5px;padding:6px 8px;min-width:76px}
   nav.tabs button[aria-current="page"]{background:transparent}
+  /* где я — как в iOS/Android: у открытого раздела значок в подсветке и жирная подпись; сверху раздела — его название (Андрей 02.11) */
+  nav.tabs button svg{padding:3px 16px;box-sizing:content-box;border-radius:999px;transition:background .25s}
+  nav.tabs button[aria-current="page"]{font-weight:800}
+  nav.tabs button[aria-current="page"] svg{background:var(--accent-wash)}
+  .ptitle{display:flex;align-items:baseline;gap:8px;margin:0 4px 10px;font-size:26px;font-weight:800;letter-spacing:-.02em;line-height:1.15}
+  .ptitle small{font-size:13px;font-weight:500;color:var(--ink-2);letter-spacing:0}
   main{padding:12px 12px 16px}
   .grid,.sum-grid{grid-template-columns:minmax(0,1fr)}
   .res,.detail{position:static;max-height:none;overflow:visible}
@@ -1224,6 +1270,7 @@ window.svcBack=o=>{
 <main>
 <!-- ═════════ СВОДКА ═════════ -->
 <section class="page" id="p-sum">
+  <h1 class="ptitle">Сводка<small>маржа и цены всех товаров</small></h1>
   <div id="factLoading" class="card empty hidden">Загружаю товары из панелей…</div>
   <div id="factLock" class="card lock hidden">
     <div class="h" style="font-size:17px">Сводка по товарам</div>
@@ -1256,6 +1303,7 @@ window.svcBack=o=>{
 
 <!-- ═════════ СПП НАШИХ ТОВАРОВ (Андрей 26.10) ═════════ -->
 <section class="page" id="p-spp">
+  <h1 class="ptitle">СПП<small>сколько доплачивает площадка</small></h1>
   <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
     <input id="sq" type="search" placeholder="Найти товар — начните печатать" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="search"><button id="sqClear" class="hidden" aria-label="Очистить">✕</button></div>
   <div class="sfn" id="sqn"></div>
@@ -1272,6 +1320,7 @@ window.svcBack=o=>{
 
 <!-- ═════════ РАСЧЁТ ═════════ -->
 <section class="page" id="p-calc">
+  <h1 class="ptitle">Расчёт<small>юнитка вручную</small></h1>
   <div class="grid">
     <div class="col" id="form">
       <div class="mprow">Площадка <div class="seg" id="mpSeg" role="group" aria-label="Площадка"><button data-mp="wb"><span class="mpi wb"></span>WB</button><button data-mp="ozon"><span class="mpi ozon"></span>Ozon</button><button data-mp="ym"><span class="mpi ym"></span>ЯМ</button></div></div>
@@ -1371,6 +1420,7 @@ window.svcBack=o=>{
 
 <!-- ═════════ МОИ РАСЧЁТЫ ═════════ -->
 <section class="page" id="p-saved">
+  <h1 class="ptitle">Мои расчёты<small>на этом устройстве</small></h1>
   <div class="saved" id="savedBox"></div>
 </section>
 </main>
@@ -2139,7 +2189,7 @@ function calc(s, mp, p0) {
   const disc = Math.min(99.9, Math.max(0, num(s.disc))) / 100;
   const P = P0 * (1 - disc);
   // Ozon: при цене до 300 ₽ СПП не больше ставки комиссии ступени (порог СПП, Андрей 31.10)
-  const sppP = mp === "ozon" && f.scheme !== "rFBS" ? OZS(P, num(f.spp) / 100) * 100 : num(f.spp);
+  const sppP = mp === "ozon" && f.scheme !== "rFBS" ? (s.tar && s.tar.mp === mp ? ozSppAt(num(s.price0) * (1 - disc), P, num(f.spp) / 100) : OZS(P, num(f.spp) / 100)) * 100 : num(f.spp);
   const Pb = P * (1 - sppP / 100);
   const qty = num(s.lotQty);
   const cost = num(s.buy) * (1 + num(s.agent) / 100) + (qty > 0 ? num(s.lotShip) / qty : 0) + num(s.ff) + num(s.costOther);
@@ -2656,7 +2706,7 @@ async function loadFact(pass) {
     LS.set("pass", pass);
     try { const raw = new Uint8Array(await crypto.subtle.exportKey("raw", key)); let bin = ""; raw.forEach(x => bin += String.fromCharCode(x)); LS.set("kc", { salt: enc.salt, k: btoa(bin) }); } catch (e) {}
   }
-  return JSON.parse(new TextDecoder().decode(plain));
+  return liveApply(JSON.parse(new TextDecoder().decode(plain)));
 }
 async function openFact(pass) {
   $("#lockMsg").textContent = pass ? "Открываю…" : "";
@@ -2696,18 +2746,27 @@ function unit(row, mp) {
 const OZT = p => (p <= 100 ? 0.17 : p <= 300 ? 0.23 : null);
 /* подсказка у ползунка (Бондарев 31.10: «рядом с окном, где цену регулируем, — сколько прибавить или убрать до изменения комиссии»):
    ближайшие пороги Ozon вниз и вверх от цены; нажатие ставит эту цену (attr — data-setp «Сводки» / data-ssetp «СПП») */
-function ozHint(x, price, attr) {
+/* 02.11 (Андрей: «не понял, что с ним делать, механику») — карточка «Порог комиссии Ozon»: словами, что меняется на пороге,
+   и одна кнопка «Примерить N ₽» — ставит эту цену на ползунок (всё ниже пересчитается); стоит на пороге — «Вернуть цену сейчас» */
+function ozHint(x, price, attr, base) {
   if (!x || !x.oz || !(price > 0)) return "";
   const p = Math.round(price), opts = p > 300 ? [300] : p > 100 ? [100, 301] : [101];
   const li = opts.map(q => {
-    const d = q - p, r = at(x, q, FADS);
-    return `<button class="chip" ${attr}="${q}">${d > 0 ? "Прибавить" : "Убрать"} <b>${rub(Math.abs(d))}</b> → цена ${rub(q)}: комиссия станет <b>${pct(x.cAt(q), 0)}</b>, прибыль/шт ${rub(r.profit)}</button>`;
+    const r = at(x, q, FADS), r0 = at(x, p, FADS), lo = q < p;
+    return `<div class="ozc"><div class="t1">Порог комиссии Ozon: ${rub(lo ? q : q - 1)}</div>
+      <div class="t2">${lo ? `Если цена ${rub(q)} или ниже` : `Если цена выше ${rub(q - 1)}`}, Ozon берёт комиссию <b>${pct(x.cAt(q), 0)}</b> вместо ${pct(x.cAt(p), 0)} сейчас.
+        Это на ${rub(Math.abs(q - p))} ${lo ? "дешевле" : "дороже"} цены на ползунке.</div>
+      <div class="ozr">Прибыль/шт при ${rub(q)}: <b class="${cls(r.profit)}">${rub(r.profit)}</b> <span class="${cls(r.profit - r0.profit)}">(${rub(r.profit - r0.profit, true)} к цене на ползунке)</span></div>
+      <button ${attr}="${q}">Примерить ${rub(q)}</button></div>`;
   }).join("");
-  return `<div class="ozh"><div class="h">До смены комиссии Ozon <span>сейчас ${pct(x.cAt(p), 0)} при ${rub(p)}</span></div>${li}</div>`;
+  return `<div class="ozh">${li}</div>`;
 }
 /* Ozon: соинвест (СПП) при нашей цене до 300 ₽ (Андрей 31.10: «чтобы учёт был порога спп 300»): скидка Ozon списывается из его комиссии,
    с комиссии остаётся минимум 1% от неё (справка Ozon с 01.12) — потолок СПП = ставка ступени × 0,99 (≈22,8% / 16,8%); выше 300 ₽ — наш СПП как есть */
 const OZS = (p, s) => { const t = OZT(p); return t != null && s > t * 0.99 ? t * 0.99 : s; };
+/* 02.11 (Андрей: «СПП отличается в разделе и внутри карточки расчёта»): потолок — только когда цена УХОДИТ в другую ступень.
+   В той же ступени, что цена сейчас, верим витрине: Ozon уже показывает реальный СПП при этой цене (у дешёвых товаров он бывает выше потолка) */
+const ozSppAt = (base, p, s) => (base > 0 && OZT(base) === OZT(p) ? s : OZS(p, s));
 function at(x, p, adsMode) {
   const comm = x.cAt(p) * p, acq = x.aR * p, tax = x.tR * p, ads = adsMode === "pct" ? x.drr * p : x.ads;
   const fixed = x.logi + x.stor + x.ff + x.dop + x.loyal + x.resid + x.cost;
@@ -2890,7 +2949,7 @@ function renderDetail() {
     box.innerHTML = back + `
     <div><div class="title tline">${mpIco(mp, true)}<span>${esc(row.a)}</span></div><div class="note">${[MPS[mp].name, cab(mp, row.ip), row.np ? "нет в панели" : "нет продаж"].filter(Boolean).map(esc).join(" · ")}</div></div>
     <div class="kpis">
-      <div class="kpi"><b>${now ? rub(now) : "—"}</b><span>наша до СПП${now ? "" : " — нет данных"}${row.spp ? `<br>витрина ${rub(row.vit)} · СПП ${pct(row.spp, 0)}` : ""}</span></div>
+      <div class="kpi"><b>${now ? rub(now) : "—"}</b><span>наша до СПП${now ? "" : " — нет данных"}${sppOf(row) != null ? `<br>витрина ${rub(row.vit)} · СПП ${pct(sppOf(row), 1)}` : ""}</span></div>
       <div class="kpi"><b>${row.c1 ? rub(row.c1) : "—"}</b><span>себестоимость 1 шт${row.c1 ? "" : " — в панели нет"}</span></div>
       <div class="kpi"><b>${ff ? rub(ff) : "—"}</b><span>${num(row.dop1) || num(row.dops) ? "ФФ и доукомплектовка на 1 шт" : "ФФ на 1 шт" + (ff ? "" : " — ставки нет ни в панелях, ни в таблице ФФ")}</span></div>
     </div>
@@ -2909,14 +2968,13 @@ function renderDetail() {
     <div><div class="title tline">${mpIco(mp, true)}<span>${esc(row.a)}</span></div><div class="note">${[MPS[mp].name, cab(mp, row.ip), (num(row.units) > 0 ? NF0.format(num(row.units)) + " шт продано за " + mon : "за " + mon + " продаж нет"),
       x.src ? "юнитка за " + x.src + " (" + NF0.format(x.ub) + " шт)" : ""].filter(Boolean).map(esc).join(" · ")}</div></div>
     <div class="kpis">
-      <div class="kpi"><b>${now ? rub(now) : "—"}</b><span>наша до СПП${now ? "" : " — нет данных"}${row.spp ? `<br>витрина ${rub(row.vit)} · СПП ${pct(row.spp, 0)}` : ""}</span></div>
+      <div class="kpi"><b>${now ? rub(now) : "—"}</b><span>наша до СПП${now ? "" : " — нет данных"}${sppOf(row) != null ? `<br>витрина ${rub(row.vit)} · СПП ${pct(sppOf(row), 1)}` : ""}</span></div>
       <div class="kpi"><b class="${tone(nb.margin, t)}">${pct(nb.margin)}</b><span>по юнитке · ${rub(nb.profit)}/шт</span></div>
       <div class="kpi"><b class="${pm.m != null ? tone(pm.m, t) : ""}">${pm.m != null ? pct(pm.m) : "—"}</b><span>по панели ${esc(PER[SUMP])}${pm.nd != null ? ` · без ДРР <span class="${tone(pm.nd, t)}">${pct(pm.nd)}</span> · ДРР ${pct(pm.drr)}` : ""}</span></div>
     </div>
     <div><div class="h">Если поставить цену <span>наша до СПП ${rub(base)}</span></div>
       <div class="slider"><input type="range" id="fR" min="${lo}" max="${hi}" step="1" value="${price}" aria-label="Новая цена">
-        <span class="inp"><input id="fP" inputmode="decimal" value="${inField(price)}"><i>₽</i></span></div>
-      <div class="chips" style="margin-top:6px">${[-10, -5, 5, 10].map(d => `<button class="chip" data-step="${d}">${d > 0 ? "+" : MINUS}${Math.abs(d)}%</button>`).join("")}<button class="chip" data-step="now">↺ цена сейчас</button></div></div>
+        <span class="inp"><input id="fP" inputmode="decimal" value="${inField(price)}"><i>₽</i></span></div></div>
     <div id="dOut" style="display:flex;flex-direction:column;gap:14px"></div>
     <button class="btn" id="bToCalc">Посчитать подробно во вкладке «Расчёт»</button>
     <div class="note">Юнитка берёт расходы на 1 шт из панели за ${x.src ? esc(x.src) + " — за " + esc(mon) + " продаж мало, поэтому добраны прошлые месяцы" : esc(mon)}: комиссия, эквайринг, налог и реклама меняются вместе с ценой (в % от цены; у Ozon при цене до 100 ₽ комиссия 17%, 101–300 ₽ — 23%), логистика, ФФ, доукомплектовка, хранение и себестоимость — те же рубли.</div>`;
@@ -2938,7 +2996,8 @@ function paintDetail() {
   }).join("");
   const { row } = curFact();
   out.innerHTML = `
-    ${ozHint(x, price, "data-setp")}
+    ${stepChips("data-step", base, price)}
+    ${ozHint(x, price, "data-setp", base)}
     ${priceTrio(mp, row, x, base, price)}
     ${buyerBlock(mp, row, base, price)}
     <div class="rows">
@@ -2975,12 +3034,12 @@ $("#detail").addEventListener("input", e => {
 $("#detail").addEventListener("click", e => {
   const b = e.target.closest("button"); if (!b) return;
   const { mp, row, x, now } = curFact();
-  if (b.id === "bBack") { history.back(); return; }
+  if (b.id === "bBack") { if (NAV[NAV.length - 1] === "d") history.back(); else { $("#detailWrap").classList.remove("open"); if (SPPBACK) { SPPBACK = false; setTab("spp"); } } return; }
   if (b.dataset.setp != null && x) { FPRICE = num(b.dataset.setp); $("#fP").value = inField(FPRICE); $("#fR").value = FPRICE; keepScroll(paintDetail); return; }
   if (b.dataset.step != null && x) {
-    const base = now || x.price, d = b.dataset.step;
-    FPRICE = d === "now" ? null : Math.round(base * (1 + num(d) / 100));
-    const v = Math.round(FPRICE || base); $("#fP").value = inField(v); $("#fR").value = v; keepScroll(paintDetail);
+    const base = now || x.price, d = num(b.dataset.step);
+    FPRICE = d === 0 ? null : Math.round(base * (1 + d / 100));
+    const v = Math.round(FPRICE || base); $("#fP").value = inField(v); $("#fR").value = v; segSlide(b, () => keepScroll(paintDetail));
   }
   if (b.id === "bToCalc" && row) {
     S = withMeta(x ? factToState(mp, row, x, FPRICE || now || x.price) : emptyToState(mp, row));
@@ -3000,7 +3059,7 @@ function emptyToState(mp, row) {
   s.tar = { mp, a: row.a, fact: false, t: row.t || null, m: FACT && FACT.mp[mp] ? FACT.mp[mp].tq || null : null };
   const f = s.fees[mp], v = tarVals(mp, f.scheme, row.t, s.tar.m);
   if (v) Object.assign(f, v);
-  if (sppOf(row)) f.spp = Math.round(sppOf(row) * 1e6) / 1e4;       // СПП с витрины — цена для покупателя (26.10)
+  if (sppNow(row)) f.spp = Math.round(sppNow(row) * 1e6) / 1e4;       // СПП с витрины — цена для покупателя (26.10)
   s.auto = { [mp + "|" + f.scheme]: pickSch(f) };
   return s;
 }
@@ -3016,7 +3075,7 @@ function linkTars(s) {
     s.tars[mp] = { mp, a: row.a, fact: false, t: row.t, m: FACT.mp[mp].tq || null };
     const f = s.fees[mp], v = tarVals(mp, f.scheme, row.t, s.tars[mp].m);
     if (v) { Object.assign(f, v); s.auto[mp + "|" + f.scheme] = pickSch(f); }
-    if (sppOf(row)) f.spp = Math.round(sppOf(row) * 1e6) / 1e4;
+    if (sppNow(row)) f.spp = Math.round(sppNow(row) * 1e6) / 1e4;
   }
   return s;
 }
@@ -3034,7 +3093,7 @@ function factToState(mp, row, x, price) {
   Object.assign(s, { name: row.a, price0: r2(price), disc: 0, buy: r2(x.cost), lotShip: 0, ff: r2(x.ff), costOther: r2(x.dop), vol: 0,
     tax: "ausn_d", taxRate: p4(x.tR), nds: 0, taxBase: "sale", perMonth: Math.round(x.units) });     // АУСН «Доходы» по ставке панели
   if (FADS === "pct") { s.adsMode = "pct"; s.drr = p4(x.drr); } else { s.adsMode = "rub"; s.adsRub = r2(x.ads); }
-  const spp = row.spp > 0 && row.spp < 0.95 ? row.spp : 0;                          // СПП / соинвест с витрины (лист «Цены витрина» панели)
+  const spp = sppNow(row) || 0;                                                     // СПП — тот же, что в разделе «СПП»: витрина, иначе последний день истории (02.11)
   Object.assign(f, OZX, { comm: p4(x.cR), acq: p4(x.aR / (1 - spp)), spp: p4(spp), logi: r2(x.logi), logiPct: 0, back: 0, buyout: 100,
     stor: r2(x.stor), accept: 0, other: r2(x.loyal + x.resid), otherPct: 0, soinv: 0, scheme: "fact" });
   // схема «По панели»: факт как продавали; тарифы схем этого товара (shemy.py) — для переключателя схемы
@@ -3110,7 +3169,7 @@ function buyerBlock(mp, row, base, price, spp, noChart) {
   const tops = topsOf(row), sig = kcSig(mp, row), wait = (row && row.kc && row.kc.wait) || 0;
   const now = row && num(row.vit) > 0 ? num(row.vit) : spp != null && base ? base * (1 - spp) : null;
   const moved = Math.abs(price - base) >= 0.5;
-  const sp2 = spp != null && mp === "ozon" && moved ? OZS(price, spp) : spp, cut = sp2 != null && sp2 < spp - 1e-9;   // порог СПП Ozon 300 ₽
+  const sp2 = spp != null && mp === "ozon" && moved ? ozSppAt(base, price, spp) : spp, cut = sp2 != null && sp2 < spp - 1e-9;   // порог СПП Ozon 300 ₽ — только если цена уходит за порог
   const pb = sp2 != null ? price * (1 - sp2) : null, ours = moved ? pb : now;
   const last = row && row.sh && row.sh.length ? row.sh[row.sh.length - 1][0] : null;
   // плашка топа — нажимается целиком (Андрей 26.10: «кликабельными сами квадраты, а не слова со ссылкой»); href — куда ведёт
@@ -3121,21 +3180,23 @@ function buyerBlock(mp, row, base, price, spp, noChart) {
   const choose = `выбрать в «Конкурентах»`;
   let t = spp == null ? tile("me", "Мы для покупателя", "—", "СПП не снят — товара нет на витрине")
     : tile("me", moved ? "Мы при " + rub(price) : "Мы сейчас", rub(ours),
-      (moved && now ? `сейчас ${rub(now)} <span class="${cls(now - pb)}">${rub(pb - now, true)}</span>` : `наш СПП ${pct(spp, 0)}${last ? " · " + dTxt(last) : ""}`) +
-      (cut ? `<br>СПП ${pct(spp, 0)} → ${pct(sp2, 0)}: до ${price <= 100 ? 100 : 300} ₽ Ozon даёт не больше комиссии` : ""));
+      (moved && now ? `сейчас ${rub(now)} <span class="${cls(now - pb)}">${rub(pb - now, true)}</span>` : `наш СПП ${pct(spp, 1)}`) +
+      (cut ? `<br>СПП ${pct(spp, 1)} → ${pct(sp2, 1)}: до ${price <= 100 ? 100 : 300} ₽ Ozon даёт не больше комиссии` : ""));
   tops.forEach((k, i) => {
     const d = ours != null && k.v ? ours - k.v : null;
-    t += tile("tp", `Топ ${i + 1}`, k.v ? rub(k.v) : "нет в наличии",
+    t += tile("tp", `Топ ${i + 1} · Ozon ↗`, k.v ? rub(k.v) : "нет в наличии",
       `${esc(shortSel(k.sel))}<br>` +
       (d == null ? "" : `<span class="${cls(-d)}">мы ${Math.abs(d) < 0.5 ? "как он" : (d > 0 ? "дороже на " : "дешевле на ") + pct(Math.abs(d) / k.v, 0)}</span><br>`) + NF0.format(k.u28) + " шт за 28 дн",
       k.link, true);                         // топ → его карточка на Ozon (новая вкладка браузера)
   });
   if (mp === "ozon") for (let i = tops.length; i < 2; i++)
-    t += tile("nok", `Топ ${i + 1}`, "не добавлен", (wait ? `ждут решения ${wait}<br>` : "") + choose, kurl(row));
+    t += `<button class="bt nok press" data-kgo><span>Топ ${i + 1}</span><b>не выбран</b><small>${wait ? `ждут решения ${wait}<br>` : ""}нажмите — как выбрать</small></button>`;
   const k0 = tops.find(k => k.d);
   const foot = sig && mp !== "ozon" ? `<div class="sig">⚠ ${esc(sig)}</div>`
     : k0 ? `<div class="note">Топы — витрина Ozon ${dTxt(k0.d)}${k0.tm ? " в " + k0.tm : ""}, цена «с другими банками», как у нас. Их СПП Ozon не показывает — сравниваем цену покупателя.</div>` : "";
-  return `<div class="buyer"><div class="h">Цена для покупателя${moved && spp != null ? " <span>прогноз по нашему СПП</span>" : ""}</div><div class="btg">${t}</div>${foot}${noChart ? "" : sppChart(row && row.sh, "mini")}</div>`;
+  // «не выбран» больше не уводит в «Конкуренты» с одного касания (Андрей 02.11: «на мобиле выкидывает в конкуренты») — сначала пояснение и явная кнопка
+  const kgo = mp === "ozon" && tops.length < 2 ? `<div class="kgo hidden" data-kgobox>Топов выбирают в сервисе «Конкуренты»: там по этому товару список похожих с продажами — «Взять» или «Убрать».${wait ? ` Ждут решения: ${wait}.` : ""}<a href="${esc(kurl(row))}">Открыть «Конкуренты» на этом товаре ›</a></div>` : "";
+  return `<div class="buyer"><div class="h">Цена для покупателя${moved && spp != null ? " <span>прогноз по нашему СПП</span>" : ""}</div><div class="btg">${t}</div>${kgo}${foot}${noChart ? "" : sppChart(row && row.sh, "mini")}</div>`;
 }
 
 /* «Маржа по панели, если бы стояла эта цена» (Андрей 26.10: «за 2 недели, а лучше выбор, или 4 недели; что было бы, если бы в панели стояла такая цена»):
@@ -3148,7 +3209,12 @@ function perRowOf(mp, row, per) {
   const pp = FACT && FACT.mp[mp] && FACT.mp[mp].per && FACT.mp[mp].per[per]; if (!pp) return undefined;
   return pp.rows.find(z => z.a === row.a && (z.ip || "") === (row.ip || "")) || null;
 }
-const perLbl = (mp, per) => (per === "month" ? String(FACT.mp[mp].month || "месяц") : String(FACT.mp[mp].per[per].label)).toLowerCase().replace(/\./g, " ").replace(/\s+/g, " ").trim();
+/* «19.окт. – 01.нояб.» → «19 окт – 1 нояб»; день в день — одна дата */
+const perLbl = (mp, per) => {
+  const s = (per === "month" ? String(FACT.mp[mp].month || "месяц") : String(FACT.mp[mp].per[per].label)).toLowerCase()
+    .replace(/(\d+)\.([^\s.\d–-]+)\.?/g, (m, d, w) => +d + " " + w).replace(/\s*[-–]\s*/, " – ").replace(/\s+/g, " ").trim();
+  const [a, b] = s.split(" – "); return b && a === b ? a : s;
+};
 /* три квадрата в ряд прямо под ползунком (Андрей 26.10: «прибыль на штуку, маржа чистая по панели и по юнитке в ряд, на одном экране»):
    прибыль/шт и маржа по юнитке при новой цене; третий — маржа чистая по панели за срок, если бы в панели стояла эта цена; срок — кнопками под рядом */
 function priceTrio(mp, row, x, base, price) {
@@ -3156,29 +3222,46 @@ function priceTrio(mp, row, x, base, price) {
   const avail = FACT && row ? ["week", "w2", "w4", "month"].filter(p => perRowOf(mp, row, p) !== undefined) : [];
   const per = avail.includes(PNPER) ? PNPER : avail.includes("w2") ? "w2" : avail[avail.length - 1];
   let sq = `<div class="kpi"><b>—</b><span>чистая по панели — данных нет</span></div>`;
-  // срок — кнопкой внизу квадрата панели; выбор открывается под рядом квадратов синими кнопками, экран не закрывает (Андрей 26.10)
-  const pick = per ? `<button class="persel" data-pnopen aria-expanded="false" title="Срок панели">${PNL[per]} ▾</button>` : "";
   if (per) {
     const pr = perRowOf(mp, row, per);
     if (pr && num(pr.units) > 0 && num(pr.sales) > 0) {
       const u = num(pr.units), P0 = num(pr.sales) / u, pr0 = num(pr.profit) / u, adR = (num(pr.ads) + num(pr.ads2)) / num(pr.sales);
       const r0 = x.aR + x.tR + (FADS === "pct" ? adR : 0), p1 = price * (1 - r0 - x.cAt(price)) - (P0 * (1 - r0 - x.cAt(P0)) - pr0), m1 = p1 / price;
-      sq = `<div class="kpi pk"><b class="${tone(m1, t)}">${pct(m1)}</b><span>чистая по панели<br>${rub(p1)}/шт</span>${pick}</div>`;
-    } else sq = `<div class="kpi pk"><b>—</b><span>чистая по панели: за этот срок продаж не было</span>${pick}</div>`;
+      sq = `<div class="kpi pk"><b class="${tone(m1, t)}">${pct(m1)}</b><span>чистая по панели<br>${rub(p1)}/шт</span></div>`;
+    } else sq = `<div class="kpi pk"><b>—</b><span>чистая по панели: за этот срок продаж не было</span></div>`;
   }
-  const row2 = per ? `<div class="perrow hidden" data-perrow>${avail.map(p => `<button class="pill${p === per ? " on" : ""}" data-pnper="${p}">${p === per ? "✓ " : ""}${PNL[p]}<small>${esc(perLbl(mp, p))}</small></button>`).join("")}</div>` : "";
-  return `<div class="kpis trio">
+  // срок панели — переключатель как в iOS над рядом (Андрей 02.11: «выбор срока изящнее и понятнее»): ползунок переезжает на выбранный, под словом — даты
+  const row2 = per ? `<div><div class="seglbl"><span>Чистая по панели — за какой срок</span><b>${esc(perLbl(mp, per))}</b></div>${segHtml(avail.map(p => [p, PNL[p], perLbl(mp, p)]), per, "data-pnper")}</div>` : "";
+  return `${row2}<div class="kpis trio">
       <div class="kpi"><b class="${tone(n.margin, t)}">${rub(n.profit)}</b><span>прибыль/шт по юнитке${moved ? `<br><span class="delta ${cls(n.profit - b.profit)}">${rub(n.profit - b.profit, true)}</span>` : ""}</span></div>
       <div class="kpi"><b class="${tone(n.margin, t)}">${pct(n.margin)}</b><span>маржа по юнитке${moved ? `<br>сейчас ${pct(b.margin)}` : ""}</span></div>
-      ${sq}</div>${row2}`;
+      ${sq}</div>`;
+}
+/* переключатель-сегмент: items = [[значение, слово, мелкая подпись]]; выбранный — под «ползунком», который переезжает при нажатии */
+function segHtml(items, cur, attr, cls) {
+  const n = items.length, i = Math.max(0, items.findIndex(z => z[0] === cur));
+  return `<div class="seg2${cls ? " " + cls : ""}" style="--n:${n}"><span class="thumb" style="left:calc(3px + (100% - 6px) * ${i} / ${n});width:calc((100% - 6px) / ${n})${items.some(z => z[0] === cur) ? "" : ";opacity:0"}"></span>` +
+    items.map(([v, w, s, c]) => `<button ${attr}="${esc(String(v))}" aria-pressed="${v === cur}"${c ? ` class="${c}"` : ""}>${w}${s ? `<small>${esc(s)}</small>` : ""}</button>`).join("") + `</div>`;
+}
+/* сначала ползунок плавно переезжает, потом пересчёт (иначе перерисовка съедает движение) */
+function segSlide(b, then) {
+  const g = b.closest(".seg2"), bs = [...g.querySelectorAll("button")], i = bs.indexOf(b), th = g.querySelector(".thumb");
+  bs.forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+  if (th) { th.style.opacity = 1; th.style.left = `calc(3px + (100% - 6px) * ${i} / ${bs.length})`; }
+  setTimeout(then, matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 230);
 }
 document.addEventListener("click", e => {
-  const o = e.target.closest("[data-pnopen]");
-  if (o) { const r = o.closest(".kpis").nextElementSibling; if (r && r.matches("[data-perrow]")) { const on = r.classList.toggle("hidden"); o.setAttribute("aria-expanded", String(!on)); } return; }
   const b = e.target.closest("[data-pnper]"); if (!b) return;
   PNPER = b.dataset.pnper; LS.set("pnPer", PNPER);
-  if (b.closest("#sOut")) paintSppOut(); else if (b.closest("#dOut")) keepScroll(paintDetail);
+  segSlide(b, () => { if (b.closest("#sOut")) keepScroll(paintSppOut); else if (b.closest("#dOut")) keepScroll(paintDetail); });
 });
+/* «Примерить цену» (Андрей 02.11: «блок % убрать/прибавить — не понял, что с ним делать»): кнопка = цена, которую она поставит, крупно;
+   выбранная — под ползунком сегмента; «сейчас» — вернуть цену, которая стоит */
+function stepChips(attr, base, price) {
+  const ds = [-10, -5, 0, 5, 10], cur = ds.find(d => Math.abs(Math.round(base * (1 + d / 100)) - Math.round(price)) < 1);
+  return `<div class="pricetry"><div class="seglbl"><span>Примерить цену — нажмите, ползунок встанет на неё</span></div>` +
+    segHtml(ds.map(d => [d, d === 0 ? "сейчас" : (d > 0 ? "+" : MINUS) + Math.abs(d) + "%", rub(Math.round(base * (1 + d / 100))), d === 0 ? "now" : ""]), cur, attr) + `</div>`;
+}
 /* ═════════ вкладка «СПП»: все товары с гистограммой СПП за 2 недели «на ладони»; нажал на товар — его карточка с начала (Андрей 26.10) ═════════ */
 let SPPF = LS.get("sppMp", "all"), SPPS = LS.get("sppSort", "sales"), SPPBACK = false, SPPSEL = null, SPPPRICE = null, SPPHASH = null, SPPQ = "";
 function sppItems() {
@@ -3231,6 +3314,85 @@ function renderSpp() {
     else { const it = $$("#sppList .item").find(b => b.dataset.key === open); if (it) it.scrollIntoView({ block: "center" }); }
   }
 }
+/* ═════════ «Обновить СПП» одного товара (Андрей 02.11: «чтобы конкретно по этому товару СПП обновилось, режим ожидания красиво, как в Эпл»):
+   сайт → ntfy.sh/<FACT.relay> → компьютер (Код\unitka\spp_live.py, \Claude\unitka-spp-live: слушает каждую минуту) снимает витрину товара
+   так же, как дневной прогон СПП, и отвечает в ntfy.sh/<relay>-r. Новые цифры сразу идут в товар (row.spp / vit / now) — и в список,
+   и в карточку, и в «Сводку», «Расчёт»; на устройстве помнятся до следующей выкладки данных (LS «sppLive»). ═════════ */
+let LIVE = {};                               // ключ товара → {st: wait|ok|err, msg, t0, was, flash}
+const LIVEKEY = (mp, row) => mp + "|" + (row.ip || "") + "|" + row.a;
+const hm = iso => new Date(iso).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Moscow" });
+function liveRow(row, v) { row.spp = v.spp; row.vit = v.vit; if (v.now) row.now = v.now; row.liveAt = v.at; }
+function liveApply(d) {
+  try {
+    const keep = LS.get("sppLive", {}), up = Date.parse(d.updated || 0) || 0, out = {};
+    for (const k in keep) {
+      const v = keep[k]; if (!(Date.parse(v.at) > up)) continue;          // данные уже свежее снимка с кнопки — он больше не нужен
+      out[k] = v;
+      const [mp, ip, ...a] = k.split("|"), row = d.mp[mp] && d.mp[mp].rows.find(r => r.a === a.join("|") && (r.ip || "") === ip);
+      if (row) liveRow(row, v);
+    }
+    LS.set("sppLive", out);
+  } catch (e) {}
+  return d;
+}
+function liveHtml(mp, row) {
+  if (!FACT || !FACT.relay) return "";
+  const k = LIVEKEY(mp, row), L = LIVE[k] || {}, mk = MPS[mp].short;
+  const src = row.liveAt ? "обновлён сегодня в " + hm(row.liveAt) : mp === "ym" ? "из снимка витрины, раз в 3 часа" : "из утреннего снимка витрины";
+  if (L.st === "wait") return `<div class="live" data-live><svg class="ring" viewBox="0 0 26 26" aria-hidden="true"><circle class="bg" cx="13" cy="13" r="10"/><circle class="fg" cx="13" cy="13" r="10"/></svg>
+    <span class="lt"><b>Смотрю витрину ${mk}…</b><span class="st" data-livest>${esc(L.msg || "")}</span></span></div>`;
+  if (L.st === "ok") return `<div class="live ok" data-live><span class="chk" aria-hidden="true">✓</span>
+    <span class="lt"><b>СПП обновлён — ${pct(row.spp, 1)}</b><span class="st">${L.was != null ? `было ${pct(L.was, 1)} · ` : ""}покупателю ${rub(row.vit)} · в ${hm(row.liveAt)}</span></span><button class="go" data-livego>↻</button></div>`;
+  if (L.st === "err") return `<div class="live bad" data-live><span class="lt"><b>Не обновилось</b><span class="st">${esc(L.msg || "")}</span></span><button class="go" data-livego>Ещё раз</button></div>`;
+  return `<div class="live" data-live><span class="lt"><b>СПП ${src}</b><span class="st">Нажмите — компьютер посмотрит этот товар на ${mk} прямо сейчас, до минуты</span></span><button class="go" data-livego>↻ Обновить</button></div>`;
+}
+function livePaint(k) {                      // перерисовать только плашку — карточка и прокрутка на месте
+  const { mp, row } = curSpp(); if (!row || LIVEKEY(mp, row) !== k) return;
+  const box = $("#liveBox"); if (box) box.innerHTML = liveHtml(mp, row);
+}
+function liveMsg(k, msg) { const L = LIVE[k]; if (!L || L.st !== "wait") return; L.msg = msg; const el = $("#liveBox [data-livest]"); if (el && LIVEKEY(curSpp().mp, curSpp().row) === k) { el.style.opacity = 0; setTimeout(() => { el.textContent = msg; el.style.opacity = 1; }, 200); } }
+function liveGo() {
+  const { mp, row } = curSpp(); if (!row || !FACT.relay) return;
+  const k = LIVEKEY(mp, row); if (LIVE[k] && LIVE[k].st === "wait") return;
+  const id = Math.random().toString(36).slice(2, 10), t0 = Date.now(), was = sppNow(row);
+  LIVE[k] = { st: "wait", msg: "Отправляю запрос компьютеру", t0, was }; livePaint(k);
+  let done = false, es = null, poll = null;
+  const stop = () => { done = true; try { es && es.close(); } catch (e) {} clearInterval(poll); clearTimeout(slow); clearTimeout(dead); };
+  const got = m => {
+    if (done || !m || m.id !== id) return;
+    if (m.st === "work") { liveMsg(k, "Компьютер взял — открываю карточку товара на витрине"); return; }
+    stop();
+    if (m.st === "done") {
+      const v = { spp: m.spp, vit: m.vit, now: m.now, at: m.at }, keep = LS.get("sppLive", {}); keep[k] = v; LS.set("sppLive", keep);
+      liveRow(row, v); LIVE[k] = { st: "ok", was, flash: true };
+      const sw = $("#sppWrap").scrollTop, sd = $("#sppDet").scrollTop, y = window.scrollY;
+      renderSpp(); $("#sppWrap").scrollTop = sw; $("#sppDet").scrollTop = sd; window.scrollTo(0, y);
+      liveCount(was, m.spp); setTimeout(() => { if (LIVE[k]) LIVE[k].flash = false; }, 1500);
+      try { navigator.vibrate && navigator.vibrate([10, 60, 10]); } catch (e) {}
+    } else { LIVE[k] = { st: "err", msg: m.msg || "не получилось" }; livePaint(k); }
+  };
+  const take = raw => { try { const x = JSON.parse(raw); if (x.event === "message") got(JSON.parse(x.message)); } catch (e) {} };
+  const since = Math.floor(t0 / 1000) - 5, R = "https://ntfy.sh/" + FACT.relay + "-r";
+  try { es = new EventSource(R + "/sse?since=" + since); es.onmessage = e => take(e.data); es.onerror = () => { if (es.readyState === 2 && !poll && !done) startPoll(); }; } catch (e) { startPoll(); }
+  function startPoll() { poll = setInterval(() => fetch(R + "/json?poll=1&since=" + since).then(r => r.text()).then(t => t.split("\n").filter(Boolean).forEach(take)).catch(() => {}), 4000); }
+  const slow = setTimeout(() => liveMsg(k, "Жду компьютер — он заглядывает в запросы раз в минуту"), 15000);
+  const dead = setTimeout(() => { if (done) return; stop(); LIVE[k] = { st: "err", msg: "Компьютер не ответил за 2,5 минуты — возможно, он выключен или занят. Попробуйте позже." }; livePaint(k); }, 150000);
+  fetch("https://ntfy.sh/" + FACT.relay, { method: "POST", body: JSON.stringify({ k: "spp", id, mp, a: row.a, ip: row.ip || "", nm: row.nm || null, sku: row.sku || null }) })
+    .then(r => { if (!r.ok) throw 0; liveMsg(k, "Запрос ушёл — компьютер откроет витрину " + MPS[mp].short); })
+    .catch(() => { if (done) return; stop(); LIVE[k] = { st: "err", msg: "Нет связи — проверьте интернет и нажмите ещё раз" }; livePaint(k); });
+}
+function liveCount(a, b) {                   // старая цифра плавно перетекает в новую
+  const el = $("#sppDet [data-sppnow]"); if (!el || a == null || b == null) return;
+  const t0 = performance.now(), D = 700;
+  const f = t => { const q = Math.min(1, (t - t0) / D), e = 1 - Math.pow(1 - q, 3); el.textContent = pct(a + (b - a) * e, 1); if (q < 1) requestAnimationFrame(f); };
+  requestAnimationFrame(f);
+}
+$("#sppDet").addEventListener("click", e => { if (e.target.closest("[data-livego]")) liveGo(); });
+/* «Топ не выбран» — пояснение и явная кнопка в «Конкуренты» (раньше касание плашки сразу уводило из Юнитки) */
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-kgo]"); if (!b) return;
+  const box = b.closest(".buyer") && b.closest(".buyer").querySelector("[data-kgobox]"); if (box) box.classList.toggle("hidden");
+});
 /* кнопка «Конкуренты» в шапке ведёт на открытый товар Ozon (карточка «СПП» или «Сводки»), иначе — на начало сервиса */
 function setKonkLink(mp, row) { const a = $("#toKonk"); if (a) a.href = KURL + (mp === "ozon" && row && row.sku ? "#sku=" + encodeURIComponent(row.sku) : ""); }
 function curSpp() {
@@ -3244,16 +3406,16 @@ function renderSppDet() {
   if (!row) { box.innerHTML = '<div class="empty">Выберите товар в списке</div>'; return; }
   const s = sppNow(row), d14 = sppD(row.sh, 14), d7 = sppD(row.sh, 7), vit = num(row.vit);
   const base = now || (x && x.price) || 0, price = Math.round(SPPPRICE || base);
-  box.innerHTML = `<div class="backbar"><button class="btn sm back" id="sppBack">‹ СПП</button><span class="bt">${esc(row.a)}</span></div>
+  box.innerHTML = `<div class="backbar"><button class="btn sm back" id="sppBack">‹ Все товары</button><span class="bt">СПП · ${esc(row.a)}</span></div>
     <div><div class="title tline">${mpIco(mp, true)}<span>${esc(row.a)}</span></div><div class="note">${[MPS[mp].name, cab(mp, row.ip)].filter(Boolean).map(esc).join(" · ")}</div></div>
-    <div class="kpis"><div class="kpi"><b>${s != null ? pct(s, 1) : "—"}</b><span>СПП сейчас</span></div>
+    <div class="kpis"><div class="kpi"><b data-sppnow class="${LIVE[LIVEKEY(mp, row)] && LIVE[LIVEKEY(mp, row)].flash ? "flash" : ""}">${s != null ? pct(s, 1) : "—"}</b><span>СПП сейчас</span></div>
       <div class="kpi"><b class="${cls(d14)}">${ppTxt(d14)}</b><span>за 2 недели, п.п.${d7 != null ? `<br>за 7 дней ${ppTxt(d7)}` : ""}</span></div>
       <div class="kpi"><b>${vit ? rub(vit) : "—"}</b><span>покупателю<br>наша ${now ? rub(now) : "—"}</span></div></div>
+    <div id="liveBox">${liveHtml(mp, row)}</div>
     ${sppChart(row.sh, "full") || '<div><div class="h">СПП по дням</div><div class="note">Данных за 2 недели меньше двух дней — гистограмма появится позже.</div></div>'}
     <div><div class="h">Если поменять цену <span>наша до СПП ${base ? rub(base) : "—"}</span></div>
       ${base ? `<div class="slider"><input type="range" id="sR" min="${Math.round(base * 0.5)}" max="${Math.round(base * 1.5)}" step="1" value="${price}" aria-label="Новая цена">
         <span class="inp"><input id="sP" inputmode="decimal" value="${inField(price)}"><i>₽</i></span></div>
-        <div class="chips" style="margin-top:6px">${[-10, -5, 5, 10].map(d => `<button class="chip" data-sstep="${d}">${d > 0 ? "+" : MINUS}${Math.abs(d)}%</button>`).join("")}<button class="chip" data-sstep="now">↺ сейчас</button></div>
         <div id="sOut" style="display:flex;flex-direction:column;gap:12px;margin-top:10px"></div>` : '<div class="note">Цены сейчас нет — менять не от чего.</div>'}
       <button class="btn" id="sppToSum" style="margin-top:12px">Вся юнитка товара — в «Сводке»</button></div>`;
   paintSppOut();
@@ -3264,7 +3426,7 @@ function paintSppOut() {
   if (!x) { out.innerHTML = buyerBlock(mp, row, base, price, null, true) + `<div class="note">Продаж не было — прибыль по юнитке посчитать не из чего, посчитайте во вкладке «Расчёт».</div>`; return; }
   // сначала три квадрата в ряд (прибыль/шт, маржа по юнитке, чистая по панели за срок), потом цена для покупателя — всё на одном экране с ползунком
   const be = factPrice(x, FADS, 0), ptg = factPrice(x, FADS, t), mon = p && p.month ? String(p.month).toLowerCase() : "месяц";
-  out.innerHTML = ozHint(x, price, "data-ssetp") + priceTrio(mp, row, x, base, price) + buyerBlock(mp, row, base, price, null, true) + `
+  out.innerHTML = stepChips("data-sstep", base, price) + ozHint(x, price, "data-ssetp", base) + priceTrio(mp, row, x, base, price) + buyerBlock(mp, row, base, price, null, true) + `
     <div class="rows"><span>Безубыточная цена</span><span class="r">${be ? rub(be) : "—"}</span>
       <span>Цена под маржу ${NF1.format(t * 100)}%</span><span class="r">${ptg ? rub(ptg) : "недостижимо"}</span></div>
     <div class="note">По юнитке — расходы на 1 шт из панели за ${esc(x.src || mon)}; чистая по панели — прибыль панели по товару за выбранный срок, как если бы стояла эта цена: комиссия, эквайринг, налог и реклама — в % от цены, остальное — те же рубли.</div>`;
@@ -3289,12 +3451,13 @@ $("#sppDet").addEventListener("input", e => {
 });
 $("#sppDet").addEventListener("click", e => {
   const b = e.target.closest("button"); if (!b) return;
-  if (b.id === "sppBack") { history.back(); return; }
+  if (b.id === "sppBack") { if (NAV[NAV.length - 1] === "s") history.back(); else $("#sppWrap").classList.remove("open"); return; }   // своего шага в истории нет (открыли по ссылке) — просто закрыть, со страницы не уходить
   if (b.dataset.ssetp != null) { SPPPRICE = num(b.dataset.ssetp); $("#sP").value = inField(SPPPRICE); $("#sR").value = SPPPRICE; paintSppOut(); return; }
   if (b.dataset.sstep != null) {
-    const { x, now } = curSpp(), base = now || (x && x.price); if (!base) return;
-    SPPPRICE = b.dataset.sstep === "now" ? null : Math.round(base * (1 + num(b.dataset.sstep) / 100));
-    const v = Math.round(SPPPRICE || base); $("#sP").value = inField(v); $("#sR").value = v; paintSppOut();
+    const { x, now } = curSpp(), base = now || (x && x.price), d = num(b.dataset.sstep); if (!base) return;
+    SPPPRICE = d === 0 ? null : Math.round(base * (1 + d / 100));
+    const v = Math.round(SPPPRICE || base); $("#sP").value = inField(v); $("#sR").value = v; segSlide(b, () => keepScroll(paintSppOut));
+    return;
   }
   if (b.id === "sppToSum") {                 // глубже — вся юнитка товара в «Сводке»; «назад» вернёт сюда
     const mp = SPPSEL.split("|")[0];
