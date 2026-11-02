@@ -2574,10 +2574,37 @@ async function svSend(list) {
   const pick = list.filter(x => CMP.has(x.id));
   if (!pick.length) { toast("Отметьте галочкой, какие отправить, или нажмите «Выбрать все»"); return; }
   const n = pick.length, w = n + " " + plural(n, "расчёт", "расчёта", "расчётов");
-  const url = location.origin + location.pathname + "#" + (await packState(pick.map(x => ({ id: x.id, at: x.at, s: x.s })))).replace(/^[zc]=/, "add=");
+  const data = (await packState(pick.map(x => ({ id: x.id, at: x.at, s: x.s })))).replace(/^[zc]=/, "");
+  toast("Готовлю ссылку…");
+  let id; try { id = await shPut(data); } catch (e) { toast("Нет связи — ссылка не получилась, нажмите ещё раз"); return; }
+  const url = location.origin + location.pathname + "#s=" + id;
   shOpen(url, "Юнитка: " + w, n === 1 ? "Ссылка на расчёт «" + (pick[0].s.name || "Без названия") + "»" : "Ссылка на " + w,
     "Получатель откроет ссылку — и " + (n === 1 ? "расчёт добавится" : "расчёты добавятся") + " в его «Мои расчёты». Его старые расчёты не удалятся. Пароль не нужен.");
 }
+/* короткая ссылка #s=<номер> (Андрей 02.11: «ссылка битая, ему 2 надо было выслать — не надо длинную»): длинная #add=… на много расчётов
+   больше сообщения Telegram и режется. Теперь расчёты уходят кусками в ntfy.sh/<SHT_T>, компьютер (spp_live.py) за минуту кладёт их
+   в репозиторий unitka → s/<номер>.txt; получатель берёт оттуда, а пока не положил — прямо из ntfy (там хранятся 12 ч) */
+const SHT_T = "us-sh-c813a7c0dd87fb35d2bd5fb5", SH_RAW = "https://raw.githubusercontent.com/asty7us-web/unitka/main/s/";
+async function shPut(data) {
+  const id = Array.from(crypto.getRandomValues(new Uint8Array(8)), b => "abcdefghjkmnpqrstuvwxyz23456789"[b % 31]).join("");
+  const parts = data.match(/[\s\S]{1,3000}/g) || [""];
+  for (let i = 0; i < parts.length; i++) {
+    const r = await fetch("https://ntfy.sh/" + SHT_T, { method: "POST", body: JSON.stringify({ k: "share", id, i, n: parts.length, d: parts[i] }) });
+    if (!r.ok) throw 0;
+  }
+  return id;
+}
+async function shGet(id) {
+  try { const r = await fetch(SH_RAW + id + ".txt", { cache: "no-store" }); if (r.ok) { const t = (await r.text()).trim(); if (t) return t; } } catch (e) {}
+  for (let a = 0; a < 5; a++) {                // сразу после отправки ntfy показывает куски не все — подождать и ещё раз
+    if (a) await new Promise(q => setTimeout(q, 2500));
+    const t = await (await fetch("https://ntfy.sh/" + SHT_T + "/json?poll=1&since=all")).text(), parts = {}; let n = 0;
+    t.split("\n").forEach(l => { try { const x = JSON.parse(l); if (x.event !== "message") return; const m = JSON.parse(x.message); if (m.k === "share" && m.id === id) { parts[m.i] = m.d; n = m.n; } } catch (e) {} });
+    if (n && Object.keys(parts).length >= n) return Array.from({ length: n }, (_, i) => parts[i]).join("");
+  }
+  throw 0;
+}
+function inShort(id) { toast("Загружаю присланные расчёты…"); shGet(id).then(inLink).catch(() => toast("Ссылка на расчёты не найдена — попросите прислать заново")); }
 /* получили #add=…: показать список и добавить к своим; совпадающие по id — не дублировать (тот же расчёт обновится) */
 let INQ = [];
 function inLink(a) {
@@ -3934,11 +3961,12 @@ function setHdr() { document.documentElement.style.setProperty("--hdr", $("heade
     toast("В «Моих расчётах» теперь " + list.length); }).catch(() => toast("Ссылка на расчёты повреждена")); }
   /* #add=… — прислали расчёты кнопкой «Отправить выбранные»: показать и добавить к своим, свои не трогать */
   if (h.get("add")) { TAB = "saved"; inLink(h.get("add")); }
+  if (h.get("s")) { TAB = "saved"; inShort(h.get("s")); }               // короткая ссылка «Отправить выбранные»
   addEventListener("hashchange", () => {                               // ссылку открыли во вкладке, где Юнитка уже открыта
-    const a = new URLSearchParams(location.hash.slice(1)).get("add");
-    if (a) { history.replaceState(null, "", location.pathname + location.search); inLink(a); }
+    const q = new URLSearchParams(location.hash.slice(1)), a = q.get("add"), s = q.get("s");
+    if (a || s) { history.replaceState(null, "", location.pathname + location.search); a ? inLink(a) : inShort(s); }
   });
-  if (h.get("k") || h.get("c") || h.get("z") || h.get("spp") || h.get("mine") || h.get("add")) history.replaceState(null, "", location.pathname + location.search);
+  if (h.get("k") || h.get("c") || h.get("z") || h.get("spp") || h.get("mine") || h.get("add") || h.get("s")) history.replaceState(null, "", location.pathname + location.search);
   if (isPhone()) $$("details.sec").forEach(d => { if (!["price", "cost", "mp"].includes(d.dataset.sec)) d.open = false; });
   writeForm(); render(); setTab(["sum", "calc", "spp", "saved"].includes(TAB) ? TAB : "sum");
   if (location.hash === "#ext") extOpen();
