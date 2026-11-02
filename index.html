@@ -2708,6 +2708,7 @@ function renderSaved() {
         <div class="h" style="margin:0">Мои расчёты <span>${list.length ? "хранятся на этом устройстве" : ""}</span></div>
         <div class="chips"><button class="btn sm" data-sv="all">${list.length && list.every(x => CMP.has(x.id)) ? "Снять выбор" : "Выбрать все"}</button>
           <button class="btn sm${CMP.size ? " pri" : ""}" data-sv="send">${CMP.size ? "Отправить выбранные · " + CMP.size : "Отправить"}</button>
+          ${CMP.size ? `<button class="btn sm" data-sv="delsel" style="color:var(--bad)">Удалить выбранные · ${CMP.size}</button>` : ""}
           <button class="btn sm" data-sv="csv">Скачать в Excel</button></div></div>
       ${list.length > 3 ? `<div class="search" style="height:44px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
         <input id="svq" type="search" placeholder="Найти расчёт" value="${esc(SVQ)}" autocomplete="off"></div>` : ""}</div>`;
@@ -2778,6 +2779,11 @@ $("#savedBox").addEventListener("click", e => {
   if (b.dataset.sv === "csv") exportCsv();
   else if (b.dataset.sv === "all") { const on = list.every(x => CMP.has(x.id)); CMP = new Set(on ? [] : list.map(x => x.id)); renderSaved(); }
   else if (b.dataset.sv === "send") svSend(list);
+  else if (b.dataset.sv === "delsel") {                                 // Андрей 02.11: «удалить выбранные»
+    const n = list.filter(x => CMP.has(x.id)).length;
+    if (n && confirm(`Удалить ${n} ${plural(n, "расчёт", "расчёта", "расчётов")}? Вернуть не получится.`)) {
+      LS.set("saved", list.filter(x => !CMP.has(x.id))); CMP.clear(); renderSaved(); toast("Удалено: " + n); }
+  }
   else if (b.dataset.open) openSaved(b.dataset.open);
   else if (b.dataset.copy) { const it = list.find(x => x.id === b.dataset.copy); if (it) { const s = clone(it.s); s.id = Date.now().toString(36); s.name = (s.name || "") + " (копия)"; list.unshift({ id: s.id, at: Date.now(), s }); LS.set("saved", list); renderSaved(); } }
   else if (b.dataset.del) { if (confirm("Удалить расчёт?")) { LS.set("saved", list.filter(x => x.id !== b.dataset.del)); CMP.delete(b.dataset.del); renderSaved(); } }
