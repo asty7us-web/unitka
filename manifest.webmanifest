@@ -6,17 +6,44 @@
  "start_url": "./",
  "scope": "/",
  "shortcuts": [
-  {"name": "Склейки", "url": "/shov/"},
-  {"name": "Конкуренты", "url": "/shov/konkurenty/"},
-  {"name": "Закупки", "url": "/shov/zakupki/"}
+  {
+   "name": "Склейки",
+   "url": "/shov/"
+  },
+  {
+   "name": "Конкуренты",
+   "url": "/shov/konkurenty/"
+  },
+  {
+   "name": "Закупки",
+   "url": "/shov/zakupki/"
+  },
+  {
+   "name": "Панель",
+   "url": "/shov/panel/"
+  }
  ],
  "display": "standalone",
  "background_color": "#f4f4f1",
  "theme_color": "#2a78d6",
  "lang": "ru",
  "icons": [
-  {"src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
-  {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
-  {"src": "icon.svg", "sizes": "any", "type": "image/svg+xml"}
+  {
+   "src": "icon-192.png",
+   "sizes": "192x192",
+   "type": "image/png",
+   "purpose": "any"
+  },
+  {
+   "src": "icon-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "any"
+  },
+  {
+   "src": "icon.svg",
+   "sizes": "any",
+   "type": "image/svg+xml"
+  }
  ]
 }
