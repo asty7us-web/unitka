@@ -1216,7 +1216,7 @@ addEventListener('pageswap',()=>m.classList.add('gone'));   // снимок дл
 addEventListener('pageshow',e=>{if(!e.persisted)return;open(false);m.querySelectorAll('.go').forEach(x=>x.classList.remove('go'))});
 /* общая тема: выбрали тему, у которой есть пара в других сервисах, — она и там (Юнитка, Склейки, Конкуренты) */
 // столбцы: Юнитка, Склейки, Конкуренты, Закупки, Панель, Реклама (svcTheme(3, …) — у Закупок, svcTheme(4, …) — у Панели, svcTheme(5, …) — у Рекламы)
-const TH=[['auto','auto','auto','auto','auto','auto'],['light',null,'light','light','light','light'],['dark','graphite','dark','dark','dark','dark'],['space','space','space','space','space',null],['jim','jim',null,null,null,null],
+const TH=[['auto','auto','auto','auto','auto','auto'],['light',null,'light','light','light','light'],['dark','graphite','dark','dark','dark','dark'],['space','space','space','space','space','space'],['jim','jim',null,null,null,null],
   ['farcry','farcry','farcry',null,null,null],['sonic','sonic','sonic',null,null,null],['solitaire','solitaire','solitaire',null,null,null],['birds','birds','birds',null,null,null]],
   KEYS=['unitka.theme','shov.skin','konk.theme','zak.theme','pan.theme','rek.theme'];
 window.svcTheme=(i,v)=>{const r=TH.find(x=>x[i]===v);if(!r)return;r.forEach((t,j)=>{if(j!==i&&t)try{localStorage.setItem(KEYS[j],JSON.stringify(t))}catch(e){}})};
@@ -1271,6 +1271,9 @@ window.svcBack=o=>{
   let last=n(),gu=location.href;   // gu — адрес текущей записи: страницы меняют в нём раздел (#skleyki) — после «назад» оставляем его
   history.replaceState=function(s,t,u){const k=n();if(k&&!(s&&s.svg))s=Object.assign({},s,{svg:k});rs(s,t,u);if(n())gu=location.href};
   const fill=()=>{try{let k=n();const s=history.state;
+    // 17.11 Андрей «при нажатии назад выкидывает в юнитку»: палец после прокрутки (touchend без нажатия) — не касание для Chrome;
+    // стражи, поставленные тогда, «назад» пропускал все разом, а настоящее касание их уже не доливало (запас полон) — ставим только при живом касании
+    const ua=navigator.userActivation;if(ua&&!ua.isActive)return;
     if(!k){if(s&&!s.svb&&Object.keys(s).length)return;rs(Object.assign({},s,{svb:1}),'')}   // своя запись страницы (карточка Юнитки) — не доливаем
     for(k++;k<=N;k++)ps({svg:k},'',location.href);last=n();gu=location.href}catch(e){}};
   ['click','touchend','keydown'].forEach(k=>document.addEventListener(k,fill,{capture:true,passive:true}));
