@@ -713,6 +713,24 @@ nav.tabs{display:flex;gap:4px;margin-left:auto}
 @keyframes svc-out{to{opacity:0}}
 @keyframes svc-in{from{opacity:0;transform:translateY(14px)}}
 @media (prefers-reduced-motion:reduce){@keyframes svc-in{from{opacity:0}}}
+/* 18.11 Андрей «во всех сервисах»: «потянуть вниз — обновить» как в айфоне (у «Рекламы» свой такой же, reklama_wb) */
+html,body{overscroll-behavior-y:contain}
+.svc-ptr{position:fixed;left:50%;top:0;z-index:150;width:40px;height:40px;margin-left:-20px;display:grid;place-items:center;pointer-events:none;
+  color:var(--svc-ink2,#8a8a8e);opacity:0;transform:translate3d(0,var(--py,-46px),0) scale(var(--ps,1))}
+.svc-ptr .pt{opacity:0;transition:opacity .12s ease}
+.svc-ptr .pt.on{opacity:.9}
+.svc-ptr.spin .pt.on{opacity:var(--o)}
+.svc-ptr svg{transition:transform .2s cubic-bezier(.32,.72,0,1)}
+.svc-ptr.rdy svg{transition:transform .25s cubic-bezier(.34,1.56,.64,1);transform:scale(1.08)}
+.svc-ptr.go{transition:transform .5s cubic-bezier(.32,.72,0,1),opacity .25s ease}
+.svc-ptr.out{--ps:.55}
+.svc-ptr.spin svg{animation:svc-rot .8s steps(8) infinite}
+@keyframes svc-rot{to{transform:rotate(360deg)}}
+html.svc-ptrout body>main{opacity:.4;transition:opacity .16s ease}
+html.svc-ptrin body>main{animation:svc-ptrin .4s cubic-bezier(.32,.72,0,1) both}
+@keyframes svc-ptrin{from{opacity:.55}}
+:root[data-lite="1"] .svc-ptr,:root[data-lite="1"] .svc-ptr svg,:root[data-lite="1"] .svc-ptr .pt{transition:none!important;animation:none!important}
+@media (prefers-reduced-motion:reduce){.svc-ptr,.svc-ptr svg{transition:none!important;animation:none!important}html.svc-ptrin body>main{animation:none}}
 /*/SVC:CSS*/
 nav.tabs button{border:0;background:transparent;padding:8px 12px;border-radius:9px;color:var(--ink-2);font-weight:600;display:flex;align-items:center;gap:6px}
 nav.tabs button[aria-current="page"]{background:var(--accent-wash);color:var(--accent)}
@@ -1294,6 +1312,46 @@ window.svcBack=o=>{
     last=k;gu=location.href});
 };
 })();
+/* 18.11 Андрей («кружок загрузки плавнее, как в Эпл» → «во всех сервисах»): потянуть страницу вниз в самом верху — 8 чёрточек по кругу
+   появляются по мере потягивания, на пороге — все и лёгкий толчок, при загрузке бегут по кругу; страница (body>main) едет за пальцем
+   и мягко возвращается. Обновляет window.svcRefresh() страницы (данные на месте), если её нет — перезагрузка с мягким переходом (window.svcReload).
+   window.svcPtrPane — селектор окон страницы со своей прокруткой, где тоже тянется (Юнитка: открытая карточка).
+   В «Рекламе» свой такой же (#ptr) — там этот не включается. Только касание пальцем */
+(()=>{const R=document.documentElement;
+try{if(sessionStorage.getItem('svc.ptr')){sessionStorage.removeItem('svc.ptr');R.classList.add('svc-ptrin');setTimeout(()=>R.classList.remove('svc-ptrin'),500)}}catch(e){}
+const TH=70,MAX=112,lite=()=>R.dataset.lite==='1'||matchMedia('(prefers-reduced-motion: reduce)').matches;
+let ind=null,TK=[],g=null,busy=false,tgt=null,r0=false;
+const mk=()=>{if(ind)return;ind=document.createElement('div');ind.className='svc-ptr';ind.setAttribute('aria-hidden','true');
+  ind.innerHTML='<svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">'+[0,1,2,3,4,5,6,7].map(i=>'<line class="pt" x1="13" y1="3.2" x2="13" y2="7.8" transform="rotate('+i*45+' 13 13)" style="--o:'+(1-i*.11).toFixed(2)+'"/>').join('')+'</svg>';
+  document.body.appendChild(ind);TK=[...ind.querySelectorAll('.pt')]};
+const mv=(y,anim)=>{const el=tgt;if(!el||lite())return;el.style.transition=anim?'transform .5s cubic-bezier(.32,.72,0,1)':'none';el.style.transform=y?'translate3d(0,'+Math.round(y)+'px,0)':'';
+  if(!y&&anim)setTimeout(()=>{if(el.style.transform==='')el.style.transition=''},520)};
+const put=(d,top)=>{ind.style.top=Math.round(top)+'px';ind.style.setProperty('--py',Math.round(d/2-20)+'px');
+  const n=Math.min(8,Math.ceil(8*d/TH));TK.forEach((t,i)=>t.classList.toggle('on',i<n));ind.style.opacity=String(Math.min(1,d/26));
+  const r=d>=TH;ind.classList.toggle('rdy',r);if(r&&!r0){try{navigator.vibrate&&navigator.vibrate(8)}catch(e){}}r0=r;mv(d,false)};
+const hide=()=>{if(!ind)return;ind.classList.add('go','out');ind.classList.remove('rdy','spin');ind.style.opacity='0';mv(0,true);r0=false;
+  setTimeout(()=>{ind.classList.remove('go','out');ind.style.setProperty('--py','-46px');TK.forEach(t=>t.classList.remove('on'))},300)};
+/* под пальцем окно поверх страницы (лист, всплывающее, шапка) или свой уже прокрученный блок — жест не наш */
+const busyEl=(t,stop)=>{for(let e=t;e&&e!==document.body&&e!==stop&&e.nodeType===1;e=e.parentElement){const c=getComputedStyle(e);if(c.position==='fixed')return true;
+  if(e.scrollTop>0&&e.scrollHeight>e.clientHeight+1&&/auto|scroll/.test(c.overflowY))return true}return false};
+const full=()=>{try{sessionStorage.setItem('svc.ptr','1')}catch(e){}R.classList.add('svc-ptrout');setTimeout(()=>location.reload(),180);return new Promise(()=>{})};
+document.addEventListener('touchstart',e=>{g=null;if(busy||e.touches.length!==1||document.getElementById('ptr'))return;const t=e.target;
+  if(!t||!t.closest||t.closest('input,textarea,select,canvas,[contenteditable],.svc,.svt,.slider'))return;
+  const p=e.touches[0],pane=window.svcPtrPane?t.closest(window.svcPtrPane):null;   // окно страницы со своей прокруткой, где тоже можно тянуть (карточка Юнитки)
+  if(pane){if(pane.scrollTop>0||busyEl(t,pane))return;g={x:p.clientX,y:p.clientY,top:Math.max(0,pane.getBoundingClientRect().top),on:false,d:0,pane};tgt=pane;return}
+  if(busyEl(t))return;
+  const se=document.scrollingElement||R;if(Math.max(scrollY||0,se.scrollTop||0)>0||getComputedStyle(document.body).overflow==='hidden')return;
+  const h=document.querySelector('.svc-hdr'),hb=h?h.getBoundingClientRect().bottom:0;
+  g={x:p.clientX,y:p.clientY,top:Math.max(0,hb),on:false,d:0};tgt=document.querySelector('body>main')},{passive:true});
+document.addEventListener('touchmove',e=>{if(!g)return;const p=e.touches[0];if(!p||e.touches.length!==1){if(g.on)hide();g=null;return}const dx=p.clientX-g.x,dy=p.clientY-g.y;
+  if(!g.on){if(!dx&&!dy)return;if(dy<=0||Math.abs(dx)>=dy||!e.cancelable||(g.pane?g.pane.scrollTop:scrollY||0)>0){g=null;return}g.on=true;mk();ind.classList.remove('go')}
+  if(dy<=0){hide();g=null;return}e.preventDefault();g.d=Math.min(MAX,dy*.55);put(g.d,g.top)},{passive:false});
+const end=e=>{const z=g;g=null;if(!z||!z.on)return;if(e.type!=='touchend'||z.d<TH){hide();return}
+  busy=true;ind.classList.add('go','spin');ind.classList.remove('rdy');ind.style.setProperty('--py','8px');ind.style.opacity='1';TK.forEach(t=>t.classList.add('on'));mv(56,true);
+  const t0=Date.now();let pr;try{pr=Promise.resolve(typeof window.svcRefresh==='function'?window.svcRefresh():full())}catch(x){pr=Promise.resolve()}
+  const fin=()=>setTimeout(()=>{busy=false;hide()},Math.max(0,600-(Date.now()-t0)));Promise.race([pr,new Promise(r=>setTimeout(r,30000))]).then(fin,fin)};
+document.addEventListener('touchend',end,{passive:true});document.addEventListener('touchcancel',end,{passive:true});
+window.svcReload=full})();
 /*/SVC:JS*/</script>
 
 <main>
@@ -3678,34 +3736,10 @@ function restoreView(where) {             // зовут renderSpp / renderFact, 
   requestAnimationFrame(go); setTimeout(go, 120);
 }
 
-/* ═════════ «потянуть вниз — обновить» (Андрей 26.10: в приложении тянется не во всех разделах): в приложении — везде, в браузере — в открытых
-   карточках (там своя прокрутка, браузер не тянет). Не срабатывает с ползунков, полей и игр. ═════════ */
-(function () {
-  const pwa = () => matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
-  const ind = document.createElement("div"); ind.id = "ptr"; ind.setAttribute("aria-hidden", "true"); ind.textContent = "↻"; document.body.appendChild(ind);
-  let y0 = null, dy = 0, el = null;
-  addEventListener("touchstart", e => {
-    y0 = null;
-    if (e.touches.length !== 1 || e.target.closest("input,textarea,select,canvas,.slider,.modal,.tour-tip")) return;
-    el = e.target.closest(".detail-wrap.open");
-    if (!el && !pwa()) return;                                  // обычная страница в браузере — тянет сам браузер
-    const top = el ? el.scrollTop : (window.scrollY || document.documentElement.scrollTop);
-    if (top <= 0) { y0 = e.touches[0].clientY; dy = 0; }
-  }, { passive: true });
-  addEventListener("touchmove", e => {
-    if (y0 == null) return;
-    dy = e.touches[0].clientY - y0;
-    const p = Math.max(0, Math.min(1, dy / 90));
-    ind.style.opacity = p; ind.style.transform = `translate(-50%, ${Math.min(64, Math.max(0, dy) * 0.5)}px) rotate(${p * 270}deg)`;
-    ind.classList.toggle("go", p >= 1);
-  }, { passive: true });
-  addEventListener("touchend", () => {
-    if (y0 == null) return;
-    const go = dy >= 90; y0 = null;
-    if (go) { ind.classList.add("spin"); saveView(); setTimeout(() => location.reload(), 150); }
-    else { ind.style.opacity = 0; ind.style.transform = ""; }
-  });
-})();
+/* ═════════ «потянуть вниз — обновить»: с 18.11 общий из шапки сервисов (servisy\svc.py, как в айфоне — Андрей «во всех сервисах»);
+   свой прежний (стрелка ↻, Андрей 26.10) снят. Тянется везде и в открытой карточке; перед перезагрузкой запоминаем, где были (saveView) ═════════ */
+window.svcPtrPane = ".detail-wrap.open";
+window.svcRefresh = () => { saveView(); return window.svcReload(); };
 
 /* ═════════ вкладки ═════════ */
 function setTab(t) {
